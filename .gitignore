@@ -22,3 +22,7 @@ target/
 
 ### VS Code ###
 .vscode/
+
+**/node_modules/
+**/dist
+**/tmp

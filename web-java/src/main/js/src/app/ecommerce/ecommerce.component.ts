@@ -12,13 +12,13 @@ export class EcommerceComponent implements OnInit {
     private collapsed = true;
     orderFinished = false;
 
-    @ViewChild('productsC')
+    @ViewChild('productsC', {static: false})
     productsC: ProductsComponent;
 
-    @ViewChild('shoppingCartC')
+    @ViewChild('shoppingCartC', {static: false})
     shoppingCartC: ShoppingCartComponent;
 
-    @ViewChild('ordersC')
+    @ViewChild('ordersC', {static: false})
     ordersC: OrdersComponent;
 
     constructor() {
