@@ -1,6 +1,7 @@
 package com.mycompany.ecommerce.dto;
 
 import com.mycompany.ecommerce.model.Product;
+import org.springframework.core.style.ToStringCreator;
 
 public class OrderProductDto {
 
@@ -21,5 +22,10 @@ public class OrderProductDto {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringCreator(this).append("product", this.product).append("quantity", this.quantity).toString();
     }
 }

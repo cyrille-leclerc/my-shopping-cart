@@ -1,5 +1,7 @@
 package com.mycompany.ecommerce.model;
 
+import org.springframework.core.style.ToStringCreator;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -58,5 +60,14 @@ public class Product {
 
     public void setPictureUrl(String pictureUrl) {
         this.pictureUrl = pictureUrl;
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringCreator(this)
+                .append("id", id)
+                .append("name", name)
+                .append("price", price)
+                .toString();
     }
 }

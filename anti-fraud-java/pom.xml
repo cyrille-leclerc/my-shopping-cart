@@ -7,9 +7,7 @@
 		<artifactId>parent</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</parent>
-	<artifactId>web</artifactId>
-	<name>web</name>
-	<description>Web Application</description>
+	<artifactId>anti-fraud</artifactId>
 
 	<properties>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -23,19 +21,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.datatype</groupId>
-			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>2.9.6</version>
-		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -43,14 +30,31 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>com.h2database</groupId>
-			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.postgresql</groupId>
-			<artifactId>postgresql</artifactId>
-			<scope>runtime</scope>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+		</dependency>
+
+		<!-- lightstep-tracer -->
+		<dependency>
+			<groupId>com.lightstep.tracer</groupId>
+			<artifactId>lightstep-tracer-jre</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.lightstep.tracer</groupId>
+			<artifactId>tracer-okhttp</artifactId>
+		</dependency>
+		<!-- -->
+		<dependency>
+			<groupId>io.opentracing.contrib</groupId>
+			<artifactId>opentracing-spring-cloud-starter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -67,25 +71,6 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<!-- lightstep-tracer -->
-		<dependency>
-			<groupId>com.lightstep.tracer</groupId>
-			<artifactId>lightstep-tracer-jre</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.lightstep.tracer</groupId>
-			<artifactId>tracer-okhttp</artifactId>
-		</dependency>
-		<!-- -->
-		<dependency>
-			<groupId>io.opentracing.contrib</groupId>
-			<artifactId>opentracing-spring-cloud-starter</artifactId>
-		</dependency>
-		<!-- -->
-		<dependency>
-			<groupId>io.opentracing.contrib</groupId>
-			<artifactId>opentracing-jdbc</artifactId>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>
@@ -116,46 +101,6 @@
 						<goals>
 							<goal>build-info</goal>
 						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>com.github.eirslett</groupId>
-				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.9.1</version>
-				<configuration>
-					<nodeVersion>v12.12.0</nodeVersion>
-					<npmVersion>6.12.0</npmVersion>
-					<workingDirectory>src/main/js</workingDirectory>
-				</configuration>
-				<executions>
-					<execution>
-						<id>install node and npm</id>
-						<goals>
-							<goal>install-node-and-npm</goal>
-						</goals>
-						<phase>generate-resources</phase>
-					</execution>
-					<execution>
-						<id>npm install</id>
-						<goals>
-							<goal>npm</goal>
-						</goals>
-						<phase>generate-resources</phase>
-						<configuration>
-							<arguments>install</arguments>
-						</configuration>
-					</execution>
-					<execution>
-						<id>npm build</id>
-						<goals>
-							<goal>npm</goal>
-						</goals>
-						<phase>compile</phase>
-						<configuration>
-							<arguments>run build</arguments>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
