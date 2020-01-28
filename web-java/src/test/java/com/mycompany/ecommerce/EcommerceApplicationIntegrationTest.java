@@ -6,6 +6,7 @@ import com.mycompany.ecommerce.dto.OrderProductDto;
 import com.mycompany.ecommerce.model.Order;
 import com.mycompany.ecommerce.model.Product;
 import org.assertj.core.api.Assertions;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,6 +77,7 @@ public class EcommerceApplicationIntegrationTest {
           .hasSize(0);
     }
 
+    @Ignore("Not testable without the mock antiFraud service")
     @Test
     public void givenPostOrder_whenBodyRequestMatcherJson_thenResponseContainsEqualObjectProperties() {
         final ResponseEntity<Order> postResponse = restTemplate.postForEntity("http://localhost:" + port + "/api/orders", prepareOrderForm(), Order.class);

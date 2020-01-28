@@ -68,14 +68,18 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- lightstep-tracer -->
+		<!-- elastic-tracer -->
 		<dependency>
-			<groupId>com.lightstep.tracer</groupId>
-			<artifactId>lightstep-tracer-jre</artifactId>
+			<groupId>co.elastic.apm</groupId>
+			<artifactId>apm-agent-attach</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.lightstep.tracer</groupId>
-			<artifactId>tracer-okhttp</artifactId>
+			<groupId>co.elastic.apm</groupId>
+			<artifactId>apm-agent-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>co.elastic.apm</groupId>
+			<artifactId>apm-opentracing</artifactId>
 		</dependency>
 		<!-- -->
 		<dependency>

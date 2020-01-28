@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <properties>
         <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
+        <elastic-apm.version>1.12.0</elastic-apm.version>
     </properties>
     <modules>
         <module>web-java</module>
@@ -19,15 +20,32 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.lightstep.tracer</groupId>
-                <artifactId>lightstep-tracer-jre</artifactId>
-                <version>0.18.3</version>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>28.1-jre</version>
             </dependency>
             <dependency>
-                <groupId>com.lightstep.tracer</groupId>
-                <artifactId>tracer-okhttp</artifactId>
-                <version>0.19.2</version>
+                <groupId>co.elastic.apm</groupId>
+                <artifactId>apm-agent-api</artifactId>
+                <version>${elastic-apm.version}</version>
             </dependency>
+            <dependency>
+                <groupId>co.elastic.apm</groupId>
+                <artifactId>apm-opentracing</artifactId>
+                <version>${elastic-apm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>co.elastic.apm</groupId>
+                <artifactId>apm-agent-attach</artifactId>
+                <version>${elastic-apm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>co.elastic.logging</groupId>
+                <artifactId>logback-ecs-encoder</artifactId>
+                <version>0.1.3</version>
+            </dependency>
+
+            <!-- Open Tracing -->
             <dependency>
                 <groupId>io.opentracing.contrib</groupId>
                 <artifactId>opentracing-jdbc</artifactId>
@@ -56,15 +74,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>com.google.cloud.tools</groupId>
-                    <artifactId>jib-maven-plugin</artifactId>
-                    <version>1.6.1</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>
