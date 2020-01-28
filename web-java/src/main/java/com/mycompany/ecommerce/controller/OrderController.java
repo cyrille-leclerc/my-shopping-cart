@@ -26,17 +26,16 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    final static Random RANDOM = new Random();
+
+    final Logger logger = LoggerFactory.getLogger(getClass());
 
     ProductService productService;
     OrderService orderService;
@@ -58,89 +57,86 @@ public class OrderController {
     }
 
 
-
     @PostMapping
     public ResponseEntity<Order> create(@RequestBody OrderForm form, HttpServletRequest request) {
-        Span span = tracer.buildSpan("createOrder").start();
+        Span span = tracer.activeSpan().setOperationName("createOrder");
+        List<OrderProductDto> formDtos = form.getProductOrders();
+        validateProductsExistence(formDtos);
+
+        String customerId = "customer-" + RANDOM.nextInt(100); // TODO better demo
+        span.setBaggageItem("customerId", customerId);
+        span.setTag("customerId", customerId);
+
+        double totalPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
+        span.log(Collections.singletonMap("orderTotalPrice", totalPrice));
+        span.setTag("orderTotalPriceRange", getPriceRange(totalPrice));
+
+        String shippingCountry = "FR"; // TODO better demo
+        span.setTag("shippingCountry", shippingCountry);
+        ResponseEntity<String> antiFraudResult;
         try {
-            List<OrderProductDto> formDtos = form.getProductOrders();
-            validateProductsExistence(formDtos);
+            antiFraudResult = restTemplate.getForEntity(
+                    this.antiFraudServiceBaseUrl + "fraud/checkOrder?totalPrice={q}&customerIpAddress={q}&shippingCountry={q}",
+                    String.class,
+                    totalPrice, request.getRemoteAddr(), shippingCountry);
+            boolean rejectedByAntiFraud = antiFraudResult.getBody().equals("KO");
 
-            String customerId = "john-doe-123"; // TODO better demo
-            span.setBaggageItem("customerId", customerId);
-
-            double totalPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
-            span.log(Collections.singletonMap("orderTotalPrice", totalPrice));
-            span.setTag("orderTotalPriceRange", getPriceRange(totalPrice));
-
-            String shippingCountry = "FR"; // TODO better demo
-            span.setTag("shippingCountry", shippingCountry);
-            ResponseEntity<String> antiFraudResult;
-            try {
-                antiFraudResult = restTemplate.getForEntity(
-                        this.antiFraudServiceBaseUrl + "fraud/checkOrder?totalPrice={q}&customerIpAddress={q}&shippingCountry={q}",
-                        String.class,
-                        totalPrice, request.getRemoteAddr(), shippingCountry);
-                boolean rejectedByAntiFraud = antiFraudResult.getBody().equals("KO");
-
-            } catch (RestClientException e) {
-                String exceptionShortDescription = e.getClass().getName();
-                span.setTag("antiFraud.exception", exceptionShortDescription);
-                if (e.getCause() != null) { // capture SockerTimeoutException...
-                    span.setTag("antiFraud.exception.cause", e.getCause().getClass().getName());
-                    exceptionShortDescription += " / " + e.getCause().getClass().getName();
-                }
-                HttpHeaders httpHeaders = new HttpHeaders();
-                httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
-                logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (RestClientException e) {
+            String exceptionShortDescription = e.getClass().getName();
+            span.setTag("antiFraud.exception", exceptionShortDescription);
+            if (e.getCause() != null) { // capture SockerTimeoutException...
+                span.setTag("antiFraud.exception.cause", e.getCause().getClass().getName());
+                exceptionShortDescription += " / " + e.getCause().getClass().getName();
             }
-            if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
-                String exceptionShortDescription = "status-" + antiFraudResult.getStatusCode();
-                span.setTag("antiFraud.exception", exceptionShortDescription);
-                HttpHeaders httpHeaders = new HttpHeaders();
-                httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
-                logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            if (!"OK".equals(antiFraudResult.getBody())) {
-                String exceptionShortDescription = "response-" + antiFraudResult.getBody();
-                span.setTag("antiFraud.exception", exceptionShortDescription);
-                HttpHeaders httpHeaders = new HttpHeaders();
-                httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
-                logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-
-            Order order = new Order();
-            order.setStatus(OrderStatus.PAID.name());
-            order = this.orderService.create(order);
-
-            List<OrderProduct> orderProducts = new ArrayList<>();
-            for (OrderProductDto dto : formDtos) {
-                orderProducts.add(orderProductService.create(new OrderProduct(order, productService.getProduct(dto
-                        .getProduct()
-                        .getId()), dto.getQuantity())));
-            }
-
-            order.setOrderProducts(orderProducts);
-
-            this.orderService.update(order);
-
-            logger.info("SUCCESS createOrder({}): totalPrice: {}, id:{}", form, totalPrice, order.getId());
-
-            String uri = ServletUriComponentsBuilder
-                    .fromCurrentServletMapping()
-                    .path("/orders/{id}")
-                    .buildAndExpand(order.getId())
-                    .toString();
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Location", uri);
-
-            return new ResponseEntity<>(order, headers, HttpStatus.CREATED);
-        } finally {
-            span.finish();
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
+            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+        if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
+            String exceptionShortDescription = "status-" + antiFraudResult.getStatusCode();
+            span.setTag("antiFraud.exception", exceptionShortDescription);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
+            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if (!"OK".equals(antiFraudResult.getBody())) {
+            String exceptionShortDescription = "response-" + antiFraudResult.getBody();
+            span.setTag("antiFraud.exception", exceptionShortDescription);
+            HttpHeaders httpHeaders = new HttpHeaders();
+            httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
+            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        Order order = new Order();
+        order.setStatus(OrderStatus.PAID.name());
+        order = this.orderService.create(order);
+
+        List<OrderProduct> orderProducts = new ArrayList<>();
+        for (OrderProductDto dto : formDtos) {
+            orderProducts.add(orderProductService.create(new OrderProduct(order, productService.getProduct(dto
+                    .getProduct()
+                    .getId()), dto.getQuantity())));
+        }
+
+        order.setOrderProducts(orderProducts);
+
+        this.orderService.update(order);
+
+        logger.info("SUCCESS createOrder({}): totalPrice: {}, id:{}", form, totalPrice, order.getId());
+
+        String uri = ServletUriComponentsBuilder
+                .fromCurrentServletMapping()
+                .path("/orders/{id}")
+                .buildAndExpand(order.getId())
+                .toString();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location", uri);
+
+        return new ResponseEntity<>(order, headers, HttpStatus.CREATED);
+
     }
 
     private void validateProductsExistence(List<OrderProductDto> orderProducts) {
@@ -170,6 +166,7 @@ public class OrderController {
     public void setAntiFraudServiceBaseUrl(String antiFraudServiceBaseUrl) {
         this.antiFraudServiceBaseUrl = antiFraudServiceBaseUrl;
     }
+
     public String getPriceRange(double price) {
         if (price < 10) {
             return "small";
@@ -179,6 +176,7 @@ public class OrderController {
             return "large";
         }
     }
+
     public static class OrderForm {
 
         private List<OrderProductDto> productOrders;

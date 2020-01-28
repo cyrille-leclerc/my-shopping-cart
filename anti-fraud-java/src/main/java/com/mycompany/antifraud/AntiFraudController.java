@@ -31,8 +31,8 @@ public class AntiFraudController {
     int averageDurationMillisOnLargeShoppingCart = 200;
 
     int fraudPercentageOnSmallShoppingCarts = 0;
-    int fraudPercentageOnLargeShoppingCarts = 0;
-    int fraudPercentageOnMediumShoppingCarts = 10;
+    int fraudPercentageOnMediumShoppingCarts = 0;
+    int fraudPercentageOnLargeShoppingCarts = 10;
 
     int priceUpperBoundaryDollarsOnSmallShoppingCart = 10;
     int priceUpperBoundaryDollarsOnMediumShoppingCarts = 100;
@@ -47,7 +47,7 @@ public class AntiFraudController {
             @RequestParam(required = true) double totalPrice,
             @RequestParam(required = true) String shippingCountry,
             @RequestParam(required = true) String customerIpAddress) {
-        Span span = tracer.buildSpan("checkOrder").start();
+        Span span = tracer.activeSpan().setOperationName("checkOrder");
         span
                 .log(Collections.singletonMap("totalPrice", totalPrice))
                 .log(Collections.singletonMap("customerIpAddress", customerIpAddress))
@@ -97,7 +97,6 @@ public class AntiFraudController {
         } finally {
             this.fraudChecksPriceInDollarsCounter.addAndGet((int) Math.ceil(totalPrice));
             this.fraudChecksCounter.incrementAndGet();
-            span.finish();
         }
     }
 
