@@ -30,7 +30,7 @@ public class Injector {
     public void post(String url) throws IOException, InterruptedException {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
 
-            for (int i = 0; i < 10000; i++) {
+            for (int i = 0; i < 100_000; i++) {
                 int productIdx = RANDOM.nextInt(this.products.size());
                 int quantity = 1 + RANDOM.nextInt(2);
 
