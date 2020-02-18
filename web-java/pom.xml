@@ -72,7 +72,7 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- elastic-tracer -->
+		<!-- elastic-apm -->
 		<dependency>
 			<groupId>co.elastic.apm</groupId>
 			<artifactId>apm-agent-attach</artifactId>
@@ -80,20 +80,6 @@
 		<dependency>
 			<groupId>co.elastic.apm</groupId>
 			<artifactId>apm-agent-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>co.elastic.apm</groupId>
-			<artifactId>apm-opentracing</artifactId>
-		</dependency>
-		<!-- -->
-		<dependency>
-			<groupId>io.opentracing.contrib</groupId>
-			<artifactId>opentracing-spring-cloud-starter</artifactId>
-		</dependency>
-		<!-- -->
-		<dependency>
-			<groupId>io.opentracing.contrib</groupId>
-			<artifactId>opentracing-jdbc</artifactId>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>

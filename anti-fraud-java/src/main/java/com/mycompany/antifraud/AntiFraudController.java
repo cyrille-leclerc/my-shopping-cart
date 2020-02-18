@@ -1,7 +1,7 @@
 package com.mycompany.antifraud;
 
-import io.opentracing.Span;
-import io.opentracing.Tracer;
+import co.elastic.apm.api.CaptureTransaction;
+import co.elastic.apm.api.ElasticApm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.sql.DataSource;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -31,9 +29,6 @@ public class AntiFraudController {
 
     final static Random RANDOM = new Random();
     final static BigDecimal FIVE_PERCENT = new BigDecimal(5).divide(new BigDecimal(100));
-
-
-    Tracer tracer;
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -60,12 +55,13 @@ public class AntiFraudController {
             @RequestParam double totalPrice,
             @RequestParam String shippingCountry,
             @RequestParam String customerIpAddress) {
-        Span span = tracer.activeSpan().setOperationName("checkOrder");
-        span
-                .log(Collections.singletonMap("totalPrice", totalPrice))
-                .log(Collections.singletonMap("customerIpAddress", customerIpAddress))
-                .setTag("shippingCountry", shippingCountry);
 
+        ElasticApm.currentSpan().setName("checkOrder");
+
+        // FIXME shouldn't these be log messages rather than tags / labels?
+        ElasticApm.currentSpan().addLabel("totalPrice", totalPrice);
+        ElasticApm.currentSpan().addLabel("customerIpAddress", customerIpAddress);
+        ElasticApm.currentSpan().addLabel("shippingCountry", shippingCountry);
 
         try {
             int durationOffsetInMillis;
@@ -85,7 +81,7 @@ public class AntiFraudController {
             int checkOrderDurationMillis = durationOffsetInMillis + RANDOM.nextInt(randomDurationInMillis);
             // positive means fraud
             int fraudScore = fraudPercentage - RANDOM.nextInt(100);
-            tracer.activeSpan().setTag("fraudScore", fraudScore);
+            ElasticApm.currentSpan().addLabel("fraudScore", fraudScore);
 
             boolean rejected = fraudScore > 0;
 
@@ -110,6 +106,7 @@ public class AntiFraudController {
                 }
                 // Thread.sleep(checkOrderDurationMillis);
             } catch (SQLException | InterruptedException e) {
+                ElasticApm.currentSpan().captureException(e);
                 e.printStackTrace();
             }
 
@@ -228,11 +225,6 @@ public class AntiFraudController {
     @ManagedAttribute
     public AtomicInteger getFraudChecksPriceSumInDollars() {
         return fraudChecksPriceInDollarsCounter;
-    }
-
-    @Autowired
-    public void setTracer(Tracer tracer) {
-        this.tracer = tracer;
     }
 
     @Autowired
