@@ -6,8 +6,12 @@
 </ul>
 <h3 class="text-right">Total amount: ${{ total }}</h3>
 
-<button class="btn btn-primary btn-block" (click)="pay()" *ngIf="!paid">Pay</button>
+<button class="btn btn-primary btn-block" (click)="pay()" *ngIf="isPaymentNotPaid()">Pay</button>
 
-<div class="alert alert-success" role="alert" *ngIf="paid">
+<div class="alert alert-success" role="alert" *ngIf="isPaymentSuccess()">
     <strong>Congratulation!</strong> You successfully made the order.
+</div>
+
+<div class="alert alert-warning" role="alert" *ngIf="isPaymentFailure()">
+    <strong>Sorry!</strong> your payment failed.
 </div>

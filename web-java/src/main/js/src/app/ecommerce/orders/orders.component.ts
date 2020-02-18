@@ -11,7 +11,7 @@ import {EcommerceService} from "../services/EcommerceService";
 export class OrdersComponent implements OnInit {
     orders: ProductOrders;
     total: number;
-    paid: boolean;
+    paymentStatus: PaymentStatus;
     sub: Subscription;
 
     constructor(private ecommerceService: EcommerceService) {
@@ -19,7 +19,7 @@ export class OrdersComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.paid = false;
+        this.paymentStatus = PaymentStatus.NOT_PAID;
         this.sub = this.ecommerceService.OrdersChanged.subscribe(() => {
             this.orders = this.ecommerceService.ProductOrders;
         });
@@ -27,8 +27,12 @@ export class OrdersComponent implements OnInit {
     }
 
     pay() {
-        this.paid = true;
-        this.ecommerceService.saveOrder(this.orders).subscribe();
+        this.paymentStatus = PaymentStatus.PAYMENT_FAILURE;
+        console.warn("Before invocation saveOrder(): "  + this.orders);
+        this.ecommerceService.saveOrder(this.orders).subscribe(resp => {
+            console.warn("Response for invocation saveOrder(): "  + resp);
+            this.paymentStatus = PaymentStatus.PAYMENT_SUCCESS;
+        });
     }
 
     loadTotal() {
@@ -36,4 +40,19 @@ export class OrdersComponent implements OnInit {
             this.total = this.ecommerceService.Total;
         });
     }
+
+    isPaymentSuccess() : boolean {
+        return this.paymentStatus == PaymentStatus.PAYMENT_SUCCESS;
+    }
+
+    isPaymentFailure() : boolean {
+        return this.paymentStatus == PaymentStatus.PAYMENT_FAILURE;
+    }
+
+    isPaymentNotPaid() : boolean {
+        return this.paymentStatus == PaymentStatus.NOT_PAID;
+    }
+
 }
+export enum PaymentStatus {NOT_PAID, PAYMENT_SUCCESS, PAYMENT_FAILURE}
+

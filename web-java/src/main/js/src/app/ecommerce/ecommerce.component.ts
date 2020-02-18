@@ -1,7 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ProductsComponent} from "./products/products.component";
 import {ShoppingCartComponent} from "./shopping-cart/shopping-cart.component";
-import {OrdersComponent} from "./orders/orders.component";
+import {OrdersComponent, PaymentStatus} from "./orders/orders.component";
 
 @Component({
     selector: 'app-ecommerce',
@@ -39,6 +39,6 @@ export class EcommerceComponent implements OnInit {
         this.orderFinished = false;
         this.productsC.reset();
         this.shoppingCartC.reset();
-        this.ordersC.paid = false;
+        this.ordersC.paymentStatus = PaymentStatus.NOT_PAID;
     }
 }

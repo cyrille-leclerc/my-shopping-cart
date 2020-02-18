@@ -30,7 +30,7 @@ export class EcommerceService {
     }
 
     saveOrder(order: ProductOrders) {
-        return this.http.post(this.ordersUrl, order);
+        return this.http.post(this.ordersUrl, order, {observe: 'response'});
     }
 
     set SelectedProductOrder(value: ProductOrder) {
