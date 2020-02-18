@@ -36,7 +36,7 @@ public class EcommerceApplication {
 
     @Bean
     public RestTemplate getRestTemplate() {
-        return new RestTemplateBuilder().setReadTimeout(Duration.of(300, ChronoUnit.MILLIS)).build();
+        return new RestTemplateBuilder().setReadTimeout(Duration.of(900, ChronoUnit.MILLIS)).build();
     }
 
     @Bean

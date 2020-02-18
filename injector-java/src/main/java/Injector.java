@@ -51,7 +51,7 @@ public class Injector {
                     }
                 }
 
-                Thread.sleep(300);
+                Thread.sleep(RANDOM.nextInt(300));
             }
         }
     }

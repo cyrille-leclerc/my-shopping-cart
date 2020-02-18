@@ -12,8 +12,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.sql.DataSource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @ManagedResource
@@ -21,10 +30,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AntiFraudController {
 
     final static Random RANDOM = new Random();
+    final static BigDecimal FIVE_PERCENT = new BigDecimal(5).divide(new BigDecimal(100));
+
 
     Tracer tracer;
 
     final Logger logger = LoggerFactory.getLogger(getClass());
+
+    DataSource dataSource;
 
     int averageDurationMillisOnSmallShoppingCarts = 50;
     int averageDurationMillisOnMediumShoppingCarts = 50;
@@ -44,9 +57,9 @@ public class AntiFraudController {
 
     @RequestMapping(path = "fraud/checkOrder", method = {RequestMethod.GET, RequestMethod.POST})
     public String checkOrder(
-            @RequestParam(required = true) double totalPrice,
-            @RequestParam(required = true) String shippingCountry,
-            @RequestParam(required = true) String customerIpAddress) {
+            @RequestParam double totalPrice,
+            @RequestParam String shippingCountry,
+            @RequestParam String customerIpAddress) {
         Span span = tracer.activeSpan().setOperationName("checkOrder");
         span
                 .log(Collections.singletonMap("totalPrice", totalPrice))
@@ -68,7 +81,7 @@ public class AntiFraudController {
                 durationOffsetInMillis = averageDurationMillisOnLargeShoppingCart;
             }
 
-            int randomDurationInMillis = Math.max(5, Math.round(5 / 100 * durationOffsetInMillis));
+            int randomDurationInMillis = Math.max(5, new BigDecimal(durationOffsetInMillis).multiply(FIVE_PERCENT).intValue());
             int checkOrderDurationMillis = durationOffsetInMillis + RANDOM.nextInt(randomDurationInMillis);
             // positive means fraud
             int fraudScore = fraudPercentage - RANDOM.nextInt(100);
@@ -76,11 +89,27 @@ public class AntiFraudController {
 
             boolean rejected = fraudScore > 0;
 
-            logger.info("checkOrder(totalPrice: {}, shippingCountry: {}, customerIpAddress: {}): fraudScore: {}, checkOrderDurationMillis: {}, rejected: {}",
-                    totalPrice, shippingCountry, customerIpAddress, fraudScore, checkOrderDurationMillis, rejected);
-            try {
-                Thread.sleep(checkOrderDurationMillis);
-            } catch (InterruptedException e) {
+
+            try (Connection cnn = dataSource.getConnection()) {
+                try (Statement stmt = cnn.createStatement()) {
+
+                    BigDecimal checkoutDurationInSeconds = new BigDecimal(checkOrderDurationMillis).divide(new BigDecimal(1000));;
+                    long nanosBefore = System.nanoTime();
+                    String checkoutDurationInSecondsAsString = checkoutDurationInSeconds.toPlainString();
+                    stmt.execute("select pg_sleep(0.05)");
+                    Thread.sleep(checkOrderDurationMillis);
+                    long actualSleepInNanos = System.nanoTime() - nanosBefore;
+                    long actualSleepInMillis = TimeUnit.MILLISECONDS.convert(actualSleepInNanos, TimeUnit.NANOSECONDS);
+
+                    long deltaPercents = Math.abs(actualSleepInMillis - checkOrderDurationMillis) * 100 / checkOrderDurationMillis;
+                    logger.info("checkOrder(totalPrice: {}, shippingCountry: {}, customerIpAddress: {}): fraudScore: {}, rejected: {}, " +
+                                    "expectedSleep: {}ms, actualSleep: {}ms, delta:{}%",
+                            new DecimalFormat("000").format(totalPrice), shippingCountry, customerIpAddress, fraudScore, rejected,
+                            checkOrderDurationMillis, actualSleepInMillis, deltaPercents);
+
+                }
+                // Thread.sleep(checkOrderDurationMillis);
+            } catch (SQLException | InterruptedException e) {
                 e.printStackTrace();
             }
 
@@ -204,5 +233,10 @@ public class AntiFraudController {
     @Autowired
     public void setTracer(Tracer tracer) {
         this.tracer = tracer;
+    }
+
+    @Autowired
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 }
