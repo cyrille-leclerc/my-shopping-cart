@@ -2,6 +2,7 @@
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -33,16 +34,28 @@ public class Injector {
             for (int i = 0; i < 100_000; i++) {
                 int productIdx = RANDOM.nextInt(this.products.size());
                 int quantity = 1 + RANDOM.nextInt(2);
+                Product product = this.products.get(productIdx);
 
-                String json = this.products.get(productIdx).toJson(quantity);
+                // GET PRODUCT
+                HttpGet getProductRequest = new HttpGet(url + "/api/products/" + product.id);
+                getProductRequest.setHeader("Accept", "application/json");
 
-                HttpPost httpPost = new HttpPost(url + "/api/orders");
-                StringEntity entity = new StringEntity(json);
-                httpPost.setEntity(entity);
-                httpPost.setHeader("Accept", "application/json");
-                httpPost.setHeader("Content-type", "application/json");
+                try (CloseableHttpResponse response = client.execute(getProductRequest)) {
+                    int statusCode = response.getStatusLine().getStatusCode();
+                    if (statusCode == HttpStatus.SC_OK) {
+                        // success
+                    } else {
+                        // failure
+                    }
+                }
+                // CREATE ORDER
+                HttpPost createOrderRequest = new HttpPost(url + "/api/orders");
+                String createOrderJsonPayload = product.toJson(quantity);
+                createOrderRequest.setEntity(new StringEntity(createOrderJsonPayload));
+                createOrderRequest.setHeader("Accept", "application/json");
+                createOrderRequest.setHeader("Content-type", "application/json");
 
-                try (CloseableHttpResponse response = client.execute(httpPost)) {
+                try (CloseableHttpResponse response = client.execute(createOrderRequest)) {
                     int statusCode = response.getStatusLine().getStatusCode();
                     if (statusCode == HttpStatus.SC_CREATED) {
                         StressTestUtils.incrementProgressBarSuccess();
@@ -51,7 +64,7 @@ public class Injector {
                     }
                 }
 
-                Thread.sleep(RANDOM.nextInt(300));
+                Thread.sleep(RANDOM.nextInt(250));
             }
         }
     }
