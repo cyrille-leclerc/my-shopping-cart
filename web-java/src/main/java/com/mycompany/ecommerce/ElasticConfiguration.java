@@ -48,6 +48,8 @@ public class ElasticConfiguration {
                 configuration.put(name, properties.getProperty(name));
         }
 
+        // https://www.elastic.co/guide/en/apm/agent/java/current/config-logging.html#config-enable-log-correlation
+        configuration.put("enable_log_correlation", "true");
         // warning may contain secret `secret_token`
         logger.debug("Load ElasticAPM with configuration {}", configuration);
         ElasticApmAttacher.attach(configuration);

@@ -72,6 +72,11 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- elastic logs-->
+		<dependency>
+			<groupId>co.elastic.logging</groupId>
+			<artifactId>logback-ecs-encoder</artifactId>
+		</dependency>
 		<!-- elastic-apm -->
 		<dependency>
 			<groupId>co.elastic.apm</groupId>
