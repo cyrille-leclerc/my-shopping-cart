@@ -1,7 +1,5 @@
 package com.mycompany.antifraud;
 
-import co.elastic.apm.api.CaptureTransaction;
-import co.elastic.apm.api.ElasticApm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
-import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,12 +53,12 @@ public class AntiFraudController {
             @RequestParam String shippingCountry,
             @RequestParam String customerIpAddress) {
 
-        ElasticApm.currentSpan().setName("checkOrder");
+        // ElasticApm.currentSpan().setName("checkOrder");
 
         // FIXME shouldn't these be log messages rather than tags / labels?
-        ElasticApm.currentSpan().addLabel("totalPrice", totalPrice);
-        ElasticApm.currentSpan().addLabel("customerIpAddress", customerIpAddress);
-        ElasticApm.currentSpan().addLabel("shippingCountry", shippingCountry);
+        // ElasticApm.currentSpan().addLabel("totalPrice", totalPrice);
+        // ElasticApm.currentSpan().addLabel("customerIpAddress", customerIpAddress);
+        // ElasticApm.currentSpan().addLabel("shippingCountry", shippingCountry);
 
         try {
             int durationOffsetInMillis;
@@ -81,7 +78,7 @@ public class AntiFraudController {
             int checkOrderDurationMillis = durationOffsetInMillis + RANDOM.nextInt(randomDurationInMillis);
             // positive means fraud
             int fraudScore = fraudPercentage - RANDOM.nextInt(100);
-            ElasticApm.currentSpan().addLabel("fraudScore", fraudScore);
+            // ElasticApm.currentSpan().addLabel("fraudScore", fraudScore);
 
             boolean rejected = fraudScore > 0;
 
@@ -89,7 +86,8 @@ public class AntiFraudController {
             try (Connection cnn = dataSource.getConnection()) {
                 try (Statement stmt = cnn.createStatement()) {
 
-                    BigDecimal checkoutDurationInSeconds = new BigDecimal(checkOrderDurationMillis).divide(new BigDecimal(1000));;
+                    BigDecimal checkoutDurationInSeconds = new BigDecimal(checkOrderDurationMillis).divide(new BigDecimal(1000));
+                    ;
                     long nanosBefore = System.nanoTime();
                     String checkoutDurationInSecondsAsString = checkoutDurationInSeconds.toPlainString();
                     stmt.execute("select pg_sleep(0.05)");
@@ -106,7 +104,7 @@ public class AntiFraudController {
                 }
                 // Thread.sleep(checkOrderDurationMillis);
             } catch (SQLException | InterruptedException e) {
-                ElasticApm.currentSpan().captureException(e);
+                // œElasticApm.currentSpan().captureException(e);
                 e.printStackTrace();
             }
 

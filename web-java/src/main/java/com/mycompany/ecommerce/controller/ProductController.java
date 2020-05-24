@@ -1,8 +1,10 @@
 package com.mycompany.ecommerce.controller;
 
-import co.elastic.apm.api.ElasticApm;
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
+import io.opentelemetry.context.Scope;
+import io.opentelemetry.trace.Span;
+import io.opentelemetry.trace.Tracer;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,22 +16,34 @@ import javax.validation.constraints.NotNull;
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private ProductService productService;
+    ProductService productService;
 
-    public ProductController(ProductService productService) {
+    Tracer tracer;
+
+    public ProductController(ProductService productService, Tracer tracer) {
         this.productService = productService;
+        this.tracer = tracer;
     }
 
-    @GetMapping(value = { "", "/" })
+    @GetMapping(value = {"", "/"})
     public @NotNull Iterable<Product> getProducts() {
-        ElasticApm.currentSpan().setName("products");
-        return productService.getAllProducts();
+        Span span = tracer.spanBuilder("products").startSpan();
+        try (Scope scope = tracer.withSpan(span)) {
+            return productService.getAllProducts();
+        } finally {
+            span.end();
+        }
+
     }
 
     @GetMapping("/{id}")
     public @NotNull Product getProduct(@PathVariable long id) {
-        ElasticApm.currentSpan().setName("product");
-        ElasticApm.currentSpan().addLabel("product.id", id);
-        return productService.getProduct(id);
+        Span span = tracer.spanBuilder("products").startSpan();
+        try {
+            span.setAttribute("product.id", id);
+            return productService.getProduct(id);
+        } finally {
+            span.end();
+        }
     }
 }

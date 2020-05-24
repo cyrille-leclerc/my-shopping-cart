@@ -10,8 +10,7 @@
     <packaging>pom</packaging>
     <properties>
         <spring-boot.version>2.3.0.RELEASE</spring-boot.version>
-        <elastic-apm.version>1.16.0</elastic-apm.version>
-        <ecs-logging-java.version>0.4.0</ecs-logging-java.version>
+        <open-telemetry.version>0.4.1</open-telemetry.version>
     </properties>
     <modules>
         <module>web-java</module>
@@ -21,29 +20,33 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-api</artifactId>
+                <version>${open-telemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk</artifactId>
+                <version>${open-telemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-contrib-auto-annotations</artifactId>
+                <version>${open-telemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporters-logging</artifactId>
+                <version>${open-telemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId></groupId>
+                <artifactId>opentelemetry-auto-instr-java</artifactId>
+            </dependency>
+            <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>29.0-jre</version>
-            </dependency>
-            <dependency>
-                <groupId>co.elastic.logging</groupId>
-                <artifactId>logback-ecs-encoder</artifactId>
-                <version>${ecs-logging-java.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>co.elastic.apm</groupId>
-                <artifactId>apm-agent-api</artifactId>
-                <version>${elastic-apm.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>co.elastic.apm</groupId>
-                <artifactId>apm-agent-attach</artifactId>
-                <version>${elastic-apm.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>co.elastic.logging</groupId>
-                <artifactId>logback-ecs-encoder</artifactId>
-                <version>${ecs-logging-java.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jolokia</groupId>

@@ -51,6 +51,19 @@
 		</dependency>
 
 		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-sdk</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-exporters-logging</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
@@ -76,20 +89,6 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
-		</dependency>
-		<!-- elastic logs-->
-		<dependency>
-			<groupId>co.elastic.logging</groupId>
-			<artifactId>logback-ecs-encoder</artifactId>
-		</dependency>
-		<!-- elastic-apm -->
-		<dependency>
-			<groupId>co.elastic.apm</groupId>
-			<artifactId>apm-agent-attach</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>co.elastic.apm</groupId>
-			<artifactId>apm-agent-api</artifactId>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>
@@ -165,5 +164,11 @@
 			</plugin>
 		</plugins>
 	</build>
+	<repositories>
+		<repository>
+			<id>oss.sonatype.org-snapshot</id>
+			<url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
+		</repository>
+	</repositories>
 
 </project>
