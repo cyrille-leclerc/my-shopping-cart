@@ -66,6 +66,7 @@ public class EcommerceApplicationIntegrationTest {
         assertThat(products, hasItem(hasProperty("name", is("Watch"))));
     }
 
+    @Ignore("the postgresql database is not reset")
     @Test
     public void givenGetOrdersApiCall_whenProductListRetrieved_thenSizeMatchAndListContainsProductNames() {
         ResponseEntity<Iterable<Order>> responseEntity = restTemplate.exchange("http://localhost:" + port + "/api/orders", HttpMethod.GET, null, new ParameterizedTypeReference<Iterable<Order>>() {
