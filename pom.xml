@@ -20,6 +20,21 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-bom</artifactId>
+                <version>1.28.1</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava-bom</artifactId>
+                <version>29.0-jre</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-api</artifactId>
                 <version>${open-telemetry.version}</version>
@@ -36,17 +51,18 @@
             </dependency>
             <dependency>
                 <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporters-jaeger</artifactId>
+                <version>${open-telemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-exporters-logging</artifactId>
                 <version>${open-telemetry.version}</version>
             </dependency>
             <dependency>
-                <groupId></groupId>
-                <artifactId>opentelemetry-auto-instr-java</artifactId>
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>29.0-jre</version>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-exporters-otlp</artifactId>
+                <version>${open-telemetry.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jolokia</groupId>

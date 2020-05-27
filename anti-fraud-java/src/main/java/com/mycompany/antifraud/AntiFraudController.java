@@ -10,22 +10,27 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @ManagedResource
 @RestController()
 public class AntiFraudController {
 
     final static Random RANDOM = new Random();
-    final static BigDecimal FIVE_PERCENT = new BigDecimal(5).divide(new BigDecimal(100));
+    final static BigDecimal FIVE_PERCENT = new BigDecimal(5).divide(new BigDecimal(100), RoundingMode.HALF_UP);
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -51,7 +56,12 @@ public class AntiFraudController {
     public String checkOrder(
             @RequestParam double totalPrice,
             @RequestParam String shippingCountry,
-            @RequestParam String customerIpAddress) {
+            @RequestParam String customerIpAddress,
+            HttpServletRequest request) {
+
+        for (String headerName: Arrays.asList("traceparent") /*Collections.list(request.getHeaderNames())*/) {
+            logger.info(headerName + ": " + Collections.list(request.getHeaders(headerName)).stream().collect(Collectors.joining(", ")));
+        }
 
         // ElasticApm.currentSpan().setName("checkOrder");
 

@@ -8,9 +8,7 @@ import com.mycompany.ecommerce.model.OrderStatus;
 import com.mycompany.ecommerce.service.OrderProductService;
 import com.mycompany.ecommerce.service.OrderService;
 import com.mycompany.ecommerce.service.ProductService;
-import io.opentelemetry.context.Scope;
-import io.opentelemetry.trace.Span;
-import io.opentelemetry.trace.Tracer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,13 +41,13 @@ public class OrderController {
     OrderProductService orderProductService;
     RestTemplate restTemplate;
     String antiFraudServiceBaseUrl;
-    Tracer tracer;
+    // Tracer tracer;
 
-    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService, Tracer tracer) {
+    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService/* , Tracer tracer*/ ) {
         this.productService = productService;
         this.orderService = orderService;
         this.orderProductService = orderProductService;
-        this.tracer = tracer;
+        //  this.tracer = tracer;
     }
 
     @GetMapping
@@ -61,21 +59,21 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<Order> create(@RequestBody OrderForm form, HttpServletRequest request) {
-        Span span = tracer.spanBuilder("order").startSpan();
-        try (Scope scope = tracer.withSpan(span)) {
+        // Span span = tracer.spanBuilder("order").startSpan();
+        try { // try (Scope scope = tracer.withSpan(span)) {
             List<OrderProductDto> formDtos = form.getProductOrders();
             validateProductsExistence(formDtos);
 
             String customerId = "customer-" + RANDOM.nextInt(100); // TODO better demo
-            span.setAttribute("customerId", customerId);
+            // span.setAttribute("customerId", customerId);
 
             double totalPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
             // FIXME shouldn't orderTotalPrice be log message rather than tag / label?
-            span.setAttribute("orderTotalPrice", totalPrice);
-            span.setAttribute("orderTotalPriceRange", getPriceRange(totalPrice)); // Label
+            // span.setAttribute("orderTotalPrice", totalPrice);
+            // span.setAttribute("orderTotalPriceRange", getPriceRange(totalPrice)); // Label
 
             String shippingCountry = "FR"; // TODO better demo
-            span.setAttribute("shippingCountry", shippingCountry); // Label
+            // span.setAttribute("shippingCountry", shippingCountry); // Label
             ResponseEntity<String> antiFraudResult;
             try {
                 antiFraudResult = restTemplate.getForEntity(
@@ -86,12 +84,12 @@ public class OrderController {
 
             } catch (RestClientException e) {
                 String exceptionShortDescription = e.getClass().getName();
-                span.setAttribute("shippingCountry", shippingCountry); // Label
+                // span.setAttribute("shippingCountry", shippingCountry); // Label
 
-                span.setAttribute("antiFraud.exception", exceptionShortDescription);
+                // span.setAttribute("antiFraud.exception", exceptionShortDescription);
                 // span.setAttribute.captureException(e);
                 if (e.getCause() != null) { // capture SockerTimeoutException...
-                    span.setAttribute("antiFraud.exception.cause", e.getCause().getClass().getName());
+                    // span.setAttribute("antiFraud.exception.cause", e.getCause().getClass().getName());
                     exceptionShortDescription += " / " + e.getCause().getClass().getName();
                 }
                 HttpHeaders httpHeaders = new HttpHeaders();
@@ -101,7 +99,7 @@ public class OrderController {
             }
             if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
                 String exceptionShortDescription = "status-" + antiFraudResult.getStatusCode();
-                span.setAttribute("antiFraud.exception", exceptionShortDescription);
+                // span.setAttribute("antiFraud.exception", exceptionShortDescription);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
                 logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
@@ -109,7 +107,7 @@ public class OrderController {
             }
             if (!"OK".equals(antiFraudResult.getBody())) {
                 String exceptionShortDescription = "response-" + antiFraudResult.getBody();
-                span.setAttribute("antiFraud.exception", exceptionShortDescription);
+                // span.setAttribute("antiFraud.exception", exceptionShortDescription);
                 HttpHeaders httpHeaders = new HttpHeaders();
                 httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
                 logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
@@ -143,7 +141,7 @@ public class OrderController {
 
             return new ResponseEntity<>(order, headers, HttpStatus.CREATED);
         } finally {
-            span.end();
+            // span.end();
         }
 
     }
