@@ -20,5 +20,5 @@ java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dota.exporter.jaeger.endpoint=localhost:14250 \
      -Dota.exporter.jaeger.service.name=web_jaeger \
      -Dserver.port=8080 \
-     -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=debug \
+     -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
      -jar target/web-1.0-SNAPSHOT.jar

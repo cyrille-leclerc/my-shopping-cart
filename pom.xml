@@ -65,6 +65,11 @@
                 <version>${open-telemetry.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-contrib-auto-annotations</artifactId>
+                <version>${open-telemetry.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.jolokia</groupId>
                 <artifactId>jolokia-core</artifactId>
                 <version>1.6.2</version>

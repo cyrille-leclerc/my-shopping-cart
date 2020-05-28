@@ -1,6 +1,3 @@
-
-import com.google.common.base.Strings;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
@@ -92,8 +89,40 @@ public final class StressTestUtils {
                 long throughputAsInt = (DASH_PER_LINE * 1000) / elapsedDuration;
                 throughput = String.valueOf(throughputAsInt);
             }
-            System.out.print("[" + dateTimeFormatter.format(LocalDateTime.now()) + " " + Strings.padStart(throughput, 4, ' ') + " req/s]\t");
+            System.out.print("[" + dateTimeFormatter.format(LocalDateTime.now()) + " " + StressTestUtils.padStart(throughput, 4, ' ') + " req/s]\t");
             this.lastSampleTime = System.currentTimeMillis();
         }
+    }
+
+
+    /**
+     * Returns a string, of length at least {@code minLength}, consisting of {@code string} prepended
+     * with as many copies of {@code padChar} as are necessary to reach that length. For example,
+     *
+     * <ul>
+     *   <li>{@code padStart("7", 3, '0')} returns {@code "007"}
+     *   <li>{@code padStart("2010", 3, '0')} returns {@code "2010"}
+     * </ul>
+     *
+     * <p>See {@link java.util.Formatter} for a richer set of formatting capabilities.
+     *
+     * @param string the string which should appear at the end of the result
+     * @param minLength the minimum length the resulting string must have. Can be zero or negative, in
+     *     which case the input string is always returned.
+     * @param padChar the character to insert at the beginning of the result until the minimum length
+     *     is reached
+     * @return the padded string
+     * @see Strings
+     */
+    public static String padStart(String string, int minLength, char padChar) {
+        if (string.length() >= minLength) {
+            return string;
+        }
+        StringBuilder sb = new StringBuilder(minLength);
+        for (int i = string.length(); i < minLength; i++) {
+            sb.append(padChar);
+        }
+        sb.append(string);
+        return sb.toString();
     }
 }
