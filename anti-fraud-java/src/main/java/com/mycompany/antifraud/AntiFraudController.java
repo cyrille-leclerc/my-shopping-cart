@@ -97,7 +97,7 @@ public class AntiFraudController {
                 try (Statement stmt = cnn.createStatement()) {
 
                     BigDecimal checkoutDurationInSeconds = new BigDecimal(checkOrderDurationMillis).divide(new BigDecimal(1000));
-                    ;
+
                     long nanosBefore = System.nanoTime();
                     String checkoutDurationInSecondsAsString = checkoutDurationInSeconds.toPlainString();
                     stmt.execute("select pg_sleep(0.05)");
@@ -114,7 +114,7 @@ public class AntiFraudController {
                 }
                 // Thread.sleep(checkOrderDurationMillis);
             } catch (SQLException | InterruptedException e) {
-                // œElasticApm.currentSpan().captureException(e);
+                // ElasticApm.currentSpan().captureException(e);
                 e.printStackTrace();
             }
 

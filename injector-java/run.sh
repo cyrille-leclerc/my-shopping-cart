@@ -9,17 +9,17 @@ export OPEN_TELEMETRY_AGENT_JAR=$OPEN_TELEMETRY_AGENT_HOME/opentelemetry-auto-$O
 # export OPEN_TELEMETRY_AGENT_EXPORTER_JAR=$OPEN_TELEMETRY_AGENT_HOME/opentelemetry-auto-exporters-logging-$OPEN_TELEMETRY_AGENT_VERSION.jar
 
 # JAEGER
-export OPEN_TELEMETRY_AGENT_EXPORTER_JAR=$OPEN_TELEMETRY_AGENT_HOME/opentelemetry-auto-exporters-jaeger-$OPEN_TELEMETRY_AGENT_VERSION.jar
-export OTEL_RESOURCE_ATTRIBUTES=service.name=monitor_jaeger,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT
+# export OPEN_TELEMETRY_AGENT_EXPORTER_JAR=$OPEN_TELEMETRY_AGENT_HOME/opentelemetry-auto-exporters-jaeger-$OPEN_TELEMETRY_AGENT_VERSION.jar
+# export OTEL_RESOURCE_ATTRIBUTES=service.name=monitor,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT
 
 # OTEL COLLECTOR
-# export OPEN_TELEMETRY_AGENT_EXPORTER_JAR=$OPEN_TELEMETRY_AGENT_HOME/opentelemetry-auto-exporters-otlp-$OPEN_TELEMETRY_AGENT_VERSION.jar
-# export OTEL_RESOURCE_ATTRIBUTES=service.name=monitor_otlp,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT
+export OPEN_TELEMETRY_AGENT_EXPORTER_JAR=$OPEN_TELEMETRY_AGENT_HOME/opentelemetry-auto-exporters-otlp-$OPEN_TELEMETRY_AGENT_VERSION.jar
+export OTEL_RESOURCE_ATTRIBUTES=service.name=monitor,service.namespace=com-shoppingcart,service.version=1.0-otlp-SNAPSHOT
 
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dota.exporter.jar=$OPEN_TELEMETRY_AGENT_EXPORTER_JAR \
      -Dota.exporter.otlp.endpoint=localhost:55680 \
      -Dota.exporter.jaeger.endpoint=localhost:14250 \
-     -Dota.exporter.jaeger.service.name=monitor_jaeger \
+     -Dota.exporter.jaeger.service.name=monitor \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
      -classpath target/classes/ Injector
