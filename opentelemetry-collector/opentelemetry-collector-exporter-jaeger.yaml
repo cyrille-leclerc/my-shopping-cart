@@ -1,0 +1,20 @@
+receivers:
+  otlp:
+    endpoint: 'localhost:55680'
+processors:
+  batch: null
+exporters:
+  logging:
+    debug
+  jaeger_grpc:
+    endpoint: '127.0.0.1:14250'
+service:
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - batch
+      exporters:
+        - logging
+        - jaeger_grpc

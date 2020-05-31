@@ -15,7 +15,7 @@
     <modules>
         <module>frontend-java</module>
         <module>anti-fraud-java</module>
-        <module>injector-java</module>
+        <module>monitor-java</module>
     </modules>
     <dependencyManagement>
         <dependencies>
@@ -62,11 +62,6 @@
             <dependency>
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-exporters-otlp</artifactId>
-                <version>${open-telemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-contrib-auto-annotations</artifactId>
                 <version>${open-telemetry.version}</version>
             </dependency>
             <dependency>

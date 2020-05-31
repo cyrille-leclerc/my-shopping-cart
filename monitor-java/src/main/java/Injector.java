@@ -13,6 +13,8 @@ public class Injector {
 
     final static Random RANDOM = new Random();
 
+    final static int SLEEP_MAX_DURATION_MILLIS = 250;
+
     List<Product> products = Arrays.asList(
             new Product(1L, "TV Set", 300.00),
             new Product(2L, "Game Console", 200.00),
@@ -30,7 +32,7 @@ public class Injector {
             Product product = this.products.get(productIdx);
             placeOrder(url, quantity, product);
 
-            Thread.sleep(RANDOM.nextInt(250));
+            Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));
         }
 
     }

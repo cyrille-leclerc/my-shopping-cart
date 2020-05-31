@@ -26,3 +26,5 @@ target/
 **/node_modules/
 **/dist
 **/tmp
+
+.otel/

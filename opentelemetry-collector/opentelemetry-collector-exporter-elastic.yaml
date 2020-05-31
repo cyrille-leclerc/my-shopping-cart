@@ -1,0 +1,26 @@
+receivers:
+  otlp:
+    endpoint: 'localhost:55680'
+processors:
+  batch: null
+  queued_retry: null
+exporters:
+  elastic:
+    apm_server_url: 'http://localhost:8200'
+    secret_token: 'my_secret_token'
+  logging:
+  #    loglevel: debug
+  jaeger:
+    endpoint: '127.0.0.1:14250'
+    insecure: true
+service:
+  pipelines:
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - batch
+      exporters:
+        - elastic
+        - jaeger
+        - logging
