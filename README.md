@@ -1,4 +1,10 @@
 
+# Pre requisites
+
+* Java 8
+* Elastic APM
+* OpenTelemetry Collector with https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/240
+    * Cyrille Le Clerc shared the executable for MacOS on Can be downloaded at https://drive.google.com/open?id=1cZQ-84UFnWHu310szerEDoW58gvbrNVe
 
 # Architecture
 

@@ -27,7 +27,7 @@ mkdir -p "$OPEN_TELEMETRY_AGENT_HOME"
 export OPENTELEMETRY_COLLECTOR_PATH=otelcontribcol-dc17498
 
 echo "WARNING hardcoded opentelemetry collector executable: $OPENTELEMETRY_COLLECTOR_PATH, to change the executable path, edit $0"
-
+echo "collector can be downloaded at https://drive.google.com/open?id=1cZQ-84UFnWHu310szerEDoW58gvbrNVe"
 set -x
 
 $OPENTELEMETRY_COLLECTOR_PATH --config $PRGDIR/opentelemetry-collector-exporter-elastic.yaml
