@@ -15,6 +15,20 @@
 
 # Run the sample
 
+* install Postgresql
+
+```
+brew install postgresql
+brew services start postgresql
+psql postgre
+create database test;
+CREATE USER test WITH PASSWORD 'test';
+
+// TODO create role test
+GRANT ALL PRIVILEGES ON DATABASE test TO test;
+
+```
+
 * shell 1: start OpenTelemetry collector
 
  ```
