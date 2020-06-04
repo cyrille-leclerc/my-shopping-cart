@@ -97,4 +97,6 @@ WARNING hardcoded opentelemetry collector executable: otelcontribcol-dc17498, to
 2020-05-31T16:05:00.737+0200    INFO    service/service.go:233  Everything is ready. Begin running and processing data.
 2020-05-31T16:06:05.331+0200    INFO    loggingexporter/logging_exporter.go:90  TraceExporter   {"#spans": 38}`
 ...
-``
+```
+
+![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/elastic-apm-distributed-trace-opentelemetry.png)
