@@ -15,7 +15,9 @@
 
 # Run the sample
 
-* install Postgresql
+* Install java: on Mac, see https://installvirtual.com/install-openjdk-10-mac-using-brew/
+
+* Install Postgresql
 
 ```
 brew install postgresql
@@ -30,7 +32,9 @@ GRANT ALL PRIVILEGES ON DATABASE test TO test;
 ```
 
 * shell 1: start OpenTelemetry collector
-
+   * Download the OpenTelemetry collector. e.g. otelcontribcol-dc17498 for Mac -> https://drive.google.com/open?id=1cZQ-84UFnWHu310szerEDoW58gvbrNVe
+   * Install `otelcontribcol-dc17498` in your PATH, typically under `~/bin/`
+   * Run the collector
  ```
 cd opentelemetry-collector/
 ./run-opentelemetry-collector.sh  
