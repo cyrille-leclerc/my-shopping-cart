@@ -29,8 +29,13 @@ public class Injector {
         for (int i = 0; i < 100_000 /*100_000*/; i++) {
             int productIdx = RANDOM.nextInt(this.products.size());
             int quantity = 1 + RANDOM.nextInt(2);
-            Product product = this.products.get(productIdx);
-            placeOrder(url, quantity, product);
+            try {
+                Product product = this.products.get(productIdx);
+                placeOrder(url, quantity, product);
+            } catch(Exception e) {
+                StressTestUtils.incrementProgressBarFailure();
+                System.err.println(e.toString());
+            }
 
             Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));
         }
