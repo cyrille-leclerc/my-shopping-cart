@@ -66,6 +66,9 @@ cd monitor-java
  ./run-filebeat.sh  
  ```
 
+For troubleshooting, edit `logging.level` in `filebeat/filebeat.yml`.
+See sample below.
+
 # Sample execution
 
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/elastic/docs/images/elastic-apm-distributed-trace-elastic.png)
