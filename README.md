@@ -9,6 +9,12 @@
 
 # Architecture
 
+## Simplified Architecture
+
+![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/elastic/docs/images/demo-architecture-simplified.png)
+
+## Detailed Architecture
+
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/elastic/docs/images/demo-architecture.png)
 
 # Run the sample
