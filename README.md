@@ -59,3 +59,5 @@ cd monitor-java
 # Sample execution
 
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/elastic/docs/images/elastic-apm-distributed-trace-elastic.png)
+
+![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/elastic/docs/images/elastic-apm-distributed-trace-elastic-links.png)
