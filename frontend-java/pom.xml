@@ -50,20 +50,20 @@
 			<artifactId>jolokia-core</artifactId>
 		</dependency>
 
-		<!--
+		<!-- elastic logs-->
 		<dependency>
-			<groupId>io.opentelemetry</groupId>
-			<artifactId>opentelemetry-api</artifactId>
+			<groupId>co.elastic.logging</groupId>
+			<artifactId>logback-ecs-encoder</artifactId>
+		</dependency>
+		<!-- elastic-apm -->
+		<dependency>
+			<groupId>co.elastic.apm</groupId>
+			<artifactId>apm-agent-attach</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.opentelemetry</groupId>
-			<artifactId>opentelemetry-sdk</artifactId>
+			<groupId>co.elastic.apm</groupId>
+			<artifactId>apm-agent-api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.opentelemetry</groupId>
-			<artifactId>opentelemetry-exporters-logging</artifactId>
-		</dependency>
-	    -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -171,11 +171,4 @@
 			</plugin>
 		</plugins>
 	</build>
-	<repositories>
-		<repository>
-			<id>oss.sonatype.org-snapshot</id>
-			<url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
-		</repository>
-	</repositories>
-
 </project>

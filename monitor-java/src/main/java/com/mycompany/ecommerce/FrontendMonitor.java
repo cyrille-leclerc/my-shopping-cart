@@ -1,4 +1,7 @@
-import io.opentelemetry.contrib.auto.annotations.WithSpan;
+package com.mycompany.ecommerce;
+
+import co.elastic.apm.api.CaptureSpan;
+import co.elastic.apm.api.CaptureTransaction;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class Injector {
+public class FrontendMonitor {
 
     final static Random RANDOM = new Random();
 
@@ -35,20 +38,20 @@ public class Injector {
             } catch(Exception e) {
                 StressTestUtils.incrementProgressBarFailure();
                 System.err.println(e.toString());
+            } finally {
+                Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));
             }
-
-            Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));
         }
 
     }
 
-    @WithSpan("placeOrder")
+    @CaptureTransaction("placeOrder")
     public void placeOrder(String url, int quantity, Product product) throws IOException {
         getProduct(url, product);
         createOrder(url, quantity, product);
     }
 
-    @WithSpan("createOrder")
+    @CaptureSpan("createOrder")
     public void createOrder(String url, int quantity, Product product) throws IOException {
         URL createProductUrl = new URL(url + "/api/orders");
         HttpURLConnection createOrderConnection = (HttpURLConnection) createProductUrl.openConnection();
@@ -74,7 +77,7 @@ public class Injector {
         }
     }
 
-    @WithSpan("getProduct")
+    @CaptureSpan("getProduct")
     public void getProduct(String url, Product product) throws IOException {
         URL getProductUrl = new URL(url + "/api/products/" + product.id);
         HttpURLConnection getProductConnection = (HttpURLConnection) getProductUrl.openConnection();
@@ -92,8 +95,9 @@ public class Injector {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        Injector injector = new Injector();
-        injector.post("http://localhost:8080");
+        new ElasticConfiguration().postConstruct();
+        FrontendMonitor frontendMonitor = new FrontendMonitor();
+        frontendMonitor.post("http://localhost:8080");
     }
 
     private static class Product {
