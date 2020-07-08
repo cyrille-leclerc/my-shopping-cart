@@ -1,6 +1,8 @@
 receivers:
   otlp:
-    endpoint: 'localhost:55680'
+    protocols:
+      grpc:
+        endpoint: '127.0.0.1:55680'
 processors:
   batch: null
   queued_retry: null
@@ -9,12 +11,21 @@ exporters:
     apm_server_url: 'http://localhost:8200'
     secret_token: 'my_secret_token'
   logging:
-  #    loglevel: debug
+    loglevel: debug
   jaeger:
-    endpoint: '127.0.0.1:14250'
+    endpoint: 'localhost:14250'
     insecure: true
+  prometheus:
+    endpoint: '0.0.0.0:9090'
+    namespace: my-shopping-cart
 service:
   pipelines:
+    metrics:
+      receivers:
+        - otlp
+      exporters:
+        - logging
+#        - prometheus
     traces:
       receivers:
         - otlp
@@ -22,5 +33,5 @@ service:
         - batch
       exporters:
         - elastic
-        - jaeger
+#        - jaeger
         - logging

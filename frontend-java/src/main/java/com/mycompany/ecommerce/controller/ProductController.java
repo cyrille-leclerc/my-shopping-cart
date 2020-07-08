@@ -35,7 +35,7 @@ public class ProductController {
     @GetMapping("/{id}")
     public @NotNull Product getProduct(@PathVariable long id, HttpServletRequest request) {
         for (String headerName: Arrays.asList("traceparent") /*Collections.list(request.getHeaderNames())*/) {
-            logger.info(headerName + ": " + Collections.list(request.getHeaders(headerName)).stream().collect(Collectors.joining(", ")));
+            logger.debug(headerName + ": " + Collections.list(request.getHeaders(headerName)).stream().collect(Collectors.joining(", ")));
         }
 
         return productService.getProduct(id);

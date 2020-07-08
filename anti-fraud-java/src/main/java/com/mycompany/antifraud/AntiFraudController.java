@@ -60,7 +60,7 @@ public class AntiFraudController {
             HttpServletRequest request) {
 
         for (String headerName: Arrays.asList("traceparent") /*Collections.list(request.getHeaderNames())*/) {
-            logger.info(headerName + ": " + Collections.list(request.getHeaders(headerName)).stream().collect(Collectors.joining(", ")));
+            logger.debug(headerName + ": " + Collections.list(request.getHeaders(headerName)).stream().collect(Collectors.joining(", ")));
         }
 
         // ElasticApm.currentSpan().setName("checkOrder");

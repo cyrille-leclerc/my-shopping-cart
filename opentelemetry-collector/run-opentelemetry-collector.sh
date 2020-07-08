@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+export OPEN_TELEMETRY_COLLECTOR_VERSION=0.5.0
+export OPEN_TELEMETRY_COLLECTOR_PLATFORM="darwin_amd64"
+
+
 ##########################################################################################
 # PARENT DIRECTORY
 # code copied from Tomcat's `catalina.sh`
@@ -20,14 +24,33 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-export OPEN_TELEMETRY_AGENT_HOME=$PRGDIR/../.otel
-mkdir -p "$OPEN_TELEMETRY_AGENT_HOME"
+export OPEN_TELEMETRY_COLLECTOR_HOME=$PRGDIR/../.otel
+mkdir -p "$OPEN_TELEMETRY_COLLECTOR_HOME"
 
-# otelcontribcol-dc17498 -> https://github.com/open-telemetry/opentelemetry-collector-contrib/commit/dc17498a84a16fac6769983b595f0ab183201a06
-export OPENTELEMETRY_COLLECTOR_PATH=otelcontribcol-dc17498
 
-echo "WARNING hardcoded opentelemetry collector executable: $OPENTELEMETRY_COLLECTOR_PATH, to change the executable path, edit $0"
-echo "collector can be downloaded at https://drive.google.com/open?id=1cZQ-84UFnWHu310szerEDoW58gvbrNVe"
+##########################################################################################
+# DOWNLOAD OPEN TELEMETRY COLLECTOR IF NOT FOUND
+# code copied from Maven Wrappers's mvnw`
+##########################################################################################
+export OPEN_TELEMETRY_COLLECTOR=$OPEN_TELEMETRY_COLLECTOR_HOME/otelcontribcol
+if [ -r "$OPEN_TELEMETRY_COLLECTOR" ]; then
+    echo "Found $OPEN_TELEMETRY_COLLECTOR"
+else
+    echo "Couldn't find $OPEN_TELEMETRY_COLLECTOR, downloading it ..."
+    OPEN_TELEMETRY_COLLECTOR_URL="https://github.com/open-telemetry/opentelemetry-collector-contrib/releases/download/v$OPEN_TELEMETRY_COLLECTOR_VERSION/otelcontribcol_$OPEN_TELEMETRY_COLLECTOR_PLATFORM"
+
+    if command -v wget > /dev/null; then
+        wget "$OPEN_TELEMETRY_COLLECTOR_URL" -O "$OPEN_TELEMETRY_COLLECTOR"
+        chmod a+x $OPEN_TELEMETRY_COLLECTOR
+    elif command -v curl > /dev/null; then
+        curl -o "$OPEN_TELEMETRY_COLLECTOR" "$OPEN_TELEMETRY_COLLECTOR_URL"
+        chmod a+x $OPEN_TELEMETRY_COLLECTOR
+    else
+        echo "FAILURE: OpenTelemetry collector not found and none of curl and wget found"
+        exit 1;
+    fi
+fi
+
 set -x
 
-$OPENTELEMETRY_COLLECTOR_PATH --config $PRGDIR/opentelemetry-collector-exporter-elastic.yaml
+$OPEN_TELEMETRY_COLLECTOR --config $PRGDIR/opentelemetry-collector-exporter-elastic.yaml
