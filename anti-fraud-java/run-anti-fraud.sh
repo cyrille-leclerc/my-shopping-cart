@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-export OPEN_TELEMETRY_AGENT_VERSION=0.4.0
+export OPEN_TELEMETRY_AGENT_VERSION=0.6.0
 export OPEN_TELEMETRY_EXPORTER_PROTOCOL="otlp"
 
 ##########################################################################################
@@ -32,12 +32,12 @@ mkdir -p "$OPEN_TELEMETRY_AGENT_HOME"
 # DOWNLOAD OPEN TELEMETRY AGENT IF NOT FOUND
 # code copied from Maven Wrappers's mvnw`
 ##########################################################################################
-export OPEN_TELEMETRY_AGENT_JAR=$OPEN_TELEMETRY_AGENT_HOME/opentelemetry-auto-all-$OPEN_TELEMETRY_AGENT_VERSION.jar
+export OPEN_TELEMETRY_AGENT_JAR=$OPEN_TELEMETRY_AGENT_HOME/opentelemetry-javaagent-all-$OPEN_TELEMETRY_AGENT_VERSION.jar
 if [ -r "$OPEN_TELEMETRY_AGENT_JAR" ]; then
     echo "Found $OPEN_TELEMETRY_AGENT_JAR"
 else
     echo "Couldn't find $OPEN_TELEMETRY_AGENT_JAR, downloading it ..."
-    jarUrl="https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v$OPEN_TELEMETRY_AGENT_VERSION/opentelemetry-auto-all.jar"
+    jarUrl="https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v$OPEN_TELEMETRY_AGENT_VERSION/opentelemetry-javaagent-all.jar"
 
     if command -v wget > /dev/null; then
         wget "$jarUrl" -O "$OPEN_TELEMETRY_AGENT_JAR"
@@ -54,12 +54,12 @@ $PRGDIR/../mvnw -DskipTests package
 
 export OTEL_RESOURCE_ATTRIBUTES=service.name=anti-fraud,service.namespace=com-shoppingcart,service.version=1.0-$OPEN_TELEMETRY_EXPORTER_PROTOCOL-SNAPSHOT
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
+     -Dotel.otlp.endpoint=localhost:55680 \
      -Dserver.port=8081 \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
      -jar target/anti-fraud-1.0-SNAPSHOT.jar
 
 #      -Dota.exporter=$OPEN_TELEMETRY_EXPORTER_PROTOCOL \
-#      -Dota.exporter.otlp.endpoint=localhost:55680 \
 #      -Dota.exporter.jaeger.endpoint=localhost:14250 \
 #      -Dota.exporter.jaeger.service.name=anti-fraud \
 #      -Dserver.port=8081 \
