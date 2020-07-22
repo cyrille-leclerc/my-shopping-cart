@@ -6,8 +6,9 @@
     * Hibernate will create a bunch of tables in this `test` database. 
     * Configuration can be changed in the `application.properties` config files
 * Elastic APM
-* OpenTelemetry Collector with https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/240
-    * Cyrille Le Clerc shared the executable for MacOS on Can be downloaded at https://drive.google.com/open?id=1cZQ-84UFnWHu310szerEDoW58gvbrNVe
+* OpenTelemetry Collector Contrib v0.6.0 or greater
+    * https://github.com/open-telemetry/opentelemetry-collector-contrib/releases/
+    
 
 # Architecture
 
