@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 set -x
 
-export OPEN_TELEMETRY_AGENT_VERSION=0.3.0
-export OPEN_TELEMETRY_EXPORTER_PROTOCOL="otlp"
-
 ##########################################################################################
 # PARENT DIRECTORY
 # code copied from Tomcat's `catalina.sh`
