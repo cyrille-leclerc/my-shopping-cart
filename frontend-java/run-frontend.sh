@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-export OPEN_TELEMETRY_AGENT_VERSION=0.6.0
+export OPEN_TELEMETRY_AGENT_VERSION=0.7.0
 export OPEN_TELEMETRY_EXPORTER_PROTOCOL="otlp"
 
 ##########################################################################################

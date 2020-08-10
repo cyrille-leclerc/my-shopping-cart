@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export OPEN_TELEMETRY_COLLECTOR_VERSION=0.5.0
+export OPEN_TELEMETRY_COLLECTOR_VERSION=0.7.0
 export OPEN_TELEMETRY_COLLECTOR_PLATFORM="darwin_amd64"
 
 
@@ -24,7 +24,7 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-export OPEN_TELEMETRY_COLLECTOR_HOME=$PRGDIR/../.otel
+export OPEN_TELEMETRY_COLLECTOR_HOME=$PRGDIR/../.otel/collector/v$OPEN_TELEMETRY_COLLECTOR_VERSION
 mkdir -p "$OPEN_TELEMETRY_COLLECTOR_HOME"
 
 
