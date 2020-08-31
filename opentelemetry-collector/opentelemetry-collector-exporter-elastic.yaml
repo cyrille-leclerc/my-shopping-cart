@@ -1,31 +1,44 @@
+extensions:
+  zpages:
+    endpoint: :55679
+
 receivers:
   otlp:
     protocols:
       grpc:
         endpoint: '127.0.0.1:55680'
+  hostmetrics:
+    collection_interval: 1m
+    scrapers:
+      cpu:
+      memory:
+      network:
+
 processors:
   batch: null
   queued_retry: null
+
 exporters:
   elastic:
     apm_server_url: 'http://localhost:8200'
     secret_token: 'my_secret_token'
   logging:
-    loglevel: info
+    loglevel: debug
   jaeger:
     endpoint: 'localhost:14250'
     insecure: true
   prometheus:
-    endpoint: '0.0.0.0:9090'
-    namespace: my-shopping-cart
+    endpoint: 0.0.0.0:8889
+
 service:
   pipelines:
     metrics:
       receivers:
         - otlp
+        - hostmetrics
       exporters:
         - logging
-#        - prometheus
+        - prometheus
     traces:
       receivers:
         - otlp
@@ -34,4 +47,5 @@ service:
       exporters:
         - elastic
 #        - jaeger
-        - logging
+#        - logging
+  extensions: [zpages]
