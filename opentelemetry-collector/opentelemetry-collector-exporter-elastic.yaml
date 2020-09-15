@@ -23,7 +23,7 @@ exporters:
     apm_server_url: 'http://localhost:8200'
     secret_token: 'my_secret_token'
   logging:
-    loglevel: debug
+    loglevel: info
   jaeger:
     endpoint: 'localhost:14250'
     insecure: true
@@ -32,13 +32,13 @@ exporters:
 
 service:
   pipelines:
-    metrics:
-      receivers:
-        - otlp
-        - hostmetrics
-      exporters:
-        - logging
-        - prometheus
+#    metrics:
+#      receivers:
+#        - otlp
+#        - hostmetrics
+#      exporters:
+#        - logging
+#        - prometheus
     traces:
       receivers:
         - otlp
