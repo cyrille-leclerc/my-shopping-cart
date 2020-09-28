@@ -25,7 +25,9 @@ public class FrontendMonitor {
             new Product(4L, "Icecream", 5.00),
             new Product(5L, "Beer", 3.00),
             new Product(6L, "Phone", 500.00),
-            new Product(7L, "Watch", 30.00)
+            new Product(7L, "Watch", 30.00),
+            new Product(8L, "USB Cable", 4.00)
+
     );
 
     public void post(String url) throws IOException, InterruptedException {

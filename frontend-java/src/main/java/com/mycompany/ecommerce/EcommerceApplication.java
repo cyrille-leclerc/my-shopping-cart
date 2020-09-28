@@ -31,12 +31,13 @@ public class EcommerceApplication {
             productService.save(new Product(5L, "Beer", 3.00, "http://placehold.it/200x100"));
             productService.save(new Product(6L, "Phone", 500.00, "http://placehold.it/200x100"));
             productService.save(new Product(7L, "Watch", 30.00, "http://placehold.it/200x100"));
+            productService.save(new Product(8L, "USB Cable", 4.00, "http://placehold.it/200x100"));
         };
     }
 
     @Bean
     public RestTemplate getRestTemplate() {
-        return new RestTemplateBuilder().setReadTimeout(Duration.of(900, ChronoUnit.MILLIS)).build();
+        return new RestTemplateBuilder().setReadTimeout(Duration.of(1200, ChronoUnit.MILLIS)).build();
     }
 
     @Bean
