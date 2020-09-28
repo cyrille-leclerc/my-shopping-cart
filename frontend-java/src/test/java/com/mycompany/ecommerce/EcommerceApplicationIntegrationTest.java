@@ -55,7 +55,7 @@ public class EcommerceApplicationIntegrationTest {
         Iterable<Product> products = responseEntity.getBody();
         Assertions
           .assertThat(products)
-          .hasSize(7);
+          .hasSize(8);
 
         assertThat(products, hasItem(hasProperty("name", is("TV Set"))));
         assertThat(products, hasItem(hasProperty("name", is("Game Console"))));
@@ -64,6 +64,7 @@ public class EcommerceApplicationIntegrationTest {
         assertThat(products, hasItem(hasProperty("name", is("Beer"))));
         assertThat(products, hasItem(hasProperty("name", is("Phone"))));
         assertThat(products, hasItem(hasProperty("name", is("Watch"))));
+        assertThat(products, hasItem(hasProperty("name", is("USB Cable"))));
     }
 
     @Ignore("the postgresql database is not reset")
