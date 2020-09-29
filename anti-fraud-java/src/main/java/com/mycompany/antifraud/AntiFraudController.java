@@ -1,6 +1,5 @@
 package com.mycompany.antifraud;
 
-import co.elastic.apm.api.CaptureTransaction;
 import co.elastic.apm.api.ElasticApm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
-import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
