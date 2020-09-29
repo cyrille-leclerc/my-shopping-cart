@@ -1,5 +1,8 @@
 package com.mycompany.antifraud;
 
+import io.opentelemetry.OpenTelemetry;
+import io.opentelemetry.trace.Span;
+import io.opentelemetry.trace.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
@@ -63,12 +68,13 @@ public class AntiFraudController {
             logger.debug(headerName + ": " + Collections.list(request.getHeaders(headerName)).stream().collect(Collectors.joining(", ")));
         }
 
+        Tracer tracer = OpenTelemetry.getTracer("cyrille"); // TODO better way to get the tracer
         // ElasticApm.currentSpan().setName("checkOrder");
 
         // FIXME shouldn't these be log messages rather than tags / labels?
-        // ElasticApm.currentSpan().addLabel("totalPrice", totalPrice);
-        // ElasticApm.currentSpan().addLabel("customerIpAddress", customerIpAddress);
-        // ElasticApm.currentSpan().addLabel("shippingCountry", shippingCountry);
+        tracer.getCurrentSpan().setAttribute("totalPrice", totalPrice);
+        tracer.getCurrentSpan().setAttribute("customerIpAddress", customerIpAddress);
+        tracer.getCurrentSpan().setAttribute("shippingCountry", shippingCountry);
 
         try {
             int durationOffsetInMillis;
@@ -88,10 +94,9 @@ public class AntiFraudController {
             int checkOrderDurationMillis = durationOffsetInMillis + RANDOM.nextInt(randomDurationInMillis);
             // positive means fraud
             int fraudScore = fraudPercentage - RANDOM.nextInt(100);
-            // ElasticApm.currentSpan().addLabel("fraudScore", fraudScore);
+            tracer.getCurrentSpan().setAttribute("fraudScore", fraudScore);
 
             boolean rejected = fraudScore > 0;
-
 
             try (Connection cnn = dataSource.getConnection()) {
                 try (Statement stmt = cnn.createStatement()) {
@@ -114,8 +119,15 @@ public class AntiFraudController {
                 }
                 // Thread.sleep(checkOrderDurationMillis);
             } catch (SQLException | InterruptedException e) {
-                // ElasticApm.currentSpan().captureException(e);
-                e.printStackTrace();
+                // see https://github.com/open-telemetry/opentelemetry-java-instrumentation/pull/813
+                // see https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/semantic_conventions/exceptions.md
+                Span span = tracer.getCurrentSpan();
+                span.setAttribute("exception.message\t", e.getMessage());
+                span.setAttribute("exception.type", e.getClass().getName());
+
+                StringWriter errorString = new StringWriter();
+                e.printStackTrace(new PrintWriter(errorString));
+                span.setAttribute("exception.stacktrace", errorString.toString());
             }
 
             String result;
