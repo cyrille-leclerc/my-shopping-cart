@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
     <properties>
         <spring-boot.version>2.3.0.RELEASE</spring-boot.version>
-        <open-telemetry.version>0.4.1</open-telemetry.version>
+        <open-telemetry.version>0.8.0</open-telemetry.version>
     </properties>
     <modules>
         <module>frontend-java</module>
@@ -46,8 +46,20 @@
             </dependency>
             <dependency>
                 <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-contrib-auto-annotations</artifactId>
+                <artifactId>opentelemetry-context-prop</artifactId>
                 <version>${open-telemetry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-sdk-correlation-context</artifactId>
+                <version>${open-telemetry.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-contrib-auto-annotations</artifactId>
+                <!-- FIXME why 0.5.0? -->
+                <version>0.5.0</version>
             </dependency>
             <dependency>
                 <groupId>io.opentelemetry</groupId>
