@@ -50,20 +50,15 @@
 			<artifactId>jolokia-core</artifactId>
 		</dependency>
 
-		<!--
 		<dependency>
 			<groupId>io.opentelemetry</groupId>
 			<artifactId>opentelemetry-api</artifactId>
 		</dependency>
 		<dependency>
+			<!-- for TextMapPropagator -->
 			<groupId>io.opentelemetry</groupId>
-			<artifactId>opentelemetry-sdk</artifactId>
+			<artifactId>opentelemetry-context-prop</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.opentelemetry</groupId>
-			<artifactId>opentelemetry-exporters-logging</artifactId>
-		</dependency>
-	    -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

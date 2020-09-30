@@ -68,8 +68,7 @@ public class AntiFraudController {
             logger.debug(headerName + ": " + Collections.list(request.getHeaders(headerName)).stream().collect(Collectors.joining(", ")));
         }
 
-        Tracer tracer = OpenTelemetry.getTracer("cyrille"); // TODO better way to get the tracer
-        // ElasticApm.currentSpan().setName("checkOrder");
+        Tracer tracer = OpenTelemetry.getTracer("anti-fraud");
 
         // FIXME shouldn't these be log messages rather than tags / labels?
         tracer.getCurrentSpan().setAttribute("totalPrice", totalPrice);
