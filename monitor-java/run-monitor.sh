@@ -56,7 +56,7 @@ export OTEL_RESOURCE_ATTRIBUTES=service.name=monitor,service.namespace=com-shopp
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dotel.otlp.endpoint=localhost:55680 \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
-     -classpath target/classes/ Injector
+     -classpath target/classes/ FrontendMonitor
 
 #      -Dota.exporter=$OPEN_TELEMETRY_EXPORTER_PROTOCOL \
 #      -Dota.exporter.jaeger.endpoint=localhost:14250 \
