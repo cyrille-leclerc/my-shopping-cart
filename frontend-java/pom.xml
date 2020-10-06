@@ -50,6 +50,22 @@
 			<artifactId>jolokia-core</artifactId>
 		</dependency>
 
+		<!-- micrometer -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<!--
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-elastic</artifactId>
+		</dependency>
+		-->
+
 		<!-- elastic logs-->
 		<dependency>
 			<groupId>co.elastic.logging</groupId>

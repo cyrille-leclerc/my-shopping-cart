@@ -12,6 +12,8 @@ public final class StressTestUtils {
 
     private static final String SYMBOL_FAILURE = "x";
 
+    private static final String SYMBOL_CONNECTION_FAILURE = "X";
+
     private static final String SYMBOL_SUCCESS = "-";
 
     private final static Random RANDOM = new Random();
@@ -22,6 +24,13 @@ public final class StressTestUtils {
      */
     public static void incrementProgressBarFailure() {
         instance.incrementProgressBar(SYMBOL_FAILURE);
+    }
+
+    /**
+     * Outputs an 'X' for a connection failure
+     */
+    public static void incrementProgressBarConnectionFailure() {
+        instance.incrementProgressBar(SYMBOL_CONNECTION_FAILURE);
     }
 
     /**

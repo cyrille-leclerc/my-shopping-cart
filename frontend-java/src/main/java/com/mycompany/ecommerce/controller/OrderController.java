@@ -10,6 +10,7 @@ import com.mycompany.ecommerce.model.OrderStatus;
 import com.mycompany.ecommerce.service.OrderProductService;
 import com.mycompany.ecommerce.service.OrderService;
 import com.mycompany.ecommerce.service.ProductService;
+import io.micrometer.core.instrument.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +69,8 @@ public class OrderController {
         double totalPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
         // FIXME shouldn't orderTotalPrice be log message rather than tag / label?
         ElasticApm.currentSpan().addLabel("orderTotalPrice", totalPrice);
-        ElasticApm.currentSpan().addLabel("orderTotalPriceRange", getPriceRange(totalPrice));
+        String priceRange = getPriceRange(totalPrice);
+        ElasticApm.currentSpan().addLabel("orderTotalPriceRange", priceRange);
 
         String shippingCountry = "FR"; // TODO better demo
         ElasticApm.currentSpan().addLabel("shippingCountry", shippingCountry);
@@ -78,7 +80,6 @@ public class OrderController {
                     this.antiFraudServiceBaseUrl + "fraud/checkOrder?totalPrice={q}&customerIpAddress={q}&shippingCountry={q}",
                     String.class,
                     totalPrice, request.getRemoteAddr(), shippingCountry);
-            boolean rejectedByAntiFraud = antiFraudResult.getBody().equals("KO");
 
         } catch (RestClientException e) {
             String exceptionShortDescription = e.getClass().getName();
@@ -125,6 +126,7 @@ public class OrderController {
 
         this.orderService.update(order);
 
+        Metrics.counter("order.totalPrice", "priceRange", priceRange, "shippingCountry", shippingCountry).increment(totalPrice);
         logger.info("SUCCESS createOrder({}): totalPrice: {}, id:{}", form, totalPrice, order.getId());
 
         String uri = ServletUriComponentsBuilder

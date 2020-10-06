@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
     <properties>
         <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
-        <elastic-apm.version>1.18.0</elastic-apm.version>
+        <elastic-apm.version>1.18.1</elastic-apm.version>
         <ecs-logging-java.version>0.5.1</ecs-logging-java.version>
     </properties>
     <modules>
@@ -42,6 +42,14 @@
                 <groupId>co.elastic.logging</groupId>
                 <artifactId>logback-ecs-encoder</artifactId>
                 <version>${ecs-logging-java.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-bom</artifactId>
+                <version>1.5.5</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.jolokia</groupId>
