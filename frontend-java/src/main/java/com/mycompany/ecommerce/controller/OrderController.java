@@ -126,7 +126,7 @@ public class OrderController {
 
         this.orderService.update(order);
 
-        Metrics.counter("order.totalPrice", "priceRange", priceRange, "shippingCountry", shippingCountry).increment(totalPrice);
+        Metrics.counter("micrometer_order_totalPrice", "micrometer_priceRange", priceRange, "micrometer_shippingCountry", shippingCountry).increment(totalPrice);
         logger.info("SUCCESS createOrder({}): totalPrice: {}, id:{}", form, totalPrice, order.getId());
 
         String uri = ServletUriComponentsBuilder

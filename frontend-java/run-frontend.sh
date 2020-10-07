@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -x
 
-export ELASTIC_AGENT_VERSION=1.18.1
+# SNAPSHOT version waiting for https://github.com/elastic/apm-agent-java/pull/1432
+export ELASTIC_AGENT_VERSION=1.18.2-SNAPSHOT
 
 ##########################################################################################
 # PARENT DIRECTORY
@@ -35,4 +36,4 @@ $PRGDIR/../mvnw dependency:copy \
 $PRGDIR/../mvnw -DskipTests package
 
 java -javaagent:target/agent/elastic-apm-agent-$ELASTIC_AGENT_VERSION.jar \
-     -jar target/anti-fraud-1.0-SNAPSHOT.jar
+     -jar target/frontend-1.0-SNAPSHOT.jar
