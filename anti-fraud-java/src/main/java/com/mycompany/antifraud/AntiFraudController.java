@@ -1,6 +1,7 @@
 package com.mycompany.antifraud;
 
 import co.elastic.apm.api.ElasticApm;
+import io.micrometer.core.instrument.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,24 +51,25 @@ public class AntiFraudController {
 
     @RequestMapping(path = "fraud/checkOrder", method = {RequestMethod.GET, RequestMethod.POST})
     public String checkOrder(
-            @RequestParam double totalPrice,
+            @RequestParam double orderPrice,
             @RequestParam String shippingCountry,
             @RequestParam String customerIpAddress) {
 
+        String priceRange = getPriceRange(orderPrice);
         ElasticApm.currentSpan().setName("checkOrder");
 
-        // FIXME shouldn't these be log messages rather than tags / labels?
-        ElasticApm.currentSpan().addLabel("totalPrice", totalPrice);
+        ElasticApm.currentSpan().addLabel("orderPrice", orderPrice);
+        ElasticApm.currentSpan().addLabel("priceRange", priceRange);
         ElasticApm.currentSpan().addLabel("customerIpAddress", customerIpAddress);
         ElasticApm.currentSpan().addLabel("shippingCountry", shippingCountry);
 
         try {
             int durationOffsetInMillis;
             int fraudPercentage;
-            if (totalPrice < priceUpperBoundaryDollarsOnSmallShoppingCart) {
+            if (orderPrice < priceUpperBoundaryDollarsOnSmallShoppingCart) {
                 fraudPercentage = fraudPercentageOnSmallShoppingCarts;
                 durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
-            } else if (totalPrice < priceUpperBoundaryDollarsOnMediumShoppingCarts) {
+            } else if (orderPrice < priceUpperBoundaryDollarsOnMediumShoppingCarts) {
                 fraudPercentage = fraudPercentageOnMediumShoppingCarts;
                 durationOffsetInMillis = averageDurationMillisOnMediumShoppingCarts;
             } else {
@@ -98,7 +100,7 @@ public class AntiFraudController {
                     long deltaPercents = Math.abs(actualSleepInMillis - checkOrderDurationMillis) * 100 / checkOrderDurationMillis;
                     logger.info("checkOrder(totalPrice: {}, shippingCountry: {}, customerIpAddress: {}): fraudScore: {}, rejected: {}, " +
                                     "expectedSleep: {}ms, actualSleep: {}ms, delta:{}%",
-                            new DecimalFormat("000").format(totalPrice), shippingCountry, customerIpAddress, fraudScore, rejected,
+                            new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, fraudScore, rejected,
                             checkOrderDurationMillis, actualSleepInMillis, deltaPercents);
 
                 }
@@ -108,22 +110,39 @@ public class AntiFraudController {
                 e.printStackTrace();
             }
 
+
+            Metrics.counter(
+                    "micrometer_antifraud_order_check",
+                    "micrometer_antifraud_order_check_success", Boolean.toString(!rejected),
+                    "micrometer_antifraud_order_check_price_range", priceRange,
+                    "micrometer_antifraud_order_check_shipping_country", shippingCountry).
+                    increment();
+
             String result;
             if (rejected) {
                 result = "KO";
                 this.fraudDetectionsCounter.incrementAndGet();
-                this.fraudDetectionsPriceInDollarsCounter.addAndGet((int) Math.floor(totalPrice));
+                this.fraudDetectionsPriceInDollarsCounter.addAndGet((int) Math.floor(orderPrice));
             } else {
                 result = "OK";
             }
 
             return result;
         } finally {
-            this.fraudChecksPriceInDollarsCounter.addAndGet((int) Math.ceil(totalPrice));
+            this.fraudChecksPriceInDollarsCounter.addAndGet((int) Math.ceil(orderPrice));
             this.fraudChecksCounter.incrementAndGet();
         }
     }
 
+    public String getPriceRange(double price) {
+        if (price < 10) {
+            return "small";
+        } else if (price < 100) {
+            return "medium";
+        } else {
+            return "large";
+        }
+    }
 
     @ManagedAttribute
     public int getFraudPercentageOnLargeShoppingCarts() {

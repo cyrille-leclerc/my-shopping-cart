@@ -66,20 +66,19 @@ public class OrderController {
         String customerId = "customer-" + RANDOM.nextInt(100); // TODO better demo
         ElasticApm.currentSpan().addLabel("customerId", customerId);
 
-        double totalPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
-        // FIXME shouldn't orderTotalPrice be log message rather than tag / label?
-        ElasticApm.currentSpan().addLabel("orderTotalPrice", totalPrice);
-        String priceRange = getPriceRange(totalPrice);
-        ElasticApm.currentSpan().addLabel("orderTotalPriceRange", priceRange);
+        double orderPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
+        ElasticApm.currentSpan().addLabel("orderPrice", orderPrice);
+        String priceRange = getPriceRange(orderPrice);
+        ElasticApm.currentSpan().addLabel("orderPriceRange", priceRange);
 
-        String shippingCountry = "FR"; // TODO better demo
-        ElasticApm.currentSpan().addLabel("shippingCountry", shippingCountry);
+        String shippingCountryCode = getCountryCode(request.getRemoteAddr());
+        ElasticApm.currentSpan().addLabel("shippingCountry", shippingCountryCode);
         ResponseEntity<String> antiFraudResult;
         try {
             antiFraudResult = restTemplate.getForEntity(
-                    this.antiFraudServiceBaseUrl + "fraud/checkOrder?totalPrice={q}&customerIpAddress={q}&shippingCountry={q}",
+                    this.antiFraudServiceBaseUrl + "fraud/checkOrder?orderPrice={q}&customerIpAddress={q}&shippingCountry={q}",
                     String.class,
-                    totalPrice, request.getRemoteAddr(), shippingCountry);
+                    orderPrice, request.getRemoteAddr(), shippingCountryCode);
 
         } catch (RestClientException e) {
             String exceptionShortDescription = e.getClass().getName();
@@ -91,7 +90,7 @@ public class OrderController {
             }
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
-            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
+            logger.info("Failure createOrder({}): orderPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
@@ -99,7 +98,7 @@ public class OrderController {
             ElasticApm.currentSpan().addLabel("antiFraud.exception", exceptionShortDescription);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
-            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
+            logger.info("Failure createOrder({}): orderPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (!"OK".equals(antiFraudResult.getBody())) {
@@ -107,7 +106,7 @@ public class OrderController {
             ElasticApm.currentSpan().addLabel("antiFraud.exception", exceptionShortDescription);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
-            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
+            logger.info("Failure createOrder({}): orderPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -126,8 +125,8 @@ public class OrderController {
 
         this.orderService.update(order);
 
-        Metrics.counter("micrometer_order_totalPrice", "micrometer_priceRange", priceRange, "micrometer_shippingCountry", shippingCountry).increment(totalPrice);
-        logger.info("SUCCESS createOrder({}): totalPrice: {}, id:{}", form, totalPrice, order.getId());
+        Metrics.counter("micrometer_frontend_order_price", "micrometer_frontend_order_shipping_country", shippingCountryCode).increment(orderPrice);
+        logger.info("SUCCESS createOrder({}): price: {}, id:{}", form, orderPrice, order.getId());
 
         String uri = ServletUriComponentsBuilder
                 .fromCurrentServletMapping()
@@ -152,6 +151,11 @@ public class OrderController {
         if (!CollectionUtils.isEmpty(list)) {
             new ResourceNotFoundException("Product not found");
         }
+    }
+
+    public String getCountryCode(String ip) {
+        String[] countries = {"US", "FR", "GB",};
+        return countries[RANDOM.nextInt(countries.length)];
     }
 
     @Autowired
