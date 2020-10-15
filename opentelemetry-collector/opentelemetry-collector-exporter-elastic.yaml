@@ -26,9 +26,6 @@ exporters:
     secret_token: 'my_secret_token'
   logging:
     loglevel: info
-  jaeger:
-    endpoint: 'localhost:14250'
-    insecure: true
   prometheus:
     endpoint: 0.0.0.0:8889
 
@@ -49,6 +46,4 @@ service:
         - batch
       exporters:
         - elastic
-#        - jaeger
-#        - logging
   extensions: [zpages]
