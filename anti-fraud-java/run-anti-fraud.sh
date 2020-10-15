@@ -52,15 +52,11 @@ fi
 $PRGDIR/../mvnw -DskipTests package
 
 
-export OTEL_RESOURCE_ATTRIBUTES=service.name=anti-fraud,service.namespace=com-shoppingcart,service.version=1.0-$OPEN_TELEMETRY_EXPORTER_PROTOCOL-SNAPSHOT
+export OTEL_RESOURCE_ATTRIBUTES=service.name=anti-fraud,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dotel.otlp.endpoint=localhost:55680 \
      -Dserver.port=8081 \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
      -jar target/anti-fraud-1.0-SNAPSHOT.jar
 
-#      -Dota.exporter=$OPEN_TELEMETRY_EXPORTER_PROTOCOL \
-#      -Dota.exporter.jaeger.endpoint=localhost:14250 \
-#      -Dota.exporter.jaeger.service.name=anti-fraud \
-#      -Dserver.port=8081 \
 #      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
