@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-export OPEN_TELEMETRY_AGENT_VERSION=0.8.0
-export OPEN_TELEMETRY_EXPORTER_PROTOCOL="otlp"
+export OPEN_TELEMETRY_AGENT_VERSION=0.9.0
 
 ##########################################################################################
 # PARENT DIRECTORY
