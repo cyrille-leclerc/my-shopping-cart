@@ -9,8 +9,8 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
-        <spring-boot.version>2.3.0.RELEASE</spring-boot.version>
-        <open-telemetry.version>0.8.0</open-telemetry.version>
+        <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
+        <open-telemetry.version>0.9.1</open-telemetry.version>
     </properties>
     <modules>
         <module>frontend-java</module>
@@ -22,14 +22,14 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-bom</artifactId>
-                <version>1.28.1</version>
+                <version>1.32.2</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava-bom</artifactId>
-                <version>29.0-jre</version>
+                <version>30.0-jre</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -75,11 +75,6 @@
                 <groupId>io.opentelemetry</groupId>
                 <artifactId>opentelemetry-exporters-otlp</artifactId>
                 <version>${open-telemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jolokia</groupId>
-                <artifactId>jolokia-core</artifactId>
-                <version>1.6.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
