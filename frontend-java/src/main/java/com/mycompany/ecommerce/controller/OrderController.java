@@ -10,6 +10,7 @@ import com.mycompany.ecommerce.model.OrderStatus;
 import com.mycompany.ecommerce.service.OrderProductService;
 import com.mycompany.ecommerce.service.OrderService;
 import com.mycompany.ecommerce.service.ProductService;
+import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,10 +126,22 @@ public class OrderController {
 
         this.orderService.update(order);
 
-        Metrics.summary("frontend_order").record(orderPrice);
-        Metrics.counter("frontend_order_value").increment(orderPrice);
-        Metrics.counter("frontend_order_count").increment();
-        Metrics.summary("frontend_order_per_country", "frontend_order_shipping_country", shippingCountryCode).record(orderPrice);
+        DistributionSummary.builder("order")
+                .publishPercentileHistogram()
+                .publishPercentiles(0.75, 0.95)
+                .register(Metrics.globalRegistry)
+                .record(orderPrice);
+
+        Metrics.counter("order_value_counter").increment(orderPrice);
+        Metrics.counter("order_count_counter").increment();
+
+        DistributionSummary.builder("order_per_country")
+                .tags("shipping_country", shippingCountryCode)
+                .publishPercentileHistogram()
+                .publishPercentiles(0.75, 0.95)
+                .register(Metrics.globalRegistry)
+                .record(orderPrice);
+
         logger.info("SUCCESS createOrder({}): price: {}, id:{}", form, orderPrice, order.getId());
 
         String uri = ServletUriComponentsBuilder
