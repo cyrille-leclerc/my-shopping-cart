@@ -59,29 +59,24 @@ public class AntiFraudController {
 
     @RequestMapping(path = "fraud/checkOrder", method = {RequestMethod.GET, RequestMethod.POST})
     public String checkOrder(
-            @RequestParam double totalPrice,
+            @RequestParam double orderPrice,
             @RequestParam String shippingCountry,
             @RequestParam String customerIpAddress,
             HttpServletRequest request) {
 
-        for (String headerName: Arrays.asList("traceparent") /*Collections.list(request.getHeaderNames())*/) {
-            logger.debug(headerName + ": " + Collections.list(request.getHeaders(headerName)).stream().collect(Collectors.joining(", ")));
-        }
-
         Tracer tracer = OpenTelemetry.getTracer("anti-fraud");
 
-        // FIXME shouldn't these be log messages rather than tags / labels?
-        tracer.getCurrentSpan().setAttribute("totalPrice", totalPrice);
-        tracer.getCurrentSpan().setAttribute("customerIpAddress", customerIpAddress);
-        tracer.getCurrentSpan().setAttribute("shippingCountry", shippingCountry);
+        tracer.getCurrentSpan().setAttribute("order_price", orderPrice);
+        tracer.getCurrentSpan().setAttribute("customer_ip_address", customerIpAddress);
+        tracer.getCurrentSpan().setAttribute("shipping_country", shippingCountry);
 
         try {
             int durationOffsetInMillis;
             int fraudPercentage;
-            if (totalPrice < priceUpperBoundaryDollarsOnSmallShoppingCart) {
+            if (orderPrice < priceUpperBoundaryDollarsOnSmallShoppingCart) {
                 fraudPercentage = fraudPercentageOnSmallShoppingCarts;
                 durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
-            } else if (totalPrice < priceUpperBoundaryDollarsOnMediumShoppingCarts) {
+            } else if (orderPrice < priceUpperBoundaryDollarsOnMediumShoppingCarts) {
                 fraudPercentage = fraudPercentageOnMediumShoppingCarts;
                 durationOffsetInMillis = averageDurationMillisOnMediumShoppingCarts;
             } else {
@@ -93,7 +88,7 @@ public class AntiFraudController {
             int checkOrderDurationMillis = durationOffsetInMillis + RANDOM.nextInt(randomDurationInMillis);
             // positive means fraud
             int fraudScore = fraudPercentage - RANDOM.nextInt(100);
-            tracer.getCurrentSpan().setAttribute("fraudScore", fraudScore);
+            tracer.getCurrentSpan().setAttribute("fraud_score", fraudScore);
 
             boolean rejected = fraudScore > 0;
 
@@ -112,35 +107,27 @@ public class AntiFraudController {
                     long deltaPercents = Math.abs(actualSleepInMillis - checkOrderDurationMillis) * 100 / checkOrderDurationMillis;
                     logger.info("checkOrder(totalPrice: {}, shippingCountry: {}, customerIpAddress: {}): fraudScore: {}, rejected: {}, " +
                                     "expectedSleep: {}ms, actualSleep: {}ms, delta:{}%",
-                            new DecimalFormat("000").format(totalPrice), shippingCountry, customerIpAddress, fraudScore, rejected,
+                            new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, fraudScore, rejected,
                             checkOrderDurationMillis, actualSleepInMillis, deltaPercents);
 
                 }
                 // Thread.sleep(checkOrderDurationMillis);
             } catch (SQLException | InterruptedException e) {
-                // see https://github.com/open-telemetry/opentelemetry-java-instrumentation/pull/813
-                // see https://github.com/open-telemetry/opentelemetry-specification/blob/master/specification/trace/semantic_conventions/exceptions.md
-                Span span = tracer.getCurrentSpan();
-                span.setAttribute("exception.message\t", e.getMessage());
-                span.setAttribute("exception.type", e.getClass().getName());
-
-                StringWriter errorString = new StringWriter();
-                e.printStackTrace(new PrintWriter(errorString));
-                span.setAttribute("exception.stacktrace", errorString.toString());
+                 tracer.getCurrentSpan().recordException(e);
             }
 
             String result;
             if (rejected) {
                 result = "KO";
                 this.fraudDetectionsCounter.incrementAndGet();
-                this.fraudDetectionsPriceInDollarsCounter.addAndGet((int) Math.floor(totalPrice));
+                this.fraudDetectionsPriceInDollarsCounter.addAndGet((int) Math.floor(orderPrice));
             } else {
                 result = "OK";
             }
 
             return result;
         } finally {
-            this.fraudChecksPriceInDollarsCounter.addAndGet((int) Math.ceil(totalPrice));
+            this.fraudChecksPriceInDollarsCounter.addAndGet((int) Math.ceil(orderPrice));
             this.fraudChecksCounter.incrementAndGet();
         }
     }

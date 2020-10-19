@@ -20,7 +20,7 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-export PROMETHEUS_STORAGE_PATH=$PRGDIR/../.prometheus/
+export PROMETHEUS_STORAGE_PATH=$PRGDIR/../.prometheus-otel/
 mkdir -p "$PROMETHEUS_STORAGE_PATH"
 
 prometheus --config.file "$PRGDIR/prometheus.yml" --web.listen-address=127.0.0.1:9090 --storage.tsdb.path "$PROMETHEUS_STORAGE_PATH"

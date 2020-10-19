@@ -1,6 +1,5 @@
 package com.mycompany.ecommerce.controller;
 
-import com.mycompany.ecommerce.OpenTelemetryUtils;
 import com.mycompany.ecommerce.dto.OrderProductDto;
 import com.mycompany.ecommerce.exception.ResourceNotFoundException;
 import com.mycompany.ecommerce.model.Order;
@@ -9,8 +8,11 @@ import com.mycompany.ecommerce.model.OrderStatus;
 import com.mycompany.ecommerce.service.OrderProductService;
 import com.mycompany.ecommerce.service.OrderService;
 import com.mycompany.ecommerce.service.ProductService;
-
-import io.opentelemetry.OpenTelemetry;
+import io.opentelemetry.common.Labels;
+import io.opentelemetry.metrics.DoubleCounter;
+import io.opentelemetry.metrics.DoubleValueRecorder;
+import io.opentelemetry.metrics.LongCounter;
+import io.opentelemetry.metrics.Meter;
 import io.opentelemetry.trace.Span;
 import io.opentelemetry.trace.Tracer;
 import org.slf4j.Logger;
@@ -29,7 +31,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @RestController
@@ -46,13 +51,25 @@ public class OrderController {
     RestTemplate restTemplate;
     String antiFraudServiceBaseUrl;
     Tracer tracer;
+    Meter meter;
+    DoubleValueRecorder orderValueRecorder;
+    DoubleCounter orderValueCounter;
+    DoubleCounter orderValueWithTagsCounter;
+    LongCounter orderCountCounter;
+    DoubleValueRecorder orderWithTagsValueRecorder;
 
 
-    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService, Tracer tracer) {
+    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService, Tracer tracer, Meter meter) {
         this.productService = productService;
         this.orderService = orderService;
         this.orderProductService = orderProductService;
         this.tracer = tracer;
+        this.meter = meter;
+        orderValueRecorder = meter.doubleValueRecorderBuilder("order").setUnit("usd").build();
+        orderValueCounter = meter.doubleCounterBuilder("order_value_counter").setUnit("usd").build();
+        orderCountCounter = meter.longCounterBuilder("order_count_counter").build();
+        orderWithTagsValueRecorder = meter.doubleValueRecorderBuilder("order_with_tags").setUnit("usd").build();
+        orderValueWithTagsCounter = meter.doubleCounterBuilder("order_value_with_tags_counter").build();
     }
 
     @GetMapping
@@ -70,51 +87,52 @@ public class OrderController {
         validateProductsExistence(formDtos);
 
         String customerId = "customer-" + RANDOM.nextInt(100); // TODO better demo
-        span.setAttribute("customerId", customerId);
+        span.setAttribute("customer_id", customerId);
 
-        double totalPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
-        // FIXME shouldn't orderTotalPrice be log message rather than tag / label?
-        span.setAttribute("orderTotalPrice", totalPrice);
-        span.setAttribute("orderTotalPriceRange", getPriceRange(totalPrice)); // Label
+        double orderPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
+        span.setAttribute("order_price", orderPrice);
+        span.setAttribute("order_price_range", getPriceRange(orderPrice));
 
-        String shippingCountry = "FR"; // TODO better demo
-        span.setAttribute("shippingCountry", shippingCountry); // Label
+        String shippingCountry = getCountryCode(request.getRemoteAddr());
+
+        String shippingMethod = randomShippingMethod();
+
+        String paymentMethod = randomPaymentMethod();
+        Labels labels = Labels.of(
+                "shipping_country", shippingCountry,
+                "shipping_method", shippingMethod,
+                "payment_method", paymentMethod);
+        orderWithTagsValueRecorder.record(orderPrice, labels);
+        labels.forEach((key, value) -> {
+            span.setAttribute(key, value);
+        });
+
         ResponseEntity<String> antiFraudResult;
         try {
             antiFraudResult = restTemplate.getForEntity(
-                    this.antiFraudServiceBaseUrl + "fraud/checkOrder?totalPrice={q}&customerIpAddress={q}&shippingCountry={q}",
+                    this.antiFraudServiceBaseUrl + "fraud/checkOrder?orderPrice={q}&customerIpAddress={q}&shippingCountry={q}",
                     String.class,
-                    totalPrice, request.getRemoteAddr(), shippingCountry);
-            boolean rejectedByAntiFraud = antiFraudResult.getBody().equals("KO");
-
+                    orderPrice, request.getRemoteAddr(), shippingCountry);
         } catch (RestClientException e) {
             String exceptionShortDescription = e.getClass().getName();
-            span.setAttribute("shippingCountry", shippingCountry); // Label
-
-            OpenTelemetryUtils.recordException(span, new Exception(exceptionShortDescription));
+            span.recordException(new Exception(exceptionShortDescription));
 
             if (e.getCause() != null) { // capture SockerTimeoutException...
                 exceptionShortDescription += " / " + e.getCause().getClass().getName();
             }
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
-            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
+            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
             String exceptionShortDescription = "status-" + antiFraudResult.getStatusCode();
-            OpenTelemetryUtils.recordException(span, new Exception(exceptionShortDescription));
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
-            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
+            span.recordException(new Exception(exceptionShortDescription));
+            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (!"OK".equals(antiFraudResult.getBody())) {
             String exceptionShortDescription = "response-" + antiFraudResult.getBody();
-            OpenTelemetryUtils.recordException(span, new Exception(exceptionShortDescription));
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
-            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, totalPrice, exceptionShortDescription);
+            span.recordException(new Exception(exceptionShortDescription));
+            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -133,7 +151,12 @@ public class OrderController {
 
         this.orderService.update(order);
 
-        logger.info("SUCCESS createOrder({}): totalPrice: {}, id:{}", form, totalPrice, order.getId());
+        orderValueRecorder.record(orderPrice);
+        orderValueCounter.add(orderPrice);
+        orderValueWithTagsCounter.add(orderPrice, labels);
+        orderCountCounter.add(1);
+
+        logger.info("SUCCESS createOrder({}): totalPrice: {}, id:{}", form, orderPrice, order.getId());
 
         String uri = ServletUriComponentsBuilder
                 .fromCurrentServletMapping()
@@ -157,6 +180,21 @@ public class OrderController {
         if (!CollectionUtils.isEmpty(list)) {
             new ResourceNotFoundException("Product not found");
         }
+    }
+
+    public String getCountryCode(String ip) {
+        String[] countries = {"US", "FR", "GB"};
+        return countries[RANDOM.nextInt(countries.length)];
+    }
+
+    public String randomPaymentMethod() {
+        String[] paymentMethods = {"credit_cart", "paypal"};
+        return paymentMethods[RANDOM.nextInt(paymentMethods.length)];
+    }
+
+    public String randomShippingMethod() {
+        String[] shippingMethods = {"standard", "express"};
+        return shippingMethods[RANDOM.nextInt(shippingMethods.length)];
     }
 
     @Autowired

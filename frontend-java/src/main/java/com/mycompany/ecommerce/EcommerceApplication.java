@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
 import io.opentelemetry.OpenTelemetry;
+import io.opentelemetry.metrics.Meter;
 import io.opentelemetry.trace.Tracer;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -38,6 +39,7 @@ public class EcommerceApplication {
     }
 
     private Tracer tracer = OpenTelemetry.getTracer("frontend");
+    private Meter meter = OpenTelemetry.getMeter("frontend");
 
     @Bean
     public RestTemplate getRestTemplate() {
@@ -52,5 +54,10 @@ public class EcommerceApplication {
     @Bean
     public Tracer getTracer() {
         return tracer;
+    }
+
+    @Bean
+    public Meter getMeter() {
+        return meter;
     }
 }
