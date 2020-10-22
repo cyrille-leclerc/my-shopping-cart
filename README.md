@@ -22,7 +22,7 @@ TODO
 
 ## Demoed OpenTelemetry Metrics capabilities
 
-OpenTelemetry metrics are demoed here providing:
+OpenTelemetry metrics are demoed here providing in the `frontend-java` app:
 * Business KPIs with the `OrderValueRecorder` (and `OrderValueWithTagsRecorder`) on `com.mycompany.ecommerce.controller.OrderController to provide the following commonly adopted ecommerce KPIs:
    * Sales: sum of the completed purchase orders per hour (per hour or per any desired unit of time)
    * Transaction: count of completed purchase orders per hour (per hour or per any desired unit of time)
