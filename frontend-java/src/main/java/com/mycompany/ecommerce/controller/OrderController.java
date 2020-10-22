@@ -66,6 +66,8 @@ public class OrderController {
         this.tracer = tracer;
         this.meter = meter;
         orderValueRecorder = meter.doubleValueRecorderBuilder("order").setUnit("usd").build();
+
+        // Meters below are used for testing and compare with orderValueRecorder
         orderValueCounter = meter.doubleCounterBuilder("order_value_counter").setUnit("usd").build();
         orderCountCounter = meter.longCounterBuilder("order_count_counter").build();
         orderWithTagsValueRecorder = meter.doubleValueRecorderBuilder("order_with_tags").setUnit("usd").build();
@@ -86,7 +88,7 @@ public class OrderController {
         List<OrderProductDto> formDtos = form.getProductOrders();
         validateProductsExistence(formDtos);
 
-        String customerId = "customer-" + RANDOM.nextInt(100); // TODO better demo
+        String customerId = "customer-" + RANDOM.nextInt(100);
         span.setAttribute("customer_id", customerId);
 
         double orderPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
@@ -94,9 +96,7 @@ public class OrderController {
         span.setAttribute("order_price_range", getPriceRange(orderPrice));
 
         String shippingCountry = getCountryCode(request.getRemoteAddr());
-
         String shippingMethod = randomShippingMethod();
-
         String paymentMethod = randomPaymentMethod();
         Labels labels = Labels.of(
                 "shipping_country", shippingCountry,
@@ -115,9 +115,9 @@ public class OrderController {
                     orderPrice, request.getRemoteAddr(), shippingCountry);
         } catch (RestClientException e) {
             String exceptionShortDescription = e.getClass().getName();
-            span.recordException(new Exception(exceptionShortDescription));
+            span.recordException(e);
 
-            if (e.getCause() != null) { // capture SockerTimeoutException...
+            if (e.getCause() != null) {
                 exceptionShortDescription += " / " + e.getCause().getClass().getName();
             }
             logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
@@ -151,10 +151,14 @@ public class OrderController {
 
         this.orderService.update(order);
 
-        orderValueRecorder.record(orderPrice);
-        orderValueCounter.add(orderPrice);
-        orderValueWithTagsCounter.add(orderPrice, labels);
-        orderCountCounter.add(1);
+        // UPDATE METRICS
+        this.orderValueRecorder.record(orderPrice);
+
+        // Meters below are used for testing and compare with orderValueRecorder
+        this.orderValueCounter.add(orderPrice);
+        this.orderCountCounter.add(1);
+        this.orderWithTagsValueRecorder.record(orderPrice, labels);
+        this.orderValueWithTagsCounter.add(orderPrice, labels);
 
         logger.info("SUCCESS createOrder({}): totalPrice: {}, id:{}", form, orderPrice, order.getId());
 
