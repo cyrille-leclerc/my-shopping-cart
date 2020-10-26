@@ -6,7 +6,7 @@ https://github.com/spring-projects/spring-boot/blob/v2.2.5.RELEASE/spring-boot-p
 <included>
     <appender name="LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder class="co.elastic.logging.logback.EcsEncoder">
-            <serviceName>com-shoppingcart_anti-fraud</serviceName>
+            <serviceName>anti-fraud</serviceName>
         </encoder>
         <file>${LOG_FILE}</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
