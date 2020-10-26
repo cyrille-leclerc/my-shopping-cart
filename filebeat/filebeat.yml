@@ -12,8 +12,12 @@ filebeat.inputs:
     paths:
       - /usr/local/var/log/my-shopping-cart/frontend.log
 
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
 setup.template.settings:
-  index.number_of_shards: 0
+  index.number_of_shards: 1
 
 fields:
   env: staging
@@ -31,5 +35,5 @@ processors:
   - add_kubernetes_metadata: ~
 
 # Available log levels are: error, warning, info, debug
-logging.level: info
+logging.level: warning
 
