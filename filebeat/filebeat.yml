@@ -34,6 +34,12 @@ processors:
   - add_docker_metadata: ~
   - add_kubernetes_metadata: ~
 
+monitoring.enabled: true
+monitoring.elasticsearch:
+  hosts: ["localhost:9200"]
+  username: "elastic"
+  password: "elastic"
+
 # Available log levels are: error, warning, info, debug
 logging.level: warning
 
