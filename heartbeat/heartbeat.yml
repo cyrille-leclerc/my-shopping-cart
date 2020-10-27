@@ -1,0 +1,36 @@
+
+heartbeat.config.monitors:
+  path: ${path.config}/monitors.d/*.yml
+
+heartbeat.monitors:
+  - type: http
+    id: elasticsearch
+    name: Elasticsearch
+    urls: ["http://localhost:9200"]
+    username: elastic
+    password: elastic
+    schedule: '@every 10s'
+
+setup.template.settings:
+  index.number_of_shards: 1
+  index.codec: best_compression
+
+fields:
+  env: staging
+
+output.elasticsearch:
+  hosts: ["localhost:9200"]
+  username: "elastic"
+  password: "elastic"
+
+processors:
+  - add_observer_metadata:
+
+# Available log levels are: error, warning, info, debug
+#logging.level: debug
+
+monitoring.enabled: true
+monitoring.elasticsearch:
+  hosts: ["localhost:9200"]
+  username: "elastic"
+  password: "elastic"
