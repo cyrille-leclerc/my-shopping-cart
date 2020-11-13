@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
-import io.opentelemetry.OpenTelemetry;
-import io.opentelemetry.metrics.Meter;
-import io.opentelemetry.trace.Tracer;
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.trace.Tracer;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -38,9 +38,6 @@ public class EcommerceApplication {
         };
     }
 
-    private Tracer tracer = OpenTelemetry.getTracer("frontend");
-    private Meter meter = OpenTelemetry.getMeter("frontend");
-
     @Bean
     public RestTemplate getRestTemplate() {
         return new RestTemplateBuilder().setReadTimeout(Duration.of(1200, ChronoUnit.MILLIS)).build();
@@ -51,13 +48,4 @@ public class EcommerceApplication {
         return new Hibernate5Module();
     }
 
-    @Bean
-    public Tracer getTracer() {
-        return tracer;
-    }
-
-    @Bean
-    public Meter getMeter() {
-        return meter;
-    }
 }

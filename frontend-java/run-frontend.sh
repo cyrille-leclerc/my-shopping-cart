@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-export OPEN_TELEMETRY_AGENT_VERSION=0.9.0
+export OPEN_TELEMETRY_AGENT_VERSION=0.10.1
 
 ##########################################################################################
 # PARENT DIRECTORY

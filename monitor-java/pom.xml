@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-contrib-auto-annotations</artifactId>
+            <artifactId>opentelemetry-extension-auto-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

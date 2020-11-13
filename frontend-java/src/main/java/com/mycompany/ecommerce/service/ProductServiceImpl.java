@@ -6,7 +6,7 @@ import com.mycompany.ecommerce.OpenTelemetryUtils;
 import com.mycompany.ecommerce.exception.ResourceNotFoundException;
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.repository.ProductRepository;
-import io.opentelemetry.metrics.Meter;
+import io.opentelemetry.api.metrics.Meter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +19,10 @@ public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
     private Cache<Long, Product> productCache;
 
-    public ProductServiceImpl(ProductRepository productRepository, Meter meter) {
+    public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
         this.productCache = CacheBuilder.newBuilder().maximumSize(2).recordStats().build();
-        OpenTelemetryUtils.observeGoogleGuavaCache(productCache, "product", meter);
+        OpenTelemetryUtils.observeGoogleGuavaCache(productCache, "product");
     }
 
     @Override

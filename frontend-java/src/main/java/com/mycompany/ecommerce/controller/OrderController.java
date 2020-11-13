@@ -8,13 +8,13 @@ import com.mycompany.ecommerce.model.OrderStatus;
 import com.mycompany.ecommerce.service.OrderProductService;
 import com.mycompany.ecommerce.service.OrderService;
 import com.mycompany.ecommerce.service.ProductService;
-import io.opentelemetry.common.Labels;
-import io.opentelemetry.metrics.DoubleCounter;
-import io.opentelemetry.metrics.DoubleValueRecorder;
-import io.opentelemetry.metrics.LongCounter;
-import io.opentelemetry.metrics.Meter;
-import io.opentelemetry.trace.Span;
-import io.opentelemetry.trace.Tracer;
+import io.opentelemetry.api.common.Labels;
+import io.opentelemetry.api.metrics.DoubleCounter;
+import io.opentelemetry.api.metrics.DoubleValueRecorder;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +50,6 @@ public class OrderController {
     OrderProductService orderProductService;
     RestTemplate restTemplate;
     String antiFraudServiceBaseUrl;
-    Tracer tracer;
-    Meter meter;
     DoubleValueRecorder orderValueRecorder;
     DoubleCounter orderValueCounter;
     DoubleCounter orderValueWithTagsCounter;
@@ -59,19 +57,17 @@ public class OrderController {
     DoubleValueRecorder orderWithTagsValueRecorder;
 
 
-    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService, Tracer tracer, Meter meter) {
+    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService) {
         this.productService = productService;
         this.orderService = orderService;
         this.orderProductService = orderProductService;
-        this.tracer = tracer;
-        this.meter = meter;
-        orderValueRecorder = meter.doubleValueRecorderBuilder("order").setUnit("usd").build();
+        orderValueRecorder = Meter.getDefault().doubleValueRecorderBuilder("order").setUnit("usd").build();
 
         // Meters below are used for testing and compare with orderValueRecorder
-        orderValueCounter = meter.doubleCounterBuilder("order_value_counter").setUnit("usd").build();
-        orderCountCounter = meter.longCounterBuilder("order_count_counter").build();
-        orderWithTagsValueRecorder = meter.doubleValueRecorderBuilder("order_with_tags").setUnit("usd").build();
-        orderValueWithTagsCounter = meter.doubleCounterBuilder("order_value_with_tags_counter").build();
+        orderValueCounter = Meter.getDefault().doubleCounterBuilder("order_value_counter").setUnit("usd").build();
+        orderCountCounter = Meter.getDefault().longCounterBuilder("order_count_counter").build();
+        orderWithTagsValueRecorder = Meter.getDefault().doubleValueRecorderBuilder("order_with_tags").setUnit("usd").build();
+        orderValueWithTagsCounter = Meter.getDefault().doubleCounterBuilder("order_value_with_tags_counter").build();
     }
 
     @GetMapping
@@ -83,7 +79,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<Order> create(@RequestBody OrderForm form, HttpServletRequest request) {
-        Span span = tracer.getCurrentSpan();
+        Span span = Span.current();
 
         List<OrderProductDto> formDtos = form.getProductOrders();
         validateProductsExistence(formDtos);

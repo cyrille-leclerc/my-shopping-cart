@@ -9,8 +9,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
-        <spring-boot.version>2.3.4.RELEASE</spring-boot.version>
-        <open-telemetry.version>0.9.1</open-telemetry.version>
+        <spring-boot.version>2.4.0</spring-boot.version>
     </properties>
     <modules>
         <module>frontend-java</module>
@@ -22,7 +21,7 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-bom</artifactId>
-                <version>1.32.2</version>
+                <version>1.33.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -33,48 +32,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <dependency>
                 <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-api</artifactId>
-                <version>${open-telemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk</artifactId>
-                <version>${open-telemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-context-prop</artifactId>
-                <version>${open-telemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-sdk-correlation-context</artifactId>
-                <version>${open-telemetry.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-contrib-auto-annotations</artifactId>
-                <!-- FIXME why 0.5.0? -->
-                <version>0.5.0</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporters-jaeger</artifactId>
-                <version>${open-telemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporters-logging</artifactId>
-                <version>${open-telemetry.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentelemetry</groupId>
-                <artifactId>opentelemetry-exporters-otlp</artifactId>
-                <version>${open-telemetry.version}</version>
+                <artifactId>opentelemetry-bom</artifactId>
+                <version>0.10.0</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,8 +1,6 @@
 package com.mycompany.antifraud;
 
-import io.opentelemetry.OpenTelemetry;
-import io.opentelemetry.trace.Span;
-import io.opentelemetry.trace.Tracer;
+import io.opentelemetry.api.trace.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,20 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @ManagedResource
 @RestController()
@@ -64,11 +57,9 @@ public class AntiFraudController {
             @RequestParam String customerIpAddress,
             HttpServletRequest request) {
 
-        Tracer tracer = OpenTelemetry.getTracer("anti-fraud");
-
-        tracer.getCurrentSpan().setAttribute("order_price", orderPrice);
-        tracer.getCurrentSpan().setAttribute("customer_ip_address", customerIpAddress);
-        tracer.getCurrentSpan().setAttribute("shipping_country", shippingCountry);
+        Span.current().setAttribute("order_price", orderPrice);
+        Span.current().setAttribute("customer_ip_address", customerIpAddress);
+        Span.current().setAttribute("shipping_country", shippingCountry);
 
         try {
             int durationOffsetInMillis;
@@ -88,17 +79,14 @@ public class AntiFraudController {
             int checkOrderDurationMillis = durationOffsetInMillis + RANDOM.nextInt(randomDurationInMillis);
             // positive means fraud
             int fraudScore = fraudPercentage - RANDOM.nextInt(100);
-            tracer.getCurrentSpan().setAttribute("fraud_score", fraudScore);
+            Span.current().setAttribute("fraud_score", fraudScore);
 
             boolean rejected = fraudScore > 0;
 
             try (Connection cnn = dataSource.getConnection()) {
                 try (Statement stmt = cnn.createStatement()) {
 
-                    BigDecimal checkoutDurationInSeconds = new BigDecimal(checkOrderDurationMillis).divide(new BigDecimal(1000));
-
                     long nanosBefore = System.nanoTime();
-                    String checkoutDurationInSecondsAsString = checkoutDurationInSeconds.toPlainString();
                     stmt.execute("select pg_sleep(0.05)");
                     Thread.sleep(checkOrderDurationMillis);
                     long actualSleepInNanos = System.nanoTime() - nanosBefore;
@@ -113,7 +101,7 @@ public class AntiFraudController {
                 }
                 // Thread.sleep(checkOrderDurationMillis);
             } catch (SQLException | InterruptedException e) {
-                 tracer.getCurrentSpan().recordException(e);
+                 Span.current().recordException(e);
             }
 
             String result;
