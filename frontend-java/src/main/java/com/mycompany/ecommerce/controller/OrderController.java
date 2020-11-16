@@ -14,7 +14,6 @@ import io.opentelemetry.api.metrics.DoubleValueRecorder;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,29 +44,30 @@ public class OrderController {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
-    ProductService productService;
-    OrderService orderService;
-    OrderProductService orderProductService;
+    final ProductService productService;
+    final OrderService orderService;
+    final OrderProductService orderProductService;
     RestTemplate restTemplate;
     String antiFraudServiceBaseUrl;
-    DoubleValueRecorder orderValueRecorder;
-    DoubleCounter orderValueCounter;
-    DoubleCounter orderValueWithTagsCounter;
-    LongCounter orderCountCounter;
-    DoubleValueRecorder orderWithTagsValueRecorder;
+    final DoubleValueRecorder orderValueRecorder;
+    final DoubleCounter orderSumCounter;
+    final DoubleCounter orderValueWithTagsCounter;
+    final LongCounter orderCountCounter;
+    final DoubleValueRecorder orderWithTagsValueRecorder;
 
 
-    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService) {
+    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService, Meter meter) {
         this.productService = productService;
         this.orderService = orderService;
         this.orderProductService = orderProductService;
-        orderValueRecorder = Meter.getDefault().doubleValueRecorderBuilder("order").setUnit("usd").build();
+        // (!) ValueRecorders (histograms) are ignored by Otel Collector Exporter for Elastic v0.14
+        orderValueRecorder = meter.doubleValueRecorderBuilder("order").setUnit("usd").build();
 
         // Meters below are used for testing and compare with orderValueRecorder
-        orderValueCounter = Meter.getDefault().doubleCounterBuilder("order_value_counter").setUnit("usd").build();
-        orderCountCounter = Meter.getDefault().longCounterBuilder("order_count_counter").build();
-        orderWithTagsValueRecorder = Meter.getDefault().doubleValueRecorderBuilder("order_with_tags").setUnit("usd").build();
-        orderValueWithTagsCounter = Meter.getDefault().doubleCounterBuilder("order_value_with_tags_counter").build();
+        orderSumCounter = meter.doubleCounterBuilder("order_sum").setUnit("usd").build();
+        orderCountCounter = meter.longCounterBuilder("order_count").build();
+        orderWithTagsValueRecorder = meter.doubleValueRecorderBuilder("order_with_tags").setUnit("usd").build();
+        orderValueWithTagsCounter = meter.doubleCounterBuilder("order_value_with_tags_counter").setUnit("usd").build();
     }
 
     @GetMapping
@@ -151,7 +151,7 @@ public class OrderController {
         this.orderValueRecorder.record(orderPrice);
 
         // Meters below are used for testing and compare with orderValueRecorder
-        this.orderValueCounter.add(orderPrice);
+        this.orderSumCounter.add(orderPrice);
         this.orderCountCounter.add(1);
         this.orderWithTagsValueRecorder.record(orderPrice, labels);
         this.orderValueWithTagsCounter.add(orderPrice, labels);

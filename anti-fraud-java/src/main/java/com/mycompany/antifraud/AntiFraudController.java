@@ -1,5 +1,10 @@
 package com.mycompany.antifraud;
 
+import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.metrics.DoubleCounter;
+import io.opentelemetry.api.metrics.DoubleValueRecorder;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +37,6 @@ public class AntiFraudController {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
-    DataSource dataSource;
-
     int averageDurationMillisOnSmallShoppingCarts = 50;
     int averageDurationMillisOnMediumShoppingCarts = 50;
     int averageDurationMillisOnLargeShoppingCart = 1000;
@@ -49,6 +52,29 @@ public class AntiFraudController {
     final AtomicInteger fraudDetectionsPriceInDollarsCounter = new AtomicInteger();
     final AtomicInteger fraudChecksCounter = new AtomicInteger();
     final AtomicInteger fraudChecksPriceInDollarsCounter = new AtomicInteger();
+
+    // (!) ValueRecorders (histograms) are ignored by Otel Collector Exporter for Elastic v0.14
+    final DoubleValueRecorder approvedOrderRecorder ;
+    final DoubleCounter approvedOrderValueCounter;
+    final LongCounter approvedOrderCountCounter;
+    final DoubleValueRecorder rejectedOrderRecorder ;
+    final DoubleCounter rejectedOrderValueCounter ;
+    final LongCounter rejectedOrderCountCounter;
+
+    final DataSource dataSource;
+
+
+    public AntiFraudController(Meter meter, DataSource dataSource) {
+        this.approvedOrderRecorder = meter.doubleValueRecorderBuilder("antifraud_approved_order").build();
+        this.approvedOrderValueCounter = meter.doubleCounterBuilder("antifraud_approved_order_value").build();
+        this.approvedOrderCountCounter = meter.longCounterBuilder("antifraud_approved_order_count").build();
+
+        this.rejectedOrderRecorder = meter.doubleValueRecorderBuilder("antifraud_rejected_order").build();
+        this.rejectedOrderValueCounter = meter.doubleCounterBuilder("antifraud_rejected_order_value").build();
+        this.rejectedOrderCountCounter = meter.longCounterBuilder("antifraud_rejected_order_count").build();
+
+        this.dataSource = dataSource;
+    }
 
     @RequestMapping(path = "fraud/checkOrder", method = {RequestMethod.GET, RequestMethod.POST})
     public String checkOrder(
@@ -101,7 +127,7 @@ public class AntiFraudController {
                 }
                 // Thread.sleep(checkOrderDurationMillis);
             } catch (SQLException | InterruptedException e) {
-                 Span.current().recordException(e);
+                Span.current().recordException(e);
             }
 
             String result;
@@ -109,8 +135,14 @@ public class AntiFraudController {
                 result = "KO";
                 this.fraudDetectionsCounter.incrementAndGet();
                 this.fraudDetectionsPriceInDollarsCounter.addAndGet((int) Math.floor(orderPrice));
+                this.rejectedOrderRecorder.record(orderPrice);
+                this.rejectedOrderValueCounter.add(orderPrice);
+                this.rejectedOrderCountCounter.add(1);
             } else {
                 result = "OK";
+                this.approvedOrderRecorder.record(orderPrice);
+                this.approvedOrderValueCounter.add(orderPrice);
+                this.approvedOrderCountCounter.add(1);
             }
 
             return result;
@@ -221,8 +253,4 @@ public class AntiFraudController {
         return fraudChecksPriceInDollarsCounter;
     }
 
-    @Autowired
-    public void setDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
 }

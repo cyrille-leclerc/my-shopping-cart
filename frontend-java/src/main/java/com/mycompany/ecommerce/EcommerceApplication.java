@@ -6,7 +6,6 @@ import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.trace.Tracer;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -48,4 +47,8 @@ public class EcommerceApplication {
         return new Hibernate5Module();
     }
 
+    @Bean
+    public Meter getOpenTelemetryMeter() {
+        return OpenTelemetry.getGlobalMeter("frontend");
+    }
 }
