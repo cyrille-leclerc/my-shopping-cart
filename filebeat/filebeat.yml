@@ -24,7 +24,9 @@ fields:
 
 output.elasticsearch:
   hosts: ["localhost:9200"]
-  protocol: "http"
+  protocol: "https"
+  ssl.enabled: true
+  ssl.verification_mode: none
   username: "elastic"
   password: "elastic"
 
@@ -37,6 +39,9 @@ processors:
 monitoring.enabled: true
 monitoring.elasticsearch:
   hosts: ["localhost:9200"]
+  protocol: "https"
+  ssl.enabled: true
+  ssl.verification_mode: none
   username: "elastic"
   password: "elastic"
 
