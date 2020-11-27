@@ -9,7 +9,6 @@ import com.mycompany.ecommerce.repository.ProductRepository;
 import io.opentelemetry.api.metrics.Meter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -19,10 +18,10 @@ public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
     private Cache<Long, Product> productCache;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, Meter meter) {
         this.productRepository = productRepository;
         this.productCache = CacheBuilder.newBuilder().maximumSize(2).recordStats().build();
-        OpenTelemetryUtils.observeGoogleGuavaCache(productCache, "product");
+        OpenTelemetryUtils.observeGoogleGuavaCache(productCache, "product", meter);
     }
 
     @Override
