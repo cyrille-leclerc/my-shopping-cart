@@ -10,11 +10,10 @@ receivers:
   hostmetrics:
     collection_interval: 1m
     scrapers:
-      cpu:
+      # cpu not supported on MacOS
+      # cpu:
       load:
       memory:
-#      filesystem:
-#      network:
 
 processors:
   batch: null
