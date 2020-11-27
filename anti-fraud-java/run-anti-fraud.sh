@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-# SNAPSHOT version waiting for https://github.com/elastic/apm-agent-java/pull/1432
-export ELASTIC_AGENT_VERSION=1.18.2-SNAPSHOT
+export ELASTIC_AGENT_VERSION=1.19.0
 
 ##########################################################################################
 # PARENT DIRECTORY
