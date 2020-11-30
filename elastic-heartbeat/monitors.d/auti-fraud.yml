@@ -1,6 +1,7 @@
 - type: http
   id: anti-fraud-check
   name: Anti-Fraud Service
+  service_name: anti-fraud
   schedule: '@every 5s'
   hosts: ["http://localhost:8081/actuator/health"]
   check.response.status: 200

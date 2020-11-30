@@ -65,15 +65,15 @@ public class OrderController {
         validateProductsExistence(formDtos);
 
         String customerId = "customer-" + RANDOM.nextInt(100); // TODO better demo
-        ElasticApm.currentSpan().addLabel("customerId", customerId);
+        ElasticApm.currentSpan().setLabel("customerId", customerId);
 
         double orderPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
-        ElasticApm.currentSpan().addLabel("orderPrice", orderPrice);
+        ElasticApm.currentSpan().setLabel("orderPrice", orderPrice);
         String priceRange = getPriceRange(orderPrice);
-        ElasticApm.currentSpan().addLabel("orderPriceRange", priceRange);
+        ElasticApm.currentSpan().setLabel("orderPriceRange", priceRange);
 
         String shippingCountryCode = getCountryCode(request.getRemoteAddr());
-        ElasticApm.currentSpan().addLabel("shippingCountry", shippingCountryCode);
+        ElasticApm.currentSpan().setLabel("shippingCountry", shippingCountryCode);
         ResponseEntity<String> antiFraudResult;
         try {
             antiFraudResult = restTemplate.getForEntity(
@@ -83,10 +83,10 @@ public class OrderController {
 
         } catch (RestClientException e) {
             String exceptionShortDescription = e.getClass().getName();
-            ElasticApm.currentSpan().addLabel("antiFraud.exception", exceptionShortDescription);
+            ElasticApm.currentSpan().setLabel("antiFraud.exception", exceptionShortDescription);
             ElasticApm.currentSpan().captureException(e);
             if (e.getCause() != null) { // capture SockerTimeoutException...
-                ElasticApm.currentSpan().addLabel("antiFraud.exception.cause", e.getCause().getClass().getName());
+                ElasticApm.currentSpan().setLabel("antiFraud.exception.cause", e.getCause().getClass().getName());
                 exceptionShortDescription += " / " + e.getCause().getClass().getName();
             }
             HttpHeaders httpHeaders = new HttpHeaders();
@@ -96,7 +96,7 @@ public class OrderController {
         }
         if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
             String exceptionShortDescription = "status-" + antiFraudResult.getStatusCode();
-            ElasticApm.currentSpan().addLabel("antiFraud.exception", exceptionShortDescription);
+            ElasticApm.currentSpan().setLabel("antiFraud.exception", exceptionShortDescription);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
             logger.info("Failure createOrder({}): orderPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
@@ -104,7 +104,7 @@ public class OrderController {
         }
         if (!"OK".equals(antiFraudResult.getBody())) {
             String exceptionShortDescription = "response-" + antiFraudResult.getBody();
-            ElasticApm.currentSpan().addLabel("antiFraud.exception", exceptionShortDescription);
+            ElasticApm.currentSpan().setLabel("antiFraud.exception", exceptionShortDescription);
             HttpHeaders httpHeaders = new HttpHeaders();
             httpHeaders.add("x-orderCreationFailureCause", "auti-fraud_" + exceptionShortDescription);
             logger.info("Failure createOrder({}): orderPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);

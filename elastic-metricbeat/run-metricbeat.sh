@@ -21,4 +21,4 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-filebeat --path.config $PRGDIR -e
+metricbeat --path.config $PRGDIR -e

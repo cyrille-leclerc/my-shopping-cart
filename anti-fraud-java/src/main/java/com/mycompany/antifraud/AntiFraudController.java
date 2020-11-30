@@ -58,10 +58,10 @@ public class AntiFraudController {
         String priceRange = getPriceRange(orderPrice);
         ElasticApm.currentSpan().setName("checkOrder");
 
-        ElasticApm.currentSpan().addLabel("orderPrice", orderPrice);
-        ElasticApm.currentSpan().addLabel("priceRange", priceRange);
-        ElasticApm.currentSpan().addLabel("customerIpAddress", customerIpAddress);
-        ElasticApm.currentSpan().addLabel("shippingCountry", shippingCountry);
+        ElasticApm.currentSpan().setLabel("orderPrice", orderPrice);
+        ElasticApm.currentSpan().setLabel("priceRange", priceRange);
+        ElasticApm.currentSpan().setLabel("customerIpAddress", customerIpAddress);
+        ElasticApm.currentSpan().setLabel("shippingCountry", shippingCountry);
 
         try {
             int durationOffsetInMillis;
@@ -81,7 +81,7 @@ public class AntiFraudController {
             int checkOrderDurationMillis = durationOffsetInMillis + RANDOM.nextInt(randomDurationInMillis);
             // positive means fraud
             int fraudScore = fraudPercentage - RANDOM.nextInt(100);
-            ElasticApm.currentSpan().addLabel("fraudScore", fraudScore);
+            ElasticApm.currentSpan().setLabel("fraudScore", fraudScore);
 
             boolean rejected = fraudScore > 0;
 
@@ -112,10 +112,10 @@ public class AntiFraudController {
 
 
             Metrics.counter(
-                    "micrometer_antifraud_order_check",
-                    "micrometer_antifraud_order_check_success", Boolean.toString(!rejected),
-                    "micrometer_antifraud_order_check_price_range", priceRange,
-                    "micrometer_antifraud_order_check_shipping_country", shippingCountry).
+                    "antifraud_order_check",
+                    "antifraud_order_check_success", Boolean.toString(!rejected),
+                    "antifraud_order_check_price_range", priceRange,
+                    "antifraud_order_check_shipping_country", shippingCountry).
                     increment();
 
             String result;

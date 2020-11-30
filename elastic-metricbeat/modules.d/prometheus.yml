@@ -1,0 +1,22 @@
+# Module: prometheus
+# Docs: https://www.elastic.co/guide/en/beats/metricbeat/6.8/metricbeat-module-prometheus.html
+- module: prometheus
+  #metricsets:
+  #  - stats
+  period: 10s
+  hosts: ["localhost:8080"]
+  metrics_path: "/actuator/prometheus/"
+  metrics_filters:
+    include: ["order_*", "guava_*", "hikari_*"]
+  use_types: true
+  rate_counters: true
+- module: prometheus
+  #metricsets:
+  #  - stats
+  period: 10s
+  hosts: ["localhost:8081"]
+  metrics_path: "/actuator/prometheus/"
+  metrics_filters:
+    include: ["antifraud_*", "guava_*", "hikari_*"]
+  use_types: true
+  rate_counters: true

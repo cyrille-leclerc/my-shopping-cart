@@ -2,7 +2,11 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: "micrometer"
+  - job_name: "micrometer-frontend"
     metrics_path: "/actuator/prometheus/"
     static_configs:
-      - targets: ["localhost:8080"]
+      - targets: ["localhost:8081"]
+  - job_name: "micrometer-anti-fraud"
+    metrics_path: "/actuator/prometheus/"
+    static_configs:
+      - targets: ["localhost:8081"]
