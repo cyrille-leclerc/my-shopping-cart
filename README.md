@@ -1,14 +1,11 @@
 
 # Pre requisites
 
-* Java 8
+* A recent Java
 * Postgresql with a database `jdbc:postgresql://localhost:5432/test` and a user `test/test`
     * Hibernate will create a bunch of tables in this `test` database. 
     * Configuration can be changed in the `application.properties` config files
 * Elastic APM
-* OpenTelemetry Collector Contrib v0.6.0 or greater
-    * https://github.com/open-telemetry/opentelemetry-collector-contrib/releases/
-    
 
 # Architecture
 
@@ -33,7 +30,7 @@ OpenTelemetry metrics are demoed here providing in the `frontend-java` app:
 
 # Run the sample
 
-* Install java: on Mac, see https://installvirtual.com/install-openjdk-10-mac-using-brew/
+* Install a recent java version: on Mac, see https://github.com/AdoptOpenJDK/homebrew-openjdk
 
 * Install Postgresql
 
@@ -50,8 +47,6 @@ GRANT ALL PRIVILEGES ON DATABASE test TO test;
 ```
 
 * shell 1: start OpenTelemetry collector
-   * Download the OpenTelemetry collector. e.g. otelcontribcol-dc17498 for Mac -> https://drive.google.com/open?id=1cZQ-84UFnWHu310szerEDoW58gvbrNVe
-   * Install `otelcontribcol-dc17498` in your PATH, typically under `~/bin/`
    * Run the collector
  ```
 cd opentelemetry-collector/
