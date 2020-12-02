@@ -7,6 +7,6 @@
   hosts: ["localhost:8889"]
   metrics_path: /metrics
   metrics_filters:
-    include: ["antifraud_*", "order_*", "guava_*"]
+    include: ["antifraud_*", "order_*", "guava_*", "hikari_*"]
   use_types: true
   rate_counters: true
