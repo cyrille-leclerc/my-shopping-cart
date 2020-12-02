@@ -6,7 +6,8 @@
     * Hibernate will create a bunch of tables in this `test` database. 
     * Configuration can be changed in the `application.properties` config files
 * Elastic APM
-
+* `npm`
+   * `npm install copyfiles -g`
 # Architecture
 
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/demo-architecture.png)
