@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-export OPEN_TELEMETRY_AGENT_VERSION=0.10.1
+export OPEN_TELEMETRY_AGENT_VERSION=0.11.0
 
 ##########################################################################################
 # PARENT DIRECTORY
@@ -52,7 +52,7 @@ $PRGDIR/../mvnw -DskipTests package
 
 export OTEL_RESOURCE_ATTRIBUTES=service.name=frontend,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
-     -Dotel.otlp.endpoint=localhost:55680 \
+     -Dotel.otlp.endpoint=localhost:4317 \
      -Dserver.port=8080 \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
      -jar target/frontend-1.0-SNAPSHOT.jar
