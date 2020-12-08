@@ -53,7 +53,7 @@ $PRGDIR/../mvnw -DskipTests package
 
 export OTEL_RESOURCE_ATTRIBUTES=service.name=anti-fraud,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
-     -Dotel.otlp.endpoint=localhost:4317 \
+     -Dotel.exporter.otlp.endpoint=localhost:4317 \
      -Dserver.port=8081 \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
      -jar target/anti-fraud-1.0-SNAPSHOT.jar

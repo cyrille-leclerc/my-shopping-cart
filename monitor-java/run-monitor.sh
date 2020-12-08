@@ -53,7 +53,7 @@ $PRGDIR/../mvnw -DskipTests package
 export OTEL_RESOURCE_ATTRIBUTES=service.name=monitor,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
 
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
-     -Dotel.otlp.endpoint=localhost:4317 \
+     -Dotel.exporter.otlp.endpoint=localhost:4317 \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
      -classpath target/classes/ FrontendMonitor
 
