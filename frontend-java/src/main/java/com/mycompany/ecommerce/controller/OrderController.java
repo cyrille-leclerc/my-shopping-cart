@@ -1,5 +1,6 @@
 package com.mycompany.ecommerce.controller;
 
+import com.mycompany.ecommerce.OpenTelemetryAttributes;
 import com.mycompany.ecommerce.dto.OrderProductDto;
 import com.mycompany.ecommerce.exception.ResourceNotFoundException;
 import com.mycompany.ecommerce.model.Order;
@@ -8,6 +9,7 @@ import com.mycompany.ecommerce.model.OrderStatus;
 import com.mycompany.ecommerce.service.OrderProductService;
 import com.mycompany.ecommerce.service.OrderService;
 import com.mycompany.ecommerce.service.ProductService;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.common.Labels;
 import io.opentelemetry.api.metrics.DoubleCounter;
 import io.opentelemetry.api.metrics.DoubleValueRecorder;
@@ -76,7 +78,6 @@ public class OrderController {
         return this.orderService.getAllOrders();
     }
 
-
     @PostMapping
     public ResponseEntity<Order> create(@RequestBody OrderForm form, HttpServletRequest request) {
         Span span = Span.current();
@@ -85,19 +86,27 @@ public class OrderController {
         validateProductsExistence(formDtos);
 
         String customerId = "customer-" + RANDOM.nextInt(100);
-        span.setAttribute("customer_id", customerId);
+        span.setAttribute(OpenTelemetryAttributes.CUSTOMER_ID, customerId);
 
         double orderPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
-        span.setAttribute("order_price", orderPrice);
-        span.setAttribute("order_price_range", getPriceRange(orderPrice));
-
         String shippingCountry = getCountryCode(request.getRemoteAddr());
         String shippingMethod = randomShippingMethod();
         String paymentMethod = randomPaymentMethod();
+
+        span.addEvent("order-creation", Attributes.of(
+                OpenTelemetryAttributes.CUSTOMER_ID, customerId,
+                OpenTelemetryAttributes.ORDER_PRICE, orderPrice,
+                OpenTelemetryAttributes.PAYMENT_METHOD, paymentMethod,
+                OpenTelemetryAttributes.SHIPPING_METHOD, shippingMethod,
+                OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry));
+
+        span.setAttribute(OpenTelemetryAttributes.ORDER_PRICE_RANGE, getPriceRange(orderPrice));
+
+
         Labels labels = Labels.of(
-                "shipping_country", shippingCountry,
-                "shipping_method", shippingMethod,
-                "payment_method", paymentMethod);
+                OpenTelemetryAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry,
+                OpenTelemetryAttributes.SHIPPING_METHOD.getKey(), shippingMethod,
+                OpenTelemetryAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
         orderWithTagsValueRecorder.record(orderPrice, labels);
         labels.forEach((key, value) -> {
             span.setAttribute(key, value);
