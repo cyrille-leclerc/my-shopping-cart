@@ -30,7 +30,7 @@
 ```
 brew install postgresql
 brew services start postgresql
-psql postgre
+psql postgres
 create database test;
 CREATE USER test WITH PASSWORD 'test';
 
@@ -49,7 +49,7 @@ GRANT ALL PRIVILEGES ON DATABASE test TO test;
 * shell 2: Frontend
  
 ```
- cd fronten-java/
+ cd frontend-java/
  ./run-frontend.sh  
  ```
 
@@ -62,7 +62,7 @@ cd monitor-java
 * Shell 4: filebeat
  
 ```
- cd filebeat
+ cd elastic-filebeat
  ./run-filebeat.sh  
  ```
 
