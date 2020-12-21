@@ -21,4 +21,4 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
-heartbeat --path.config $PRGDIR -e
+heartbeat --path.config $PRGDIR -e "$@"

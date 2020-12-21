@@ -1,6 +1,5 @@
 package com.mycompany.ecommerce.controller;
 
-import co.elastic.apm.api.CaptureTransaction;
 import co.elastic.apm.api.ElasticApm;
 import com.mycompany.ecommerce.dto.OrderProductDto;
 import com.mycompany.ecommerce.exception.ResourceNotFoundException;
