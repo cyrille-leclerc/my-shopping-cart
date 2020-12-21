@@ -5,3 +5,10 @@
   schedule: '@every 5s'
   hosts: ["http://localhost:8080/actuator/health"]
   check.response.status: 200
+- type: http
+  id: frontend-unreliable-check
+  name: Frontend Unreliable Check
+  service_name: frontend
+  schedule: '@every 5s'
+  hosts: ["http://localhost:8080/health-check"]
+  check.response.status: 200
