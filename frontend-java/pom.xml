@@ -54,14 +54,6 @@
 		<!-- elastic-tracer -->
 		<dependency>
 			<groupId>co.elastic.apm</groupId>
-			<artifactId>apm-agent-attach</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>co.elastic.apm</groupId>
-			<artifactId>apm-agent-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>co.elastic.apm</groupId>
 			<artifactId>apm-opentracing</artifactId>
 		</dependency>
 		<dependency>
