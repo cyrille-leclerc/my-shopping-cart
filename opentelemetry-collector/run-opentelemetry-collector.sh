@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export OPEN_TELEMETRY_COLLECTOR_VERSION=0.16.0
+export OPEN_TELEMETRY_COLLECTOR_VERSION=0.18.0
 export OPEN_TELEMETRY_COLLECTOR_PLATFORM="darwin_amd64"
 
 
@@ -26,7 +26,7 @@ PRGDIR=`dirname "$PRG"`
 
 export OPEN_TELEMETRY_COLLECTOR_HOME=$PRGDIR/../.otel/collector/v$OPEN_TELEMETRY_COLLECTOR_VERSION
 mkdir -p "$OPEN_TELEMETRY_COLLECTOR_HOME"
-
+/OpenTelemetryUtils
 
 ##########################################################################################
 # DOWNLOAD OPEN TELEMETRY COLLECTOR IF NOT FOUND

@@ -1,4 +1,4 @@
-import io.opentelemetry.extension.auto.annotations.WithSpan;
+import io.opentelemetry.extension.annotations.WithSpan;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

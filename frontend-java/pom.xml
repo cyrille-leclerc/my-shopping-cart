@@ -55,6 +55,11 @@
 			<groupId>io.opentelemetry</groupId>
 			<artifactId>opentelemetry-api</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api-metrics</artifactId>
+			<version>0.14.1-alpha</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

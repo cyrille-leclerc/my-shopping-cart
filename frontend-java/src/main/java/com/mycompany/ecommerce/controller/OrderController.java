@@ -108,9 +108,11 @@ public class OrderController {
                 OpenTelemetryAttributes.SHIPPING_METHOD.getKey(), shippingMethod,
                 OpenTelemetryAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
         orderWithTagsValueRecorder.record(orderPrice, labels);
-        labels.forEach((key, value) -> {
-            span.setAttribute(key, value);
-        });
+
+
+        span.setAttribute(OpenTelemetryAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry);
+        span.setAttribute(OpenTelemetryAttributes.SHIPPING_METHOD.getKey(), shippingMethod);
+        span.setAttribute(OpenTelemetryAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
 
         ResponseEntity<String> antiFraudResult;
         try {
