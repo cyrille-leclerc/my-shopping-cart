@@ -2,11 +2,7 @@ package com.mycompany.ecommerce;
 
 import com.google.common.cache.Cache;
 import io.opentelemetry.api.common.Labels;
-import io.opentelemetry.api.metrics.AsynchronousInstrument;
 import io.opentelemetry.api.metrics.Meter;
-
-import java.util.function.Consumer;
-
 
 public class OpenTelemetryUtils {
 
