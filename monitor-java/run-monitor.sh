@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x
+# set -x
 
 export OPEN_TELEMETRY_AGENT_VERSION=0.15.0
 
@@ -52,11 +52,14 @@ $PRGDIR/../mvnw -DskipTests package
 
 export OTEL_RESOURCE_ATTRIBUTES=service.name=monitor,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
 
-java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
+echo "##################"
+echo "# START MONITOR #"
+echo "##################"
+echo ""
+echo ""
+
+java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-all-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dotel.exporter.otlp.endpoint=http://localhost:4317 \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
      -classpath target/classes/ FrontendMonitor
 
-#      -Dota.exporter.jaeger.endpoint=localhost:14250 \
-#      -Dota.exporter.jaeger.service.name=monitor \
-#      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \

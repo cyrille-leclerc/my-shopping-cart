@@ -1,7 +1,9 @@
 import io.opentelemetry.extension.annotations.WithSpan;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Arrays;
@@ -32,7 +34,9 @@ public class FrontendMonitor {
             try {
                 Product product = this.products.get(productIdx);
                 placeOrder(url, quantity, product);
-            } catch(Exception e) {
+            } catch (ConnectException e) {
+                StressTestUtils.incrementProgressBarFailure();
+            } catch (Exception e) {
                 StressTestUtils.incrementProgressBarFailure();
                 System.err.println(e.toString());
             }

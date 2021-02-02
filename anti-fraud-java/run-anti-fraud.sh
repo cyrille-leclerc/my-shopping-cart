@@ -55,7 +55,6 @@ export OTEL_RESOURCE_ATTRIBUTES=service.name=anti-fraud,service.namespace=com-sh
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dotel.exporter.otlp.endpoint=http://localhost:4317 \
      -Dserver.port=8081 \
-     -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
      -jar target/anti-fraud-1.0-SNAPSHOT.jar
 
 #      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
