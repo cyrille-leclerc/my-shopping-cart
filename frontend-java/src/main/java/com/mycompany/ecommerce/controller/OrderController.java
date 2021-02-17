@@ -1,11 +1,14 @@
 package com.mycompany.ecommerce.controller;
 
+import com.mycompany.checkout.PlaceOrderReply;
+import com.mycompany.checkout.PlaceOrderRequest;
 import com.mycompany.ecommerce.OpenTelemetryAttributes;
 import com.mycompany.ecommerce.dto.OrderProductDto;
 import com.mycompany.ecommerce.exception.ResourceNotFoundException;
 import com.mycompany.ecommerce.model.Order;
 import com.mycompany.ecommerce.model.OrderProduct;
 import com.mycompany.ecommerce.model.OrderStatus;
+import com.mycompany.ecommerce.service.CheckoutService;
 import com.mycompany.ecommerce.service.OrderProductService;
 import com.mycompany.ecommerce.service.OrderService;
 import com.mycompany.ecommerce.service.ProductService;
@@ -49,6 +52,7 @@ public class OrderController {
     final ProductService productService;
     final OrderService orderService;
     final OrderProductService orderProductService;
+    final CheckoutService checkoutService;
     RestTemplate restTemplate;
     String antiFraudServiceBaseUrl;
     final DoubleValueRecorder orderValueRecorder;
@@ -58,10 +62,12 @@ public class OrderController {
     final DoubleValueRecorder orderWithTagsValueRecorder;
 
 
-    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService, Meter meter) {
+    public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService, CheckoutService checkoutService, Meter meter) {
         this.productService = productService;
         this.orderService = orderService;
         this.orderProductService = orderProductService;
+        this.checkoutService = checkoutService;
+
         // (!) ValueRecorders (histograms) are ignored by Otel Collector Exporter for Elastic v0.14
         orderValueRecorder = meter.doubleValueRecorderBuilder("order").setUnit("usd").build();
 
@@ -157,6 +163,8 @@ public class OrderController {
         order.setOrderProducts(orderProducts);
 
         this.orderService.update(order);
+
+        final PlaceOrderReply placeOrderReply = this.checkoutService.placeOrder(PlaceOrderRequest.newBuilder().setName(customerId).build());
 
         // UPDATE METRICS
         this.orderValueRecorder.record(orderPrice);
