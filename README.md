@@ -61,14 +61,22 @@ cd opentelemetry-collector/
  ./run-anti-fraud.sh  
  ```
 
-* shell 2: Frontend
+* shell 3: Checkout Service
+
+```
+ cd checkout-service/
+ ./run-checkout-service.sh 
+ ```
+
+* shell 4: Frontend
  
 ```
  cd fronten-java/
  ./run-frontend.sh  
  ```
 
-* shell 4: Monitor to inject load on the application
+
+* shell 5: Monitor to inject load on the application
  ```
 cd monitor-java
 ./run-monitor.sh  
