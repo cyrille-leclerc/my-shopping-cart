@@ -43,12 +43,12 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>2.11.2</version>
+			<version>2.12.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-hibernate5</artifactId>
-			<version>2.11.2</version>
+			<version>2.12.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jolokia</groupId>
@@ -142,10 +142,10 @@
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.10.4</version>
+				<version>1.11.2</version>
 				<configuration>
-					<nodeVersion>v14.15.1</nodeVersion>
-					<npmVersion>6.14.9</npmVersion>
+					<nodeVersion>v14.15.5</nodeVersion>
+					<npmVersion>7.5.4</npmVersion>
 					<workingDirectory>src/main/js</workingDirectory>
 				</configuration>
 				<executions>
