@@ -19,14 +19,15 @@ processors:
   batch: null
 
 exporters:
-  elastic:
-    apm_server_url: 'http://localhost:8200'
-    secret_token: 'my_secret_token'
   logging:
     loglevel: info
   prometheus:
     endpoint: 0.0.0.0:8889
-
+  otlp/elastic:
+    endpoint: "localhost:8200"
+    insecure: true
+    headers:
+      Authorization: "Bearer my_secret_token"
 service:
   pipelines:
     metrics:
@@ -34,14 +35,13 @@ service:
         - otlp
         - hostmetrics
       exporters:
-        - logging
         - prometheus
-        - elastic
+        - otlp/elastic
     traces:
       receivers:
         - otlp
       processors:
         - batch
       exporters:
-        - elastic
+        - otlp/elastic
   extensions: [zpages]
