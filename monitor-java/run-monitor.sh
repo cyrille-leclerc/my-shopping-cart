@@ -50,7 +50,6 @@ fi
 
 $PRGDIR/../mvnw -DskipTests package
 
-export OTEL_RESOURCE_ATTRIBUTES=service.name=monitor,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
 
 echo "##################"
 echo "# START MONITOR #"
@@ -58,8 +57,10 @@ echo "##################"
 echo ""
 echo ""
 
+export OTEL_RESOURCE_ATTRIBUTES=service.name=monitorOtlp,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:8200
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer my_secret_token"
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-all-$OPEN_TELEMETRY_AGENT_VERSION.jar \
-     -Dotel.exporter.otlp.endpoint=http://localhost:4317 \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
      -classpath target/classes/ FrontendMonitor
 
