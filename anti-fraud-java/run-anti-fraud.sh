@@ -52,8 +52,10 @@ $PRGDIR/../mvnw -DskipTests package
 
 
 export OTEL_RESOURCE_ATTRIBUTES=service.name=anti-fraud,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:8200
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer my_secret_token"
+
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
-     -Dotel.exporter.otlp.endpoint=http://localhost:4317 \
      -Dserver.port=8081 \
      -jar target/anti-fraud-1.0-SNAPSHOT.jar
 

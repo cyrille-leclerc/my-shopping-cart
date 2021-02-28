@@ -57,7 +57,9 @@ echo ""
 echo ""
 
 export OTEL_RESOURCE_ATTRIBUTES=service.name=frontend,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:8200
+export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer my_secret_token"
+
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-all-$OPEN_TELEMETRY_AGENT_VERSION.jar \
-     -Dotel.exporter.otlp.endpoint=http://localhost:4317 \
      -Dserver.port=8080 \
      -jar target/frontend-1.0-SNAPSHOT.jar
