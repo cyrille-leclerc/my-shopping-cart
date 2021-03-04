@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # set -x
 
-export OPEN_TELEMETRY_AGENT_VERSION=0.16.1
+export OPEN_TELEMETRY_AGENT_VERSION=0.17.0
 
 ##########################################################################################
 # PARENT DIRECTORY
@@ -57,7 +57,7 @@ echo "##################"
 echo ""
 echo ""
 
-export OTEL_RESOURCE_ATTRIBUTES=service.name=monitorOtlp,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
+export OTEL_RESOURCE_ATTRIBUTES=service.name=monitor,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
 export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:8200
 export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer my_secret_token"
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-all-$OPEN_TELEMETRY_AGENT_VERSION.jar \

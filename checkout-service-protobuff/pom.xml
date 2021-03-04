@@ -14,9 +14,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
 
         <!-- -->
-        <grpc.version>1.33.1</grpc.version>
-        <protobuf.version>3.12.0</protobuf.version>
-        <protoc.version>3.12.0</protoc.version>
+        <grpc.version>1.36.0</grpc.version>
+        <protobuf.version>3.15.4</protobuf.version>
+        <protoc.version>3.15.4</protoc.version>
     </properties>
 
     <dependencies>

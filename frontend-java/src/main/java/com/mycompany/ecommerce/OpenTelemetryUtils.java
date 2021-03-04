@@ -1,8 +1,8 @@
 package com.mycompany.ecommerce;
 
 import com.google.common.cache.Cache;
-import io.opentelemetry.api.common.Labels;
 import io.opentelemetry.api.metrics.Meter;
+import io.opentelemetry.api.metrics.common.Labels;
 
 public class OpenTelemetryUtils {
 
