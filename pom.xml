@@ -11,7 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>2.4.3</spring-boot.version>
-        <opentelemetry.version>0.17.0</opentelemetry.version>
+        <opentelemetry.version>1.0.1</opentelemetry.version>
     </properties>
     <modules>
         <module>checkout-service-protobuff</module>
@@ -32,7 +32,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava-bom</artifactId>
-                <version>30.0-jre</version>
+                <version>30.1-jre</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
