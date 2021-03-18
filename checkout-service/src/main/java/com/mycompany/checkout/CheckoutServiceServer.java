@@ -11,9 +11,10 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class CheckoutServiceServer {
-    final static Random RANDOM = new Random();
 
-    private static final Logger logger = LoggerFactory.getLogger(CheckoutServiceServer.class);
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
+    final static Random RANDOM = new Random();
 
     private Server server;
 
@@ -42,7 +43,7 @@ public class CheckoutServiceServer {
         /* The port on which the server should run */
         int port = 50051;
         server = ServerBuilder.forPort(port)
-                .addService(new CheckoutImpl())
+                .addService(new CheckoutServiceImpl())
                 .build()
                 .start();
         logger.info("GRPC server started, listening on " + port);
@@ -58,15 +59,20 @@ public class CheckoutServiceServer {
         }));
     }
 
-    static class CheckoutImpl extends CheckoutServiceGrpc.CheckoutServiceImplBase {
+    static class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplBase {
+
+        private final Logger logger = LoggerFactory.getLogger(getClass());
+
         @Override
         public void placeOrder(PlaceOrderRequest request, StreamObserver<PlaceOrderReply> responseObserver) {
+            final int millis = 25 + RANDOM.nextInt(50);
             try {
-                Thread.sleep(25 + RANDOM.nextInt(50));
+                Thread.sleep(millis);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            StressTestUtils.incrementProgressBarSuccess();
+            logger.info("Order successfully placed in " + millis + "ms");
+            // StressTestUtils.incrementProgressBarSuccess();
             final PlaceOrderReply placeOrderReply = PlaceOrderReply.newBuilder().setMessage("Order successfully placed!").build();
             responseObserver.onNext(placeOrderReply);
             responseObserver.onCompleted();
