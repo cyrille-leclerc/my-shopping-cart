@@ -70,18 +70,6 @@ processors:
           to: "log.logger"
       ignore_missing: true
       fail_on_error: true
-#  - add_fields:
-#      when:
-#        log.file.path: "/usr/local/var/log/my-shopping-cart/frontend.log"
-#      target: service
-#        fields:
-#          name: "frontend"
-#  - add_fields:
-#      when:
-#        log.file.path: "/usr/local/var/log/my-shopping-cart/anti-fraud.log"
-#      target: service
-#        fields:
-#          name: "anti-fraud"
 monitoring.enabled: true
 monitoring.elasticsearch:
   hosts: ["localhost:9200"]
