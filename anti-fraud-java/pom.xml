@@ -51,7 +51,6 @@
 		<dependency>
 			<groupId>io.opentelemetry</groupId>
 			<artifactId>opentelemetry-api-metrics</artifactId>
-			<version>${opentelemetry.version}-alpha</version>
 		</dependency>
 		<dependency>
 			<groupId>io.opentelemetry</groupId>
@@ -72,6 +71,10 @@
 		<dependency>
 			<groupId>ch.qos.logback.contrib</groupId>
 			<artifactId>logback-jackson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
 		</dependency>
 
 		<dependency>
