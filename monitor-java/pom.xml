@@ -15,16 +15,7 @@
     </properties>
 
     <dependencies>
-        <!-- elastic logs-->
-        <dependency>
-            <groupId>co.elastic.logging</groupId>
-            <artifactId>logback-ecs-encoder</artifactId>
-        </dependency>
         <!-- elastic-apm -->
-        <dependency>
-            <groupId>co.elastic.apm</groupId>
-            <artifactId>apm-agent-attach</artifactId>
-        </dependency>
         <dependency>
             <groupId>co.elastic.apm</groupId>
             <artifactId>apm-agent-api</artifactId>

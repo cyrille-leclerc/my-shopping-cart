@@ -100,7 +100,6 @@ public class FrontendMonitor {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        new ElasticConfiguration().postConstruct();
         FrontendMonitor frontendMonitor = new FrontendMonitor();
         frontendMonitor.post("http://localhost:8080");
     }

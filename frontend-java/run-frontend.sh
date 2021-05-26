@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -x
 
-export ELASTIC_AGENT_VERSION=1.21.0
+export ELASTIC_AGENT_VERSION=1.23.0
 
 ##########################################################################################
 # PARENT DIRECTORY
