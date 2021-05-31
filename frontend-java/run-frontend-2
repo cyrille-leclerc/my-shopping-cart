@@ -34,5 +34,13 @@ $PRGDIR/../mvnw dependency:copy \
 
 $PRGDIR/../mvnw -DskipTests package
 
+export ELASTIC_APM_SERVER_URL="https://a81def85294f4a9ab9063ffe4088a7bd.apm.eastus2.azure.elastic-cloud.com"
+export ELASTIC_APM_SECRET_TOKEN="Ew0IGyUejrfA9F4gQP"
+export ELASTIC_APM_ENVIRONMENT="staging"
+export ELASTIC_APM_SERVICE_VERSION="1.1"
+export ELASTIC_APM_HOSTNAME="srv2.frontend"
+
 java -javaagent:target/agent/elastic-apm-agent-$ELASTIC_AGENT_VERSION.jar \
+     -Dserver.port=8085 \
+     -Dorder.averageDelayMillis=200 \
      -jar target/frontend-1.0-SNAPSHOT.jar

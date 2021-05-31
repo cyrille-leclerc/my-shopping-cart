@@ -43,21 +43,30 @@ GRANT ALL PRIVILEGES ON DATABASE test TO test;
  
 ```
  cd anti-fraud-java/
- ./run-anti-fraud.sh  
+ ./run-anti-fraud  
  ```
+
+Note: `./run-anti-fraud-no-slowness` will start the Anti Fraud Service without any slowness when purchase orders are beyond $100 .
 
 * shell 2: Frontend
  
 ```
  cd frontend-java/
- ./run-frontend.sh  
+ ./run-frontend  
  ```
 
+Note: `./run-frontend` starts a second frontend on port 8085.
+
+
 * shell 3: Monitor to inject load on the application
+
  ```
 cd monitor-java
-./run-monitor.sh  
+./run-monitor  
 ```
+
+Note: `./run-monitor-2-frontends` starts a monitor that will generate load on 2 frontends.
+
 
 * Shell 4: filebeat
  

@@ -12,6 +12,8 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FrontendMonitor {
 
@@ -31,34 +33,44 @@ public class FrontendMonitor {
 
     );
 
-    public void post(String url) throws IOException, InterruptedException {
-        for (int i = 0; i < 100_000 /*100_000*/; i++) {
+    final List<String> urls;
+
+    public FrontendMonitor(List<String> urls) {
+        this.urls = urls;
+    }
+
+    public void post() {
+        for (int i = 0; i < 100_000; i++) {
             int productIdx = RANDOM.nextInt(this.products.size());
             int quantity = 1 + RANDOM.nextInt(2);
             try {
                 Product product = this.products.get(productIdx);
-                placeOrder(url, quantity, product);
-            } catch(ConnectException e) {
+                placeOrder(quantity, product);
+            } catch (ConnectException e) {
                 StressTestUtils.incrementProgressBarConnectionFailure();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 StressTestUtils.incrementProgressBarFailure();
-                System.err.println(e.toString());
+                System.err.println(e);
             } finally {
-                Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));
+                try {
+                    Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
     }
 
     @CaptureTransaction("placeOrder")
-    public void placeOrder(String url, int quantity, Product product) throws IOException {
-        getProduct(url, product);
-        createOrder(url, quantity, product);
+    public void placeOrder(int quantity, Product product) throws IOException {
+        getProduct(product);
+        createOrder(quantity, product);
     }
 
     @CaptureSpan("createOrder")
-    public void createOrder(String url, int quantity, Product product) throws IOException {
-        URL createProductUrl = new URL(url + "/api/orders");
+    public void createOrder(int quantity, Product product) throws IOException {
+        URL createProductUrl = new URL(getRandomUrl() + "/api/orders");
         HttpURLConnection createOrderConnection = (HttpURLConnection) createProductUrl.openConnection();
         createOrderConnection.setRequestMethod("POST");
         createOrderConnection.addRequestProperty("Accept", "application/json");
@@ -83,8 +95,8 @@ public class FrontendMonitor {
     }
 
     @CaptureSpan("getProduct")
-    public void getProduct(String url, Product product) throws IOException {
-        URL getProductUrl = new URL(url + "/api/products/" + product.id);
+    public void getProduct(Product product) throws IOException {
+        URL getProductUrl = new URL(getRandomUrl() + "/api/products/" + product.id);
         HttpURLConnection getProductConnection = (HttpURLConnection) getProductUrl.openConnection();
         getProductConnection.addRequestProperty("Accept", "application/json");
         int statusCode = getProductConnection.getResponseCode();
@@ -100,10 +112,17 @@ public class FrontendMonitor {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        FrontendMonitor frontendMonitor = new FrontendMonitor();
-        frontendMonitor.post("http://localhost:8080");
+        String frontEndUrlsAsString = System.getProperty("frontend.urls", "http://localhost:8080");
+        List<String> frontendUrls = Stream.of(frontEndUrlsAsString.split(",")).map(String::trim).collect(Collectors.toList());
+        System.out.println("Frontend URLS: " + frontendUrls.stream().collect(Collectors.joining(", ")));
+        FrontendMonitor frontendMonitor = new FrontendMonitor(frontendUrls);
+        frontendMonitor.post();
+
     }
 
+    public String getRandomUrl() {
+        return urls.get(RANDOM.nextInt(urls.size()));
+    }
     private static class Product {
         public Product(long id, String name, double price) {
             this.id = id;

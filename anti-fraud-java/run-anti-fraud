@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -x
+
+export ELASTIC_AGENT_VERSION=1.23.0
+
+##########################################################################################
+# PARENT DIRECTORY
+# code copied from Tomcat's `catalina.sh`
+##########################################################################################
+# resolve links - $0 may be a softlink
+PRG="$0"
+
+while [ -h "$PRG" ]; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+
+# Get standard environment variables
+PRGDIR=`dirname "$PRG"`
+
+##########################################################################################
+# DOWNLOAD ELASTIC_AGENT AGENT
+##########################################################################################
+mkdir -p $PRGDIR/target/agent
+cp  $PRGDIR/etc/elastic-agent/elasticapm.properties $PRGDIR/target/agent
+$PRGDIR/../mvnw dependency:copy \
+      -Dartifact=co.elastic.apm:elastic-apm-agent:$ELASTIC_AGENT_VERSION \
+      -DoutputDirectory=$PRGDIR/target/agent/
+
+$PRGDIR/../mvnw -DskipTests package
+
+export ELASTIC_APM_SERVER_URL="https://a81def85294f4a9ab9063ffe4088a7bd.apm.eastus2.azure.elastic-cloud.com"
+export ELASTIC_APM_SECRET_TOKEN="Ew0IGyUejrfA9F4gQP"
+export ELASTIC_APM_ENVIRONMENT="staging"
+
+java -javaagent:target/agent/elastic-apm-agent-$ELASTIC_AGENT_VERSION.jar \
+    -Dserver.port=8081 \
+     -jar target/anti-fraud-1.0-SNAPSHOT.jar

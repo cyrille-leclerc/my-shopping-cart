@@ -28,12 +28,24 @@ PRGDIR=`dirname "$PRG"`
 ##########################################################################################
 mkdir -p $PRGDIR/target/agent
 cp  $PRGDIR/etc/elastic-agent/elasticapm.properties $PRGDIR/target/agent
+
 $PRGDIR/../mvnw dependency:copy \
       -Dartifact=co.elastic.apm:elastic-apm-agent:$ELASTIC_AGENT_VERSION \
       -DoutputDirectory=$PRGDIR/target/agent/
 
+$PRGDIR/../mvnw dependency:copy-dependencies -DincludeScope=compile
+
 $PRGDIR/../mvnw -DskipTests package
 
+export ELASTIC_APM_SERVER_URL="https://a81def85294f4a9ab9063ffe4088a7bd.apm.eastus2.azure.elastic-cloud.com"
+export ELASTIC_APM_SECRET_TOKEN="Ew0IGyUejrfA9F4gQP"
+export ELASTIC_APM_ENVIRONMENT="staging"
+
 java -javaagent:target/agent/elastic-apm-agent-$ELASTIC_AGENT_VERSION.jar \
-    -Dserver.port=8081 \
-     -jar target/anti-fraud-1.0-SNAPSHOT.jar
+     -classpath target/dependency/*:target/classes/ \
+     -Dfrontend.urls="http://localhost:8080, http://localhost:8085" \
+     com.mycompany.ecommerce.FrontendMonitor
+
+
+
+
