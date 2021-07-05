@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # set -x
 
-export OPEN_TELEMETRY_AGENT_VERSION=1.3.1
-
 ##########################################################################################
 # PARENT DIRECTORY
 # code copied from Tomcat's `catalina.sh`
@@ -23,6 +21,14 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
+# LOAD ENVIRONMENT VARIABLES
+if [ -r "$PRGDIR/setenv.sh" ]; then
+  . "$PRGDIR/setenv.sh"
+elif [ -r "$PRGDIR/../setenv.sh" ]; then
+  . "$PRGDIR/../setenv.sh"
+else
+  . "$PRGDIR/../setenv.default.sh"
+fi
 
 export OPEN_TELEMETRY_AGENT_HOME=$PRGDIR/../.otel
 mkdir -p "$OPEN_TELEMETRY_AGENT_HOME"
@@ -54,11 +60,9 @@ echo "##################"
 echo "# START FRONTEND #"
 echo "##################"
 echo ""
-echo ""
+echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 
-export OTEL_RESOURCE_ATTRIBUTES=service.name=frontend,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:8200
-export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer my_secret_token"
+export OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=$OPEN_TELEMETRY_DEPLOYMENT_ENVIRONMENT"
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-all-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dserver.port=8080 \

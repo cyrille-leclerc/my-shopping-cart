@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x
+#set -x
 
 export OPEN_TELEMETRY_AGENT_VERSION=1.3.1
 
@@ -23,6 +23,14 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
+# LOAD ENVIRONMENT VARIABLES
+if [ -r "$PRGDIR/setenv.sh" ]; then
+  . "$PRGDIR/setenv.sh"
+elif [ -r "$PRGDIR/../setenv.sh" ]; then
+  . "$PRGDIR/../setenv.sh"
+else
+  . "$PRGDIR/../setenv.default.sh"
+fi
 
 export OPEN_TELEMETRY_AGENT_HOME=$PRGDIR/../.otel
 mkdir -p "$OPEN_TELEMETRY_AGENT_HOME"
@@ -51,12 +59,15 @@ fi
 $PRGDIR/../mvnw -DskipTests package
 
 
-export OTEL_RESOURCE_ATTRIBUTES=service.name=anti-fraud,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=staging
-export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:8200
-export OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer my_secret_token"
+echo "####################"
+echo "# START ANTI FRAUD #"
+echo "####################"
+echo ""
+echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
+echo ""
+
+export OTEL_RESOURCE_ATTRIBUTES="service.name=anti-fraud,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=$OPEN_TELEMETRY_DEPLOYMENT_ENVIRONMENT"
 
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dserver.port=8081 \
      -jar target/anti-fraud-1.0-SNAPSHOT.jar
-
-#      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \

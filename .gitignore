@@ -29,3 +29,7 @@ target/
 
 .otel/
 .prometheus*
+
+
+# ENVIRONMENT VARIABLES
+setenv.sh
