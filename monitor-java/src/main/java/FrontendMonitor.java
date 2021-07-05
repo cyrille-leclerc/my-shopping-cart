@@ -38,7 +38,7 @@ public class FrontendMonitor {
                 StressTestUtils.incrementProgressBarFailure();
             } catch (Exception e) {
                 StressTestUtils.incrementProgressBarFailure();
-                System.err.println(e.toString());
+                System.err.println(e.toString() + " invoking " + url);
             }
 
             Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));

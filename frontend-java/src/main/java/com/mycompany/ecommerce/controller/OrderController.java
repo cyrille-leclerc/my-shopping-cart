@@ -123,7 +123,7 @@ public class OrderController {
         ResponseEntity<String> antiFraudResult;
         try {
             antiFraudResult = restTemplate.getForEntity(
-                    this.antiFraudServiceBaseUrl + "fraud/checkOrder?orderPrice={q}&customerIpAddress={q}&shippingCountry={q}",
+                    this.antiFraudServiceBaseUrl + (antiFraudServiceBaseUrl.endsWith("/") ? "": "/") + "fraud/checkOrder?orderPrice={q}&customerIpAddress={q}&shippingCountry={q}",
                     String.class,
                     orderPrice, request.getRemoteAddr(), shippingCountry);
         } catch (RestClientException e) {

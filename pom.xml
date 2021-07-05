@@ -10,8 +10,8 @@
     <packaging>pom</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>2.4.4</spring-boot.version>
-        <opentelemetry.version>1.1.0</opentelemetry.version>
+        <spring-boot.version>2.5.2</spring-boot.version>
+        <opentelemetry.version>1.3.0</opentelemetry.version>
         <jackson.version>2.12.3</jackson.version>
     </properties>
     <modules>
@@ -26,14 +26,14 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-bom</artifactId>
-                <version>1.36.0</version>
+                <version>1.39.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava-bom</artifactId>
-                <version>30.1-jre</version>
+                <version>30.1.1-jre</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -70,6 +70,11 @@
                 <groupId>ch.qos.logback.contrib</groupId>
                 <artifactId>logback-jackson</artifactId>
                 <version>0.1.5</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13.2</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
