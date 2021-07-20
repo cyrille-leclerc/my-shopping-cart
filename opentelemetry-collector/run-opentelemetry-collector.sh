@@ -24,6 +24,15 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
+# LOAD ENVIRONMENT VARIABLES
+if [ -r "$PRGDIR/setenv.sh" ]; then
+  . "$PRGDIR/setenv.sh"
+elif [ -r "$PRGDIR/../setenv.sh" ]; then
+  . "$PRGDIR/../setenv.sh"
+else
+  . "$PRGDIR/../setenv.default.sh"
+fi
+
 export OPEN_TELEMETRY_COLLECTOR_HOME=$PRGDIR/../.otel/collector/v$OPEN_TELEMETRY_COLLECTOR_VERSION
 mkdir -p "$OPEN_TELEMETRY_COLLECTOR_HOME"
 
@@ -51,5 +60,11 @@ else
 fi
 
 set -x
+
+echo "################################"
+echo "# RUN OPEN TELEMETRY COLLECTOR #"
+echo "################################"
+echo ""
+echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 
 $OPEN_TELEMETRY_COLLECTOR --config $PRGDIR/opentelemetry-collector-exporter-elastic.yaml
