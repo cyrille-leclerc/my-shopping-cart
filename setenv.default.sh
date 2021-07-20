@@ -1,0 +1,5 @@
+export ELASTIC_AGENT_VERSION=1.24.0
+
+export ELASTIC_APM_SERVER_URL="http://localhost:8200"
+export ELASTIC_APM_SECRET_TOKEN=""
+export ELASTIC_APM_ENVIRONMENT="staging"

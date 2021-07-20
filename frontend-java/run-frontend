@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-set -x
-
-export ELASTIC_AGENT_VERSION=1.23.0
+set +x
 
 ##########################################################################################
 # PARENT DIRECTORY
@@ -23,6 +21,15 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
+# LOAD ENVIRONMENT VARIABLES
+if [ -r "$PRGDIR/setenv.sh" ]; then
+  . "$PRGDIR/setenv.sh"
+elif [ -r "$PRGDIR/../setenv.sh" ]; then
+  . "$PRGDIR/../setenv.sh"
+else
+  . "$PRGDIR/../setenv.default.sh"
+fi
+
 ##########################################################################################
 # DOWNLOAD ELASTIC_AGENT AGENT
 ##########################################################################################
@@ -34,11 +41,18 @@ $PRGDIR/../mvnw dependency:copy \
 
 $PRGDIR/../mvnw -DskipTests package
 
-export ELASTIC_APM_SERVER_URL="https://a81def85294f4a9ab9063ffe4088a7bd.apm.eastus2.azure.elastic-cloud.com"
-export ELASTIC_APM_SECRET_TOKEN="Ew0IGyUejrfA9F4gQP"
-export ELASTIC_APM_ENVIRONMENT="staging"
+
 export ELASTIC_APM_SERVICE_VERSION="1.0"
 export ELASTIC_APM_HOSTNAME="srv1.frontend"
+
+echo "##################"
+echo "# START FRONTEND #"
+echo "##################"
+echo ""
+echo "ELASTIC_APM_SERVER_URL: $ELASTIC_APM_SERVER_URL"
+echo "Hostname: $ELASTIC_APM_HOSTNAME"
+echo "Version: $ELASTIC_APM_SERVICE_VERSION"
+echo ""
 
 java -javaagent:target/agent/elastic-apm-agent-$ELASTIC_AGENT_VERSION.jar \
      -jar target/frontend-1.0-SNAPSHOT.jar

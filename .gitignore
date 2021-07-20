@@ -29,3 +29,5 @@ target/
 
 .otel/
 .prometheus*/
+
+setenv.sh
