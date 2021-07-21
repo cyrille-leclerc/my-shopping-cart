@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @ManagedResource
 @RestController()
-@ConfigurationProperties(prefix= "antifraud")
+@ConfigurationProperties(prefix = "antifraud")
 public class AntiFraudController {
 
     final static Random RANDOM = new Random();
@@ -35,6 +35,7 @@ public class AntiFraudController {
 
     DataSource dataSource;
 
+    int percentageOfSmallAndMediumShoppingCartsHavingLargeShoppingCartProfile = 35;
     int averageDurationMillisOnSmallShoppingCarts = 50;
     int averageDurationMillisOnMediumShoppingCarts = 50;
     int averageDurationMillisOnLargeShoppingCart = 1000;
@@ -51,6 +52,8 @@ public class AntiFraudController {
     final AtomicInteger fraudChecksCounter = new AtomicInteger();
     final AtomicInteger fraudChecksPriceInDollarsCounter = new AtomicInteger();
 
+    enum RequestProfile {SMALL, MEDIUM, LARGE}
+
     @RequestMapping(path = "fraud/checkOrder", method = {RequestMethod.GET, RequestMethod.POST})
     public String checkOrder(
             @RequestParam double orderPrice,
@@ -66,17 +69,40 @@ public class AntiFraudController {
         ElasticApm.currentSpan().setLabel("shippingCountry", shippingCountry);
 
         try {
+            RequestProfile profile;
+            if (orderPrice < priceUpperBoundaryDollarsOnSmallShoppingCart) {
+                if (RANDOM.nextInt(100) < percentageOfSmallAndMediumShoppingCartsHavingLargeShoppingCartProfile) {
+                    profile = RequestProfile.LARGE;
+                } else {
+                    profile = RequestProfile.SMALL;
+                }
+            } else if (orderPrice < priceUpperBoundaryDollarsOnMediumShoppingCarts) {
+                if (RANDOM.nextInt(100) < percentageOfSmallAndMediumShoppingCartsHavingLargeShoppingCartProfile) {
+                    profile = RequestProfile.LARGE;
+                } else {
+                    profile = RequestProfile.MEDIUM;
+                }
+            } else {
+                profile = RequestProfile.LARGE;
+            }
+
             int durationOffsetInMillis;
             int fraudPercentage;
-            if (orderPrice < priceUpperBoundaryDollarsOnSmallShoppingCart) {
-                fraudPercentage = fraudPercentageOnSmallShoppingCarts;
-                durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
-            } else if (orderPrice < priceUpperBoundaryDollarsOnMediumShoppingCarts) {
-                fraudPercentage = fraudPercentageOnMediumShoppingCarts;
-                durationOffsetInMillis = averageDurationMillisOnMediumShoppingCarts;
-            } else {
-                fraudPercentage = fraudPercentageOnLargeShoppingCarts;
-                durationOffsetInMillis = averageDurationMillisOnLargeShoppingCart;
+            switch (profile) {
+                case SMALL:
+                    fraudPercentage = fraudPercentageOnSmallShoppingCarts;
+                    durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
+                    break;
+                case MEDIUM:
+                    fraudPercentage = fraudPercentageOnMediumShoppingCarts;
+                    durationOffsetInMillis = averageDurationMillisOnMediumShoppingCarts;
+                    break;
+                case LARGE:
+                    fraudPercentage = fraudPercentageOnLargeShoppingCarts;
+                    durationOffsetInMillis = averageDurationMillisOnLargeShoppingCart;
+                    break;
+                default:
+                    throw new IllegalStateException();
             }
 
             int randomDurationInMillis = Math.max(5, new BigDecimal(durationOffsetInMillis).multiply(FIVE_PERCENT).intValue());
@@ -91,7 +117,7 @@ public class AntiFraudController {
             try (Connection cnn = dataSource.getConnection()) {
                 try (Statement stmt = cnn.createStatement()) {
 
-                    BigDecimal checkoutDurationInSeconds = new BigDecimal(checkOrderDurationMillis).divide(new BigDecimal(1000));;
+                    BigDecimal checkoutDurationInSeconds = new BigDecimal(checkOrderDurationMillis).divide(new BigDecimal(1000));
                     long nanosBefore = System.nanoTime();
                     String checkoutDurationInSecondsAsString = checkoutDurationInSeconds.toPlainString();
                     stmt.execute("select pg_sleep(0.05)");
@@ -114,10 +140,10 @@ public class AntiFraudController {
 
 
             Metrics.counter(
-                    "antifraud_order_check",
-                    "antifraud_order_check_success", Boolean.toString(!rejected),
-                    "antifraud_order_check_price_range", priceRange,
-                    "antifraud_order_check_shipping_country", shippingCountry).
+                            "antifraud_order_check",
+                            "antifraud_order_check_success", Boolean.toString(!rejected),
+                            "antifraud_order_check_price_range", priceRange,
+                            "antifraud_order_check_shipping_country", shippingCountry).
                     increment();
 
             String result;

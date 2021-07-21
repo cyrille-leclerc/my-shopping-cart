@@ -34,6 +34,11 @@ public class EcommerceApplication {
             productService.save(new Product(6L, "Phone", 500.00, "http://placehold.it/200x100"));
             productService.save(new Product(7L, "Watch", 30.00, "http://placehold.it/200x100"));
             productService.save(new Product(8L, "USB Cable", 4.00, "http://placehold.it/200x100"));
+            productService.save(new Product(9L, "USB-C Cable", 5.00, "http://placehold.it/200x100"));
+            productService.save(new Product(10L, "Micro USB Cable", 3.00, "http://placehold.it/200x100"));
+            productService.save(new Product(11L, "Lightning Cable", 9.00, "http://placehold.it/200x100"));
+            productService.save(new Product(12L, "USB C adapter", 5.00, "http://placehold.it/200x100"));
+
         };
     }
 

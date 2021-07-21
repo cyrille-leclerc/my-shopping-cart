@@ -67,6 +67,9 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<Order> create(@RequestBody OrderForm form, HttpServletRequest request) {
         ElasticApm.currentSpan().setName("createOrder");
+
+        String paymentMethod = form.paymentMethod;
+
         List<OrderProductDto> formDtos = form.getProductOrders();
         validateProductsExistence(formDtos);
 
@@ -77,6 +80,7 @@ public class OrderController {
         ElasticApm.currentSpan().setLabel("orderPrice", orderPrice);
         String priceRange = getPriceRange(orderPrice);
         ElasticApm.currentSpan().setLabel("orderPriceRange", priceRange);
+        ElasticApm.currentSpan().setLabel("paymentMethod", paymentMethod);
 
         String shippingCountryCode = getCountryCode(request.getRemoteAddr());
         ElasticApm.currentSpan().setLabel("shippingCountry", shippingCountryCode);
@@ -207,6 +211,8 @@ public class OrderController {
 
     public static class OrderForm {
 
+        private String paymentMethod;
+
         private List<OrderProductDto> productOrders;
 
         public List<OrderProductDto> getProductOrders() {
@@ -217,9 +223,17 @@ public class OrderController {
             this.productOrders = productOrders;
         }
 
+        public String getPaymentMethod() {
+            return paymentMethod;
+        }
+
+        public void setPaymentMethod(String paymentMethod) {
+            this.paymentMethod = paymentMethod;
+        }
+
         @Override
         public String toString() {
-            return new ToStringCreator(this).append(this.productOrders).toString();
+            return new ToStringCreator(this).append("paymentMethod", this.paymentMethod).append(this.productOrders).toString();
         }
     }
 }
