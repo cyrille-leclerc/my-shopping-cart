@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -23,7 +25,7 @@ public class FrontendMonitor {
 
     final static Random RANDOM = new Random();
 
-    final static int SLEEP_MAX_DURATION_MILLIS = 250;
+    final static int SLEEP_MAX_DURATION_MILLIS = 50;
 
     enum PaymentMethod {VISA, AMEX, PAYPAL}
 
@@ -70,12 +72,16 @@ public class FrontendMonitor {
             PaymentMethod.PAYPAL,
             PaymentMethod.PAYPAL,
             PaymentMethod.PAYPAL,
+            PaymentMethod.PAYPAL,
+            PaymentMethod.VISA,
             PaymentMethod.VISA,
             PaymentMethod.VISA,
             PaymentMethod.VISA,
             PaymentMethod.AMEX,
     };
     final static PaymentMethod[] UNEVENLY_DISTRIBUTED_PAYMENT_METHODS = {
+            PaymentMethod.AMEX,
+            PaymentMethod.AMEX,
             PaymentMethod.AMEX,
             PaymentMethod.AMEX,
             PaymentMethod.AMEX,
@@ -108,25 +114,29 @@ public class FrontendMonitor {
     }
 
     public void post() {
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+
         for (int i = 0; i < 100_000; i++) {
             int productIdx = RANDOM.nextInt(this.products.size());
             int quantity = 1 + RANDOM.nextInt(2);
-            try {
-                Product product = this.products.get(productIdx);
-                PaymentMethod paymentMethod = getPaymentMethod(product, quantity);
-                placeOrder(quantity, product, paymentMethod);
-            } catch (ConnectException e) {
-                StressTestUtils.incrementProgressBarConnectionFailure();
-            } catch (Exception e) {
-                StressTestUtils.incrementProgressBarFailure();
-                System.err.println(e);
-            } finally {
+            Product product = this.products.get(productIdx);
+            PaymentMethod paymentMethod = getPaymentMethod(product, quantity);
+            executorService.execute(() -> {
                 try {
-                    Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
+                    placeOrder(quantity, product, paymentMethod);
+                } catch (ConnectException e) {
+                    StressTestUtils.incrementProgressBarConnectionFailure();
+                } catch (Exception e) {
+                    StressTestUtils.incrementProgressBarFailure();
+                    System.err.println(e);
+                } finally {
+                    try {
+                        Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
-            }
+            });
         }
 
     }
