@@ -2,6 +2,7 @@
 # Pre requisites
 
 * Java 8
+* `npm` and `copyfiles` (`npm install -g copyfiles`). Note that there may be a smarter way to install  [copyfiles](https://www.npmjs.com/package/copyfiles) 
 * Postgresql with a database `jdbc:postgresql://localhost:5432/test` and a user `test/test`
     * Hibernate will create a bunch of tables in this `test` database. 
     * Configuration can be changed in the `application.properties` config files
