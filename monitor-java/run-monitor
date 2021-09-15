@@ -49,11 +49,12 @@ echo "#################"
 echo "# START MONITOR #"
 echo "#################"
 echo ""
-echo "ELASTIC_APM_SERVER_URL: $ELASTIC_APM_SERVER_URL"
-echo ""
+# echo "ELASTIC_APM_SERVER_URL: $ELASTIC_APM_SERVER_URL"
+# echo ""
 
-java -javaagent:target/agent/elastic-apm-agent-$ELASTIC_AGENT_VERSION.jar \
-     -classpath target/dependency/*:target/classes/ com.mycompany.ecommerce.FrontendMonitor
+# java -javaagent:target/agent/elastic-apm-agent-$ELASTIC_AGENT_VERSION.jar \
+#     -classpath target/dependency/*:target/classes/ com.mycompany.ecommerce.FrontendMonitor
 
+java -classpath target/dependency/*:target/classes/ com.mycompany.ecommerce.FrontendMonitor
 
 
