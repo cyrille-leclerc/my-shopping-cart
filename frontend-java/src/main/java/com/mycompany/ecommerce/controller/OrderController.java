@@ -105,7 +105,7 @@ public class OrderController {
         if (!"OK".equals(antiFraudResult.getBody())) {
             final Exception exception = new Exception("AntiFraud Exception " + antiFraudResult.getBody());
             ElasticApm.currentSpan().captureException(exception);
-            logger.info("Failure createOrder({}): orderPrice: {}, fraud.exception:{}", form, orderPrice, exception.toString());
+            logger.warn("Failure createOrder({}): orderPrice: {}, fraud.exception:{}", form, orderPrice, exception.toString());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
