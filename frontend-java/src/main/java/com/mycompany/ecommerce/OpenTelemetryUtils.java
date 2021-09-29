@@ -1,8 +1,9 @@
 package com.mycompany.ecommerce;
 
 import com.google.common.cache.Cache;
+import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.common.Labels;
 
 public class OpenTelemetryUtils {
 
@@ -17,25 +18,21 @@ public class OpenTelemetryUtils {
      * }
      */
     public static void observeGoogleGuavaCache(Cache cache, String cacheName, Meter meter) {
-        meter.longSumObserverBuilder("guava_cache_hit_total")
+        final Attributes cacheNameAttribute = Attributes.of(AttributeKey.stringKey("cache"), cacheName);
+        meter.counterBuilder("guava_cache_hit_total")
                 .setDescription("Cache hit totals")
-                .setUpdater(longResult -> longResult.observe(cache.stats().hitCount(), Labels.of("cache", cacheName)))
-                .build();
-        meter.longSumObserverBuilder("guava_cache_miss_total")
+                .buildWithCallback(longResult -> longResult.observe(cache.stats().hitCount(), cacheNameAttribute));
+        meter.counterBuilder("guava_cache_miss_total")
                 .setDescription("Cache miss totals")
-                .setUpdater(longResult -> longResult.observe(cache.stats().missCount(), Labels.of("cache", cacheName)))
-                .build();
-        meter.longSumObserverBuilder("guava_cache_requests_total")
+                .buildWithCallback(longResult -> longResult.observe(cache.stats().missCount(), cacheNameAttribute));
+        meter.counterBuilder("guava_cache_requests_total")
                 .setDescription("Cache requests totals")
-                .setUpdater(longResult -> longResult.observe(cache.stats().requestCount(), Labels.of("cache", cacheName)))
-                .build();
-        meter.longSumObserverBuilder("guava_cache_eviction_total")
+                .buildWithCallback(longResult -> longResult.observe(cache.stats().requestCount(), cacheNameAttribute));
+        meter.counterBuilder("guava_cache_eviction_total")
                 .setDescription("Cache evictions totals")
-                .setUpdater(longResult -> longResult.observe(cache.stats().evictionCount(), Labels.of("cache", cacheName)))
-                .build();
-        meter.longValueObserverBuilder("guava_cache_size")
+                .buildWithCallback(longResult -> longResult.observe(cache.stats().evictionCount(), cacheNameAttribute));
+        meter.counterBuilder("guava_cache_size")
                 .setDescription("Cache size")
-                .setUpdater(longResult -> longResult.observe(cache.size(), Labels.of("cache", cacheName)))
-                .build();
+                .buildWithCallback(longResult -> longResult.observe(cache.size(), cacheNameAttribute));
     }
 }

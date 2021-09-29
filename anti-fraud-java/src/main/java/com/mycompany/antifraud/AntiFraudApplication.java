@@ -15,6 +15,6 @@ public class AntiFraudApplication {
 
     @Bean
     public Meter getOpenTelemetryMeter() {
-        return GlobalMeterProvider.getMeter("anti-fraud");
+        return GlobalMeterProvider.get().get("anti-fraud");
     }
 }

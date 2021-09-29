@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # set -x
 
-export OPEN_TELEMETRY_AGENT_VERSION=1.3.1
-
 ##########################################################################################
 # PARENT DIRECTORY
 # code copied from Tomcat's `catalina.sh`
@@ -32,43 +30,14 @@ else
   . "$PRGDIR/../setenv.default.sh"
 fi
 
-export OPEN_TELEMETRY_AGENT_HOME=$PRGDIR/../.otel
-mkdir -p "$OPEN_TELEMETRY_AGENT_HOME"
-
-##########################################################################################
-# DOWNLOAD OPEN TELEMETRY AGENT IF NOT FOUND
-# code copied from Maven Wrappers's mvnw`
-##########################################################################################
-export OPEN_TELEMETRY_AGENT_JAR=$OPEN_TELEMETRY_AGENT_HOME/opentelemetry-javaagent-all-$OPEN_TELEMETRY_AGENT_VERSION.jar
-if [ -r "$OPEN_TELEMETRY_AGENT_JAR" ]; then
-    echo "Found $OPEN_TELEMETRY_AGENT_JAR"
-else
-    echo "Couldn't find $OPEN_TELEMETRY_AGENT_JAR, downloading it ..."
-    jarUrl="https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v$OPEN_TELEMETRY_AGENT_VERSION/opentelemetry-javaagent-all.jar"
-
-    if command -v wget > /dev/null; then
-        wget "$jarUrl" -O "$OPEN_TELEMETRY_AGENT_JAR"
-    elif command -v curl > /dev/null; then
-        curl -o "$OPEN_TELEMETRY_AGENT_JAR" "$jarUrl"
-    else
-        echo "FAILURE: OpenTelemetry agent not found and  none of curl and wget found"
-        exit 1;
-    fi
-fi
-
 $PRGDIR/../mvnw -DskipTests package
 
 
 echo "##################"
 echo "# START MONITOR #"
 echo "##################"
-echo ""
-echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
-echo ""
 
-export OTEL_RESOURCE_ATTRIBUTES="service.name=monitor,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=$OPEN_TELEMETRY_DEPLOYMENT_ENVIRONMENT"
 
-java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-all-$OPEN_TELEMETRY_AGENT_VERSION.jar \
-     -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
-     -classpath target/classes/ FrontendMonitor
+
+java -classpath target/classes/ FrontendMonitor
 

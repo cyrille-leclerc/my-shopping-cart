@@ -14,10 +14,9 @@ import com.mycompany.ecommerce.service.OrderService;
 import com.mycompany.ecommerce.service.ProductService;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleCounter;
-import io.opentelemetry.api.metrics.DoubleValueRecorder;
+import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
-import io.opentelemetry.api.metrics.common.Labels;
 import io.opentelemetry.api.trace.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,11 +54,11 @@ public class OrderController {
     final CheckoutService checkoutService;
     RestTemplate restTemplate;
     String antiFraudServiceBaseUrl;
-    final DoubleValueRecorder orderValueRecorder;
-    final DoubleCounter orderSumCounter;
-    final DoubleCounter orderValueWithTagsCounter;
+    final DoubleHistogram orderValueHistogram;
+    final DoubleCounter orderValueSumCounter;
+    final DoubleCounter orderValueWithTagsSumCounter;
     final LongCounter orderCountCounter;
-    final DoubleValueRecorder orderWithTagsValueRecorder;
+    final DoubleHistogram orderWithTagsHistogram;
 
 
     public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService, CheckoutService checkoutService, Meter meter) {
@@ -68,14 +67,13 @@ public class OrderController {
         this.orderProductService = orderProductService;
         this.checkoutService = checkoutService;
 
-        // (!) ValueRecorders (histograms) are ignored by Otel Collector Exporter for Elastic v0.14
-        orderValueRecorder = meter.doubleValueRecorderBuilder("order").setUnit("usd").build();
+        orderValueHistogram = meter.histogramBuilder("order").setUnit("usd").build();
 
         // Meters below are used for testing and compare with orderValueRecorder
-        orderSumCounter = meter.doubleCounterBuilder("order_sum").setUnit("usd").build();
-        orderCountCounter = meter.longCounterBuilder("order_count").build();
-        orderWithTagsValueRecorder = meter.doubleValueRecorderBuilder("order_with_tags").setUnit("usd").build();
-        orderValueWithTagsCounter = meter.doubleCounterBuilder("order_value_with_tags_counter").setUnit("usd").build();
+        orderValueSumCounter = meter.counterBuilder("order_sum").setUnit("usd").ofDoubles().build();
+        orderCountCounter = meter.counterBuilder("order_count").build();
+        orderWithTagsHistogram = meter.histogramBuilder("order_with_tags").setUnit("usd").build();
+        orderValueWithTagsSumCounter = meter.counterBuilder("order_value_with_tags_counter").ofDoubles().setUnit("usd").build();
     }
 
     @GetMapping
@@ -109,11 +107,12 @@ public class OrderController {
         span.setAttribute(OpenTelemetryAttributes.ORDER_PRICE_RANGE, getPriceRange(orderPrice));
 
 
-        Labels labels = Labels.of(
-                OpenTelemetryAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry,
-                OpenTelemetryAttributes.SHIPPING_METHOD.getKey(), shippingMethod,
-                OpenTelemetryAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
-        orderWithTagsValueRecorder.record(orderPrice, labels);
+
+        Attributes attributes = Attributes.of(
+                OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry,
+                OpenTelemetryAttributes.SHIPPING_METHOD, shippingMethod,
+                OpenTelemetryAttributes.PAYMENT_METHOD, paymentMethod);
+        orderWithTagsHistogram.record(orderPrice, attributes);
 
 
         span.setAttribute(OpenTelemetryAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry);
@@ -167,13 +166,13 @@ public class OrderController {
         final PlaceOrderReply placeOrderReply = this.checkoutService.placeOrder(PlaceOrderRequest.newBuilder().setName(customerId).build());
 
         // UPDATE METRICS
-        this.orderValueRecorder.record(orderPrice);
+        this.orderValueHistogram.record(orderPrice);
 
         // Meters below are used for testing and compare with orderValueRecorder
-        this.orderSumCounter.add(orderPrice);
+        this.orderValueSumCounter.add(orderPrice);
         this.orderCountCounter.add(1);
-        this.orderWithTagsValueRecorder.record(orderPrice, labels);
-        this.orderValueWithTagsCounter.add(orderPrice, labels);
+        this.orderWithTagsHistogram.record(orderPrice, attributes);
+        this.orderValueWithTagsSumCounter.add(orderPrice, attributes);
 
         logger.info("SUCCESS createOrder({}): totalPrice: {}, id:{}", form, orderPrice, order.getId());
 

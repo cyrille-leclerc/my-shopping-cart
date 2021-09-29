@@ -24,10 +24,13 @@ exporters:
   prometheus:
     endpoint: 0.0.0.0:8889
   otlp/elastic:
-    endpoint: "localhost:8200"
-    insecure: true
+    #endpoint: "localhost:8200"
+    #insecure: true
+    #headers:
+    #  Authorization: "Bearer my_secret_token"
+    endpoint: "my-deployment-14d9b0.apm.europe-west1.gcp.cloud.es.io:443"
     headers:
-      Authorization: "Bearer my_secret_token"
+      Authorization: "Bearer AhQ0EVyr4vxq4i5c6v"
 service:
   pipelines:
     metrics:

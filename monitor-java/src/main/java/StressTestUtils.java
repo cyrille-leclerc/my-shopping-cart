@@ -10,6 +10,8 @@ public final class StressTestUtils {
 
     private static final String SYMBOL_FAILURE = "x";
 
+    private static final String SYMBOL_CONNECTION_FAILURE = "X";
+
     private static final String SYMBOL_SUCCESS = "-";
 
     private final static Random RANDOM = new Random();
@@ -22,6 +24,16 @@ public final class StressTestUtils {
         instance.incrementProgressBar(SYMBOL_FAILURE);
     }
 
+    /**
+     * Outputs an 'X' for a connection failure
+     */
+    public static void incrementProgressBarConnectionFailure() {
+        instance.incrementProgressBar(SYMBOL_CONNECTION_FAILURE);
+    }
+
+    public static boolean isEndOfLine() {
+        return instance._isEndOfLine();
+    }
     /**
      * Outputs a dash in SystemOut and line breaks when necessary
      */
@@ -66,6 +78,9 @@ public final class StressTestUtils {
         return sleepDuration;
     }
 
+    public boolean _isEndOfLine() {
+        return this.progressBarCounter % DASH_PER_LINE == 0;
+    }
     /**
      * <p>
      * Outputs a dash in SystemOut and line breaks when necessary
@@ -78,7 +93,7 @@ public final class StressTestUtils {
         System.out.print(symbol);
         this.progressBarCounter++;
 
-        if (this.progressBarCounter % DASH_PER_LINE == 0) {
+        if (_isEndOfLine()) {
             System.out.println();
             long now = System.currentTimeMillis();
             long elapsedDuration = now - this.lastSampleTime;
@@ -112,7 +127,6 @@ public final class StressTestUtils {
      * @param padChar the character to insert at the beginning of the result until the minimum length
      *     is reached
      * @return the padded string
-     * @see Strings
      */
     public static String padStart(String string, int minLength, char padChar) {
         if (string.length() >= minLength) {

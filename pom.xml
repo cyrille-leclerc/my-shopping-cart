@@ -11,8 +11,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>2.5.2</spring-boot.version>
-        <opentelemetry.version>1.3.0</opentelemetry.version>
-        <jackson.version>2.12.3</jackson.version>
+        <opentelemetry.version>1.6.0</opentelemetry.version>
+        <jackson.version>2.12.5</jackson.version>
     </properties>
     <modules>
         <module>checkout-service-protobuff</module>
@@ -26,7 +26,7 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-bom</artifactId>
-                <version>1.39.0</version>
+                <version>1.40.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

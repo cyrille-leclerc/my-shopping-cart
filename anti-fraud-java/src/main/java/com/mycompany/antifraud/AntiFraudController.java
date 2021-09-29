@@ -1,14 +1,12 @@
 package com.mycompany.antifraud;
 
-import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.metrics.DoubleCounter;
-import io.opentelemetry.api.metrics.DoubleValueRecorder;
+import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,11 +51,10 @@ public class AntiFraudController {
     final AtomicInteger fraudChecksCounter = new AtomicInteger();
     final AtomicInteger fraudChecksPriceInDollarsCounter = new AtomicInteger();
 
-    // (!) ValueRecorders (histograms) are ignored by Otel Collector Exporter for Elastic v0.14
-    final DoubleValueRecorder approvedOrderRecorder ;
+    final DoubleHistogram approvedOrderRecorder ;
     final DoubleCounter approvedOrderValueCounter;
     final LongCounter approvedOrderCountCounter;
-    final DoubleValueRecorder rejectedOrderRecorder ;
+    final DoubleHistogram rejectedOrderRecorder ;
     final DoubleCounter rejectedOrderValueCounter ;
     final LongCounter rejectedOrderCountCounter;
 
@@ -65,13 +62,13 @@ public class AntiFraudController {
 
 
     public AntiFraudController(Meter meter, DataSource dataSource) {
-        this.approvedOrderRecorder = meter.doubleValueRecorderBuilder("antifraud_approved_order").build();
-        this.approvedOrderValueCounter = meter.doubleCounterBuilder("antifraud_approved_order_value").build();
-        this.approvedOrderCountCounter = meter.longCounterBuilder("antifraud_approved_order_count").build();
+        this.approvedOrderRecorder = meter.histogramBuilder("antifraud_approved_order").build();
+        this.approvedOrderValueCounter = meter.counterBuilder("antifraud_approved_order_value").ofDoubles().build();
+        this.approvedOrderCountCounter = meter.counterBuilder("antifraud_approved_order_count").build();
 
-        this.rejectedOrderRecorder = meter.doubleValueRecorderBuilder("antifraud_rejected_order").build();
-        this.rejectedOrderValueCounter = meter.doubleCounterBuilder("antifraud_rejected_order_value").build();
-        this.rejectedOrderCountCounter = meter.longCounterBuilder("antifraud_rejected_order_count").build();
+        this.rejectedOrderRecorder = meter.histogramBuilder("antifraud_rejected_order").build();
+        this.rejectedOrderValueCounter = meter.counterBuilder("antifraud_rejected_order_value").ofDoubles().build();
+        this.rejectedOrderCountCounter = meter.counterBuilder("antifraud_rejected_order_count").build();
 
         this.dataSource = dataSource;
     }
