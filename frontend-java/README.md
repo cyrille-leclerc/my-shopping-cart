@@ -17,3 +17,9 @@ OpenTelemetry metrics are demoed here providing:
 * Framework instrumentation with the instrumentation of a Guava cache on `com.mycompany.ecommerce.service.ProductServiceImpl`, implemented in `com.mycompany.ecommerce.OpenTelemetryUtils.observeGoogleGuavaCache`.
    * Note that these are "per-interval" metrics.
     
+
+# Build
+
+```
+ mvn spring-boot:build-image
+```

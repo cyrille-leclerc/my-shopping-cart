@@ -67,5 +67,5 @@ export OTEL_RESOURCE_ATTRIBUTES="service.name=checkoutService,service.namespace=
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-all-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
-     -classpath target/dependency/*:target/classes/ com.mycompany.checkout.CheckoutServiceServer
+     -jar target/checkout-service-1.0-SNAPSHOT.jar
 

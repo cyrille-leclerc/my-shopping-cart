@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  frontend:
+    image: 'frontend:1.0-SNAPSHOT'
+    container_name: frontend
+    depends_on:
+      - postgres
+      - anti-fraud
+      - checkout
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/compose-postgres
+      - SPRING_DATASOURCE_USERNAME=compose-postgres
+      - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - ANTIFRAUDSERVICE.BASEURL=http://anti-fraud:8081
+      - CHECKOUTSERVICE.GRPCENDPOINT=checkout:50051
+      - LOGGING_FILE_NAME=application.log
+    ports:
+      - "8080:8080"
+  anti-fraud:
+    image: 'anti-fraud:1.0-SNAPSHOT'
+    container_name: anti-fraud
+    depends_on:
+      - postgres
+    environment:
+      - SERVER_PORT=8081
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/compose-postgres
+      - SPRING_DATASOURCE_USERNAME=compose-postgres
+      - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - LOGGING_FILE_NAME=application.log
+    ports:
+      - "8081:8081"
+  checkout:
+    image: 'checkout-service:1.0-SNAPSHOT'
+    container_name: checkout
+    depends_on:
+      - postgres
+    environment:
+      - LOGGING_FILE_NAME=application.log
+    ports:
+      - "50051:50051"
+  postgres:
+    image: 'postgres:13.1-alpine'
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=compose-postgres
+      - POSTGRES_PASSWORD=compose-postgres
+    ports:
+      - "5432:5432"
