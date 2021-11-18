@@ -13,7 +13,7 @@
                 <appendLineSeparator>true</appendLineSeparator>
             </layout>
         </encoder>
-        <file>${LOG_FILE}</file>
+        <file>${LOGGING_FILE_NAME}</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>${LOGGING_FILE_NAME}.%d{yyyy-MM-dd}.%i.gz}</fileNamePattern>
             <cleanHistoryOnStart>false</cleanHistoryOnStart>

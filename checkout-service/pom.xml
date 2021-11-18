@@ -61,12 +61,6 @@
             <version>${opentelemetry.version}-alpha</version>
         </dependency>
         <dependency>
-            <groupId>io.opentelemetry.instrumentation</groupId>
-            <artifactId>opentelemetry-grpc-1.6</artifactId>
-            <version>${opentelemetry.version}-alpha</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>io.opentelemetry</groupId>
             <artifactId>opentelemetry-extension-annotations</artifactId>
         </dependency>
