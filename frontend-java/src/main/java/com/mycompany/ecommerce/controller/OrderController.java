@@ -132,7 +132,7 @@ public class OrderController {
             if (e.getCause() != null) {
                 exceptionShortDescription += " / " + e.getCause().getClass().getName();
             }
-            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
+            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception: {}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
