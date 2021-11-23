@@ -89,36 +89,19 @@ cd monitor-java
 
 * shell 1: start OpenTelemetry collector
 
- ```
-WARNING hardcoded opentelemetry collector executable: otelcontribcol-dc17498, to change the executable path, edit ./run-opentelemetry-collector.sh
-+ otelcontribcol-dc17498 --config ./opentelemetry-collector-exporter-elastic.yaml
-2020-05-31T16:05:00.734+0200    INFO    service/service.go:382  Starting OpenTelemetry Contrib Collector...     {"Version": "latest", "GitHash": "dc17498", "NumCPU": 8}
-2020-05-31T16:05:00.734+0200    INFO    service/service.go:221  Setting up own telemetry...
-2020-05-31T16:05:00.735+0200    INFO    service/telemetry.go:94 Serving Prometheus metrics      {"address": "localhost:8888", "legacy_metrics": true, "new_metrics": false, "level": 3, "service.instance.id": ""}
-2020-05-31T16:05:00.735+0200    INFO    service/service.go:259  Loading configuration...
-2020-05-31T16:05:00.736+0200    INFO    service/service.go:270  Applying configuration...
-2020-05-31T16:05:00.736+0200    INFO    service/service.go:291  Starting extensions...
-2020-05-31T16:05:00.736+0200    INFO    builder/exporters_builder.go:302        Exporter is enabled.    {"component_kind": "exporter", "exporter": "elastic"}
-2020-05-31T16:05:00.736+0200    INFO    builder/exporters_builder.go:302        Exporter is enabled.    {"component_kind": "exporter", "exporter": "logging"}
-2020-05-31T16:05:00.736+0200    INFO    builder/exporters_builder.go:302        Exporter is enabled.    {"component_kind": "exporter", "exporter": "jaeger"}
-2020-05-31T16:05:00.736+0200    INFO    service/service.go:306  Starting exporters...
-2020-05-31T16:05:00.736+0200    INFO    builder/exporters_builder.go:90 Exporter is starting... {"component_kind": "exporter", "component_type": "elastic", "component_name": "elastic"}
-2020-05-31T16:05:00.736+0200    INFO    builder/exporters_builder.go:95 Exporter started.       {"component_kind": "exporter", "component_type": "elastic", "component_name": "elastic"}
-2020-05-31T16:05:00.736+0200    INFO    builder/exporters_builder.go:90 Exporter is starting... {"component_kind": "exporter", "component_type": "logging", "component_name": "logging"}
-2020-05-31T16:05:00.736+0200    INFO    builder/exporters_builder.go:95 Exporter started.       {"component_kind": "exporter", "component_type": "logging", "component_name": "logging"}
-2020-05-31T16:05:00.736+0200    INFO    builder/exporters_builder.go:90 Exporter is starting... {"component_kind": "exporter", "component_type": "jaeger", "component_name": "jaeger"}
-2020-05-31T16:05:00.736+0200    INFO    builder/exporters_builder.go:95 Exporter started.       {"component_kind": "exporter", "component_type": "jaeger", "component_name": "jaeger"}
-2020-05-31T16:05:00.736+0200    INFO    builder/pipelines_builder.go:205        Pipeline is enabled.    {"pipeline_name": "traces", "pipeline_datatype": "traces"}
-2020-05-31T16:05:00.736+0200    INFO    service/service.go:319  Starting processors...
-2020-05-31T16:05:00.736+0200    INFO    builder/pipelines_builder.go:52 Pipeline is starting... {"pipeline_name": "traces", "pipeline_datatype": "traces"}
-2020-05-31T16:05:00.736+0200    INFO    builder/pipelines_builder.go:62 Pipeline is started.    {"pipeline_name": "traces", "pipeline_datatype": "traces"}
-2020-05-31T16:05:00.737+0200    INFO    builder/receivers_builder.go:234        Receiver is enabled.    {"component_kind": "receiver", "component_type": "otlp", "component_name": "otlp", "datatype": "traces"}
-2020-05-31T16:05:00.737+0200    INFO    service/service.go:331  Starting receivers...
-2020-05-31T16:05:00.737+0200    INFO    builder/receivers_builder.go:74 Receiver is starting... {"component_kind": "receiver", "component_type": "otlp", "component_name": "otlp"}
-2020-05-31T16:05:00.737+0200    INFO    builder/receivers_builder.go:79 Receiver started.       {"component_kind": "receiver", "component_type": "otlp", "component_name": "otlp"}
-2020-05-31T16:05:00.737+0200    INFO    service/service.go:233  Everything is ready. Begin running and processing data.
-2020-05-31T16:06:05.331+0200    INFO    loggingexporter/logging_exporter.go:90  TraceExporter   {"#spans": 38}`
-...
-```
-
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/elastic-apm-distributed-trace-opentelemetry.png)
+
+# Simulate caching service outage
+
+The application relies on a cache for better latency. An outage in the cache will cause the application to always access the database rather than use the cached data and cause a steep increase of the user facing latency.
+The symptom is the steep increase of the user facing latency. We want "find probable causes" to find the associated steep increase of the rate of log messages of the category `Cache⁕miss⁕for⁕product⁕load⁕from⁕database⁕in⁕`
+
+* Augment PostgreSQL latency to find products by ID to make hte problem more visible: http://localhost:8080/chaos/attack/latency/enable
+* Generate load for some time 
+* Verify 
+   * On Elastic APM that the "/api/orders" transaction very rarely perfoms a find product by id
+   * On Elastic logs stream that the categorisation works
+* Make caching access noop on the products, impacting the createOrder operation: http://localhost:8080/chaos/attack/cache/enable
+* Verify
+   * On the "/api/orders" latency chart, a spike from ~600ms to >2,000ms
+   * On the log categorization, the spike of `Cache⁕miss⁕for⁕product⁕load⁕from⁕database⁕in⁕`

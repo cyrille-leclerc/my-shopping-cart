@@ -8,6 +8,7 @@ import com.mycompany.ecommerce.exception.ResourceNotFoundException;
 import com.mycompany.ecommerce.model.Order;
 import com.mycompany.ecommerce.model.OrderProduct;
 import com.mycompany.ecommerce.model.OrderStatus;
+import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.CheckoutService;
 import com.mycompany.ecommerce.service.OrderProductService;
 import com.mycompany.ecommerce.service.OrderService;
@@ -33,6 +34,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -126,13 +128,13 @@ public class OrderController {
                     String.class,
                     orderPrice, request.getRemoteAddr(), shippingCountry);
         } catch (RestClientException e) {
-            String exceptionShortDescription = e.getClass().getName();
+            String exceptionShortDescription = e.getClass().getSimpleName();
             span.recordException(e);
 
             if (e.getCause() != null) {
-                exceptionShortDescription += " / " + e.getCause().getClass().getName();
+                exceptionShortDescription += " / " + e.getCause().getClass().getSimpleName();
             }
-            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception: {}", form, orderPrice, exceptionShortDescription);
+            logger.info("Failure createOrder({}): price: {}, fraud.exception: {}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
@@ -154,9 +156,10 @@ public class OrderController {
 
         List<OrderProduct> orderProducts = new ArrayList<>();
         for (OrderProductDto dto : formDtos) {
-            orderProducts.add(orderProductService.create(new OrderProduct(order, productService.getProduct(dto
+            final Product product = productService.getProduct(dto
                     .getProduct()
-                    .getId()), dto.getQuantity())));
+                    .getId());
+            orderProducts.add(orderProductService.create(new OrderProduct(order, product, dto.getQuantity())));
         }
 
         order.setOrderProducts(orderProducts);
