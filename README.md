@@ -103,5 +103,5 @@ The symptom is the steep increase of the user facing latency. We want "find prob
    * On Elastic logs stream that the categorisation works
 * Make caching access noop on the products, impacting the createOrder operation: http://localhost:8080/chaos/attack/cache/enable
 * Verify
-   * On the "/api/orders" latency chart, a spike from ~600ms to >2,000ms
-   * On the log categorization, the spike of `Cache⁕miss⁕for⁕product⁕load⁕from⁕database⁕in⁕`
+   * On the "/api/orders" latency chart, a steep increase from ~600ms to >2,000ms
+   * On the log categorization, the steep increase of `Cache⁕miss⁕for⁕product⁕load⁕from⁕database⁕in⁕`
