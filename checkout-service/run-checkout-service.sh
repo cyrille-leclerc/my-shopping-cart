@@ -64,6 +64,7 @@ echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 echo ""
 
 export OTEL_RESOURCE_ATTRIBUTES="service.name=checkoutService,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=$OPEN_TELEMETRY_DEPLOYMENT_ENVIRONMENT"
+export OTEL_METRICS_EXPORTER="otlp"
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-all-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
