@@ -4,6 +4,8 @@ import com.google.common.cache.Cache;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.Meter;
+import org.springframework.data.redis.cache.CacheStatistics;
+import org.springframework.data.redis.cache.RedisCache;
 
 public class OpenTelemetryUtils {
 
@@ -34,5 +36,23 @@ public class OpenTelemetryUtils {
         meter.counterBuilder("guava_cache_size")
                 .setDescription("Cache size")
                 .buildWithCallback(longResult -> longResult.observe(cache.size(), cacheNameAttribute));
+    }
+
+    public static void observeRedisCache(RedisCache redisCache, Meter meter){
+        final Attributes cacheNameAttribute = Attributes.of(AttributeKey.stringKey("cache"), redisCache.getName());
+
+        meter.counterBuilder("redis_cache_gets")
+                .setDescription("Cache gets totals")
+                .buildWithCallback(longResult -> longResult.observe(redisCache.getStatistics().getGets(), cacheNameAttribute));
+        meter.counterBuilder("redis_cache_puts")
+                .setDescription("Cache puts totals")
+                .buildWithCallback(longResult -> longResult.observe(redisCache.getStatistics().getPuts(), cacheNameAttribute));
+        meter.counterBuilder("redis_cache_misses")
+                .setDescription("Cache misses totals")
+                .buildWithCallback(longResult -> longResult.observe(redisCache.getStatistics().getMisses(), cacheNameAttribute));
+        // TODO overlap between gets, hits,and misses
+        meter.counterBuilder("redis_cache_hits")
+                .setDescription("Cache hits totals")
+                .buildWithCallback(longResult -> longResult.observe(redisCache.getStatistics().getHits(), cacheNameAttribute));
     }
 }

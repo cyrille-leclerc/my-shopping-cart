@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
+import eu.rekawek.toxiproxy.ToxiproxyClient;
 import io.opentelemetry.api.metrics.GlobalMeterProvider;
 import io.opentelemetry.api.metrics.Meter;
 import org.springframework.boot.CommandLineRunner;
@@ -11,6 +12,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.cache.RedisCache;
+import org.springframework.data.redis.cache.RedisCacheConfiguration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
@@ -54,5 +61,37 @@ public class EcommerceApplication {
     @Bean
     public Meter getOpenTelemetryMeter() {
         return GlobalMeterProvider.get().get("frontend");
+    }
+
+    @Bean
+    public RedisCacheConfiguration cacheConfiguration() {
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(5))
+                .disableCachingNullValues()
+                .serializeValuesWith(
+                        RedisSerializationContext.SerializationPair.fromSerializer(
+                                new GenericJackson2JsonRedisSerializer()));
+    }
+
+    @Bean
+    public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory, RedisCacheConfiguration redisCacheConfiguration) {
+        return RedisCacheManager.RedisCacheManagerBuilder
+                .fromConnectionFactory(redisConnectionFactory)
+                .cacheDefaults(redisCacheConfiguration)
+                .enableStatistics()
+                .build();
+    }
+
+    @Bean("productCache")
+    public RedisCache getProductCache(RedisCacheManager cacheManager, Meter meter) {
+        RedisCache productCache = (RedisCache) cacheManager.getCache("productCache");
+        OpenTelemetryUtils.observeRedisCache(productCache, meter);
+        return productCache;
+    }
+
+    @Bean
+    public ToxiproxyClient toxiproxyClient() {
+        // FIXME get hostname and port from cfg
+        return new ToxiproxyClient("127.0.0.1", 8474);
     }
 }

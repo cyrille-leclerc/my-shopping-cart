@@ -21,7 +21,7 @@ public class CustomizedProductRepositoryImpl implements CustomizedProductReposit
 
     @PersistenceContext
     private EntityManager em;
-    private PrimitiveIterator.OfDouble getProductDistribution = RandomUtils.positiveDoubleGaussianDistribution(1, 0.3);
+    private PrimitiveIterator.OfDouble getProductDistribution = RandomUtils.positiveDoubleGaussianDistribution(0.1, 0.05);
     private boolean latencyAttack;
 
     @Override
@@ -48,7 +48,7 @@ public class CustomizedProductRepositoryImpl implements CustomizedProductReposit
                 }
             }
         } finally {
-            logger.info("doFindByIdWithThrottle({}): {}ms", id, TimeUnit.MILLISECONDS.convert(System.nanoTime() - nanosBefore, TimeUnit.NANOSECONDS));
+            logger.trace("doFindByIdWithThrottle({}): {}ms", id, TimeUnit.MILLISECONDS.convert(System.nanoTime() - nanosBefore, TimeUnit.NANOSECONDS));
         }
     }
 

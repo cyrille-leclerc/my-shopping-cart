@@ -1,8 +1,5 @@
 package com.mycompany.ecommerce.service;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.ForwardingCache;
 import com.mycompany.ecommerce.exception.ResourceNotFoundException;
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.repository.ProductRepository;
@@ -12,10 +9,12 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.ExecutionException;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -26,14 +25,13 @@ public class ProductServiceImpl implements ProductService {
 
     private ProductRepository productRepository;
 
-    private NoopableCache<Long, Product> productCache;
+    private Cache productCache;
 
+    private boolean cacheMissAttack = false;
 
-    public ProductServiceImpl(ProductRepository productRepository, Meter meter) {
+    public ProductServiceImpl(ProductRepository productRepository, Cache productCache) {
         this.productRepository = productRepository;
-        this.productCache = new NoopableCache(CacheBuilder.newBuilder().maximumSize(20).expireAfterAccess(10, TimeUnit.SECONDS).build());
-        // FIXME record cache statistics
-        // OpenTelemetryUtils.observeGoogleGuavaCache(productCache, "product", meter);
+        this.productCache = productCache;
     }
 
     @Override
@@ -43,19 +41,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product getProduct(long id) throws ResourceNotFoundException {
-        try {
-            return productCache.get(id, () -> {
-                long beforeInNanos = System.nanoTime();
-                try {
-                    return productRepository.doFindByIdWithThrottle(id).orElseThrow(() -> new ResourceNotFoundException("Product " + id + " not found"));
-                } finally {
-                    Span.current().addEvent("cache.product", Attributes.of(AttributeKey.longKey("id"), id, AttributeKey.booleanKey("miss"), Boolean.TRUE));
-                    logger.info("Cache miss for product " + id + ", load from database in " + TimeUnit.MILLISECONDS.convert(System.nanoTime() - beforeInNanos, TimeUnit.NANOSECONDS) + "ms");
-                }
-            });
-        } catch (ExecutionException e) {
-            throw new RuntimeException("Failure to load Product '" + id + "'");
+        Object cacheKey = cacheMissAttack? UUID.randomUUID().toString() : id;
+
+        final Product product = productCache.get(cacheKey, () -> {
+            long beforeInNanos = System.nanoTime();
+            try {
+                return productRepository.doFindByIdWithThrottle(id).orElseThrow(() -> new ResourceNotFoundException("Product " + id + " not found"));
+            } finally {
+                Span.current().addEvent("cache.product", Attributes.of(AttributeKey.longKey("id"), id, AttributeKey.booleanKey("miss"), Boolean.TRUE));
+                Span.current().setAttribute("cache.miss", true);
+                logger.info("Cache miss for product " + id + ", load from database in " + TimeUnit.MILLISECONDS.convert(System.nanoTime() - beforeInNanos, TimeUnit.NANOSECONDS) + "ms");
+            }
+        });
+        if (product == null) {
+            throw new ResourceNotFoundException("product " + id);
         }
+        return product;
     }
 
     @Override
@@ -63,32 +64,46 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(product);
     }
 
-    public void startCacheAttack() {
-        this.productCache.noop = true;
+    public boolean isCacheMissAttack() {
+        return cacheMissAttack;
     }
 
-    public void stopCacheAttack() {
-        this.productCache.noop = false;
+    public void setCacheMissAttack(boolean cacheMissAttack) {
+        this.cacheMissAttack = cacheMissAttack;
     }
 
-    public boolean isCacheAttackActive() {
-        return this.productCache.noop;
-    }
+    /**
+     * Hold dummy ballast to saturate the cache
+     */
+    private static class ProductReference {
+        final static Random RANDOM = new Random();
 
-    static class NoopableCache<K, V> extends ForwardingCache<K, V> {
+        Product product;
+        byte[] ballast;
 
-        final Cache<K, V> delegate;
-        final Cache<K, V> noopCache = CacheBuilder.newBuilder().maximumSize(0).recordStats().build();
-        boolean noop;
-
-        public NoopableCache(Cache delegate) {
-            this.delegate = delegate;
-
+        public ProductReference() {
         }
 
-        @Override
-        protected Cache<K, V> delegate() {
-            return noop ? noopCache : delegate;
+        public ProductReference(Product product) {
+            this.product = product;
+            this.ballast = new byte[5 * 1024];
+            RANDOM.nextBytes(ballast);
+        }
+
+        public Product getProduct() {
+            return product;
+        }
+
+        public void setProduct(Product product) {
+            this.product = product;
+        }
+
+        public byte[] getBallast() {
+            return ballast;
+        }
+
+        public void setBallast(byte[] ballast) {
+            this.ballast = ballast;
         }
     }
 }

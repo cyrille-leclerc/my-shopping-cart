@@ -1,6 +1,7 @@
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public final class StressTestUtils {
 
@@ -49,37 +50,14 @@ public final class StressTestUtils {
 
     private long lastSampleTime;
 
-    private int progressBarCounter;
+    private AtomicInteger progressBarCounter = new AtomicInteger();
 
     private StressTestUtils() {
         super();
     }
 
-    public static long getLastSampleTime() {
-        return instance.lastSampleTime;
-    }
-
-    public static int getProgressBarCounter() {
-        return instance.progressBarCounter;
-    }
-
-    /**
-     * @param offsetInMillis
-     * @param varianceInMillis
-     * @return duration of the pause
-     */
-    public static int sleep(int offsetInMillis, int varianceInMillis) {
-        int sleepDuration = offsetInMillis - (varianceInMillis / 2) + RANDOM.nextInt(varianceInMillis);
-        try {
-            Thread.sleep(sleepDuration);
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Interrupted", e);
-        }
-        return sleepDuration;
-    }
-
     public boolean _isEndOfLine() {
-        return this.progressBarCounter % DASH_PER_LINE == 0;
+        return this.progressBarCounter.get() % DASH_PER_LINE == 0;
     }
     /**
      * <p>
@@ -91,7 +69,7 @@ public final class StressTestUtils {
             this.lastSampleTime = System.currentTimeMillis();
         }
         System.out.print(symbol);
-        this.progressBarCounter++;
+        this.progressBarCounter.incrementAndGet();
 
         if (_isEndOfLine()) {
             System.out.println();

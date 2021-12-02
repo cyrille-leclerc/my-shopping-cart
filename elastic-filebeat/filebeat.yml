@@ -29,9 +29,9 @@ filebeat.inputs:
       service.name: checkout
       event.dataset: checkout.log
     fields_under_root: true
+
 filebeat.config.modules:
   path: ${path.config}/modules.d/*.yml
-  reload.enabled: false
 
 setup.template.settings:
   index.number_of_shards: 1
@@ -50,48 +50,41 @@ fields:
 cloud:
   id: "My_Deployment:ZXVyb3BlLXdlc3QxLmdjcC5jbG91ZC5lcy5pbyQyZGM3NWQzNjI5OTA0ZjFmYWJmZDZjMTdjNDU3OGVlOSQ1YThmNTY5OTNjNDc0NjBiODJmOWZlYzQxMzQ2OGRjOA=="
   auth: "elastic:kSSP3DqJc2c9nDYUsTlcP4sZ"
-output.elasticsearch:
-  hosts: ["https://my-deployment-c52f52.es.europe-west1.gcp.cloud.es.io:9243"]
-  protocol: "https"
-  ssl.enabled: true
-  ssl.verification_mode: none
-  username: "elastic"
-  password: "elastic"
 
 processors:
   - add_host_metadata: ~
   - add_cloud_metadata: ~
   - add_docker_metadata: ~
   - add_kubernetes_metadata: ~
-  - timestamp:
-      field: "timestamp"
-      layouts:
-        - "UNIX_MS"
-      ignore_missing: true
-      test:
-        - "1615986552269"
-  - rename:
-      fields:
-        - from: "level"
-          to: "log.level"
-        - from: "thread"
-          to: "process.thread.name"
-        - from: "mdc.trace_id"
-          to: "trace.id"
-        - from: "mdc.span_id"
-          to: "span.id"
-        - from: "logger"
-          to: "log.logger"
-      ignore_missing: true
-      fail_on_error: true
+#  - timestamp:
+#      field: "timestamp"
+#      layouts:
+#        - "UNIX_MS"
+#      ignore_missing: true
+#      test:
+#        - "1615986552269"
+#  - rename:
+#      fields:
+#        - from: "level"
+#          to: "log.level"
+#        - from: "thread"
+#          to: "process.thread.name"
+#        - from: "mdc.trace_id"
+#          to: "trace.id"
+#        - from: "mdc.span_id"
+#          to: "span.id"
+#        - from: "logger"
+#          to: "log.logger"
+#      ignore_missing: true
+#      fail_on_error: true
 monitoring.enabled: true
-monitoring.elasticsearch:
-  hosts: ["localhost:9200"]
-  protocol: "https"
-  ssl.enabled: true
-  ssl.verification_mode: none
-  username: "elastic"
-  password: "elastic"
+# monitoring.elasticsearch:
+#   hosts: ["localhost:9200"]
+#   protocol: "https"
+#   ssl.enabled: true
+#   ssl.verification_mode: none
+#   username: "elastic"
+#   password: "elastic"
 
 # Available log levels are: error, warning, info, debug
 logging.level: warning

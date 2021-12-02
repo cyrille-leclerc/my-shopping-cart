@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -x
 
 ##########################################################################################
 # PARENT DIRECTORY
@@ -20,4 +19,8 @@ done
 
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
-filebeat --path.config $PRGDIR -e  -v "$@"
+
+export REDIS_STORAGE_PATH=$PRGDIR/../.redis/
+mkdir -p "$REDIS_STORAGE_PATH"
+
+redis-server "$PRGDIR/redis.conf"

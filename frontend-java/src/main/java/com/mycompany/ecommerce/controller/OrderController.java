@@ -34,7 +34,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +88,7 @@ public class OrderController {
         Span span = Span.current();
 
         List<OrderProductDto> formDtos = form.getProductOrders();
-        validateProductsExistence(formDtos);
+        //validateProductsExistence(formDtos);
 
         String customerId = "customer-" + RANDOM.nextInt(100);
         span.setAttribute(OpenTelemetryAttributes.CUSTOMER_ID, customerId);

@@ -7,7 +7,7 @@ setup.template.settings:
   #_source.enabled: false
 
 fields:
-  env: staging
+  env: production
 
 output.elasticsearch:
   hosts: ["localhost:9200"]
@@ -17,6 +17,9 @@ output.elasticsearch:
   ssl.enabled: true
   ssl.verification_mode: none
 
+cloud:
+  id: "My_Deployment:ZXVyb3BlLXdlc3QxLmdjcC5jbG91ZC5lcy5pbyQyZGM3NWQzNjI5OTA0ZjFmYWJmZDZjMTdjNDU3OGVlOSQ1YThmNTY5OTNjNDc0NjBiODJmOWZlYzQxMzQ2OGRjOA=="
+  auth: "elastic:kSSP3DqJc2c9nDYUsTlcP4sZ"
 processors:
   - add_host_metadata: ~
   - add_cloud_metadata: ~
