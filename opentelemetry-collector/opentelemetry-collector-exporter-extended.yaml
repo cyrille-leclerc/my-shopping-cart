@@ -1,0 +1,70 @@
+extensions:
+  zpages:
+    endpoint: :55679
+  bearertokenauth/elastic:
+    token: "here"
+    #token: "${OTEL_COLLECTOR_EXPORTER_OTLP_BEARER}"
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: '127.0.0.1:4317'
+  hostmetrics:
+    collection_interval: 1m
+    scrapers:
+      # cpu not supported on MacOS
+      # cpu:
+      load:
+      memory:
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 2000
+  batch:
+
+exporters:
+  logging:
+    loglevel: info
+  otlp/honeycomb:
+    endpoint: "api.honeycomb.io:443"
+    headers:
+      "x-honeycomb-team": "cbd07abcde4662efd5e82e8ab64fa030"
+      "x-honeycomb-dataset": "shopping-cart"
+  otlp/lightstep:
+    endpoint: "ingest.lightstep.com:443"
+    headers: {"lightstep-access-token":"x0YUY5MHXwz41Sf2hAgRG7Rl1Jbe6G9yKtozPxdAIfZwt7oVcsLUzFZssKZiHD2qH7C0ke0sS14bmrcHPOJCCZ/KgvO1t2ElHHg602LN"}
+  otlp/elastic:
+    endpoint: "${OTEL_COLLECTOR_EXPORTER_OTLP_ENDPOINT}"
+    #endpoint: "azerty"
+    auth:
+      authenticator: "bearertokenauth/elastic"
+  prometheus:
+    endpoint: 0.0.0.0:8889
+service:
+  pipelines:
+    metrics:
+      receivers:
+        - otlp
+        - hostmetrics
+      processors:
+        - memory_limiter
+        - batch
+      exporters:
+        - logging
+        - prometheus
+        - otlp/lightstep
+        # - otlp/honeycomb
+        - otlp/elastic
+    traces:
+      receivers:
+        - otlp
+      processors:
+        - memory_limiter
+        - batch
+      exporters:
+        - otlp/lightstep
+        - otlp/honeycomb
+        - otlp/elastic
+  extensions: [zpages, bearertokenauth/elastic]
