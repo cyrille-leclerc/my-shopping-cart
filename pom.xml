@@ -9,8 +9,9 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
+        <snyk.token>${env.SNYK_TOKEN}</snyk.token>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>2.6.0</spring-boot.version>
+        <spring-boot.version>2.6.1</spring-boot.version>
         <opentelemetry.version>1.9.1</opentelemetry.version>
         <jackson.version>2.13.0</jackson.version>
     </properties>
@@ -33,7 +34,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava-bom</artifactId>
-                <version>30.1.1-jre</version>
+                <version>31.0.1-jre</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -50,6 +51,12 @@
                 <version>${opentelemetry.version}-alpha</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <!-- https://snyk.io/vuln/SNYK-JAVA-COMGOOGLECODEGSON-1730327 -->
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.8.9</version>
             </dependency>
             <dependency>
                 <groupId>de.codecentric</groupId>
@@ -69,7 +76,7 @@
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
-                <version>1.2.6</version>
+                <version>1.2.7</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback.contrib</groupId>
@@ -113,4 +120,45 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <url>http://maven.example.com:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <url>http://maven.example.com:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.snyk</groupId>
+                <artifactId>snyk-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <!--
+                <executions>
+                    <execution>
+                        <id>snyk-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>snyk-monitor</id>
+                        <goals>
+                            <goal>monitor</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                -->
+                <configuration>
+                    <apiToken>${snyk.token}</apiToken>
+                    <args>
+                        <arg>--all-projects</arg>
+                    </args>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -13,6 +13,9 @@
     <properties>
         <maven.compiler.target>11</maven.compiler.target>
         <maven.compiler.source>11</maven.compiler.source>
+        <container-registry.username>${env.CONTAINER_REGISTRY_USERNAME}</container-registry.username>
+        <container-registry.password>${env.CONTAINER_REGISTRY_PASSWORD}</container-registry.password>
+        <snyk.token>${env.SNYK_TOKEN}</snyk.token>
     </properties>
 
     <dependencies>
@@ -115,10 +118,14 @@
                 <version>3.1.4</version>
                 <configuration>
                     <to>
-                        <image>checkout-service</image>
+                        <image>docker.io/cleclerc/${project.artifactId}:latest</image>
                         <tags>
-                            <tag>1.0-SNAPSHOT</tag>
+                            <tag>${project.version}</tag>
                         </tags>
+                        <auth>
+                            <username>${container-registry.username}</username>
+                            <password>${container-registry.password}</password>
+                        </auth>
                     </to>
                 </configuration>
             </plugin>

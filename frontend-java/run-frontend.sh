@@ -22,12 +22,13 @@ done
 PRGDIR=`dirname "$PRG"`
 
 # LOAD ENVIRONMENT VARIABLES
-if [ -r "$PRGDIR/setenv.sh" ]; then
-  . "$PRGDIR/setenv.sh"
-elif [ -r "$PRGDIR/../setenv.sh" ]; then
+if [ -r "$PRGDIR/../setenv.sh" ]; then
   . "$PRGDIR/../setenv.sh"
 else
   . "$PRGDIR/../setenv.default.sh"
+fi
+if [ -r "$PRGDIR/setenv.sh" ]; then
+  . "$PRGDIR/setenv.sh"
 fi
 
 export OPEN_TELEMETRY_AGENT_HOME=$PRGDIR/../.otel
