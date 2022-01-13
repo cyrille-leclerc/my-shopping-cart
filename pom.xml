@@ -11,9 +11,9 @@
     <properties>
         <snyk.token>${env.SNYK_TOKEN}</snyk.token>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>2.6.1</spring-boot.version>
+        <spring-boot.version>2.6.2</spring-boot.version>
         <opentelemetry.version>1.9.1</opentelemetry.version>
-        <jackson.version>2.13.0</jackson.version>
+        <jackson.version>2.13.1</jackson.version>
     </properties>
     <modules>
         <module>checkout-service-protobuff</module>
