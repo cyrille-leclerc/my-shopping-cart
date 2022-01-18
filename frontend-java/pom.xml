@@ -78,10 +78,6 @@
 			<groupId>io.opentelemetry</groupId>
 			<artifactId>opentelemetry-api</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.opentelemetry</groupId>
-			<artifactId>opentelemetry-api-metrics</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>io.grpc</groupId>

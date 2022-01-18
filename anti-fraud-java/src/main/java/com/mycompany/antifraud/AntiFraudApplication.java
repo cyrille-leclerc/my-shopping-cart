@@ -1,6 +1,6 @@
 package com.mycompany.antifraud;
 
-import io.opentelemetry.api.metrics.GlobalMeterProvider;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,6 +15,6 @@ public class AntiFraudApplication {
 
     @Bean
     public Meter getOpenTelemetryMeter() {
-        return GlobalMeterProvider.get().get("anti-fraud");
+        return GlobalOpenTelemetry.get().getMeter("anti-fraud");
     }
 }

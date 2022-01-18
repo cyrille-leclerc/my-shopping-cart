@@ -5,7 +5,7 @@ import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
-import io.opentelemetry.api.metrics.GlobalMeterProvider;
+import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -60,7 +60,7 @@ public class EcommerceApplication {
 
     @Bean
     public Meter getOpenTelemetryMeter() {
-        return GlobalMeterProvider.get().get("frontend");
+        return GlobalOpenTelemetry.get().getMeter("frontend");
     }
 
     @Bean

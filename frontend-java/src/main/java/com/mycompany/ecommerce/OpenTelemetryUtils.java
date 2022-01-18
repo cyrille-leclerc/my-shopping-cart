@@ -23,19 +23,19 @@ public class OpenTelemetryUtils {
         final Attributes cacheNameAttribute = Attributes.of(AttributeKey.stringKey("cache"), cacheName);
         meter.counterBuilder("guava_cache_hit_total")
                 .setDescription("Cache hit totals")
-                .buildWithCallback(longResult -> longResult.observe(cache.stats().hitCount(), cacheNameAttribute));
+                .buildWithCallback(longResult -> longResult.record(cache.stats().hitCount(), cacheNameAttribute));
         meter.counterBuilder("guava_cache_miss_total")
                 .setDescription("Cache miss totals")
-                .buildWithCallback(longResult -> longResult.observe(cache.stats().missCount(), cacheNameAttribute));
+                .buildWithCallback(longResult -> longResult.record(cache.stats().missCount(), cacheNameAttribute));
         meter.counterBuilder("guava_cache_requests_total")
                 .setDescription("Cache requests totals")
-                .buildWithCallback(longResult -> longResult.observe(cache.stats().requestCount(), cacheNameAttribute));
+                .buildWithCallback(longResult -> longResult.record(cache.stats().requestCount(), cacheNameAttribute));
         meter.counterBuilder("guava_cache_eviction_total")
                 .setDescription("Cache evictions totals")
-                .buildWithCallback(longResult -> longResult.observe(cache.stats().evictionCount(), cacheNameAttribute));
+                .buildWithCallback(longResult -> longResult.record(cache.stats().evictionCount(), cacheNameAttribute));
         meter.counterBuilder("guava_cache_size")
                 .setDescription("Cache size")
-                .buildWithCallback(longResult -> longResult.observe(cache.size(), cacheNameAttribute));
+                .buildWithCallback(longResult -> longResult.record(cache.size(), cacheNameAttribute));
     }
 
     public static void observeRedisCache(RedisCache redisCache, Meter meter){
@@ -43,16 +43,16 @@ public class OpenTelemetryUtils {
 
         meter.counterBuilder("redis_cache_gets")
                 .setDescription("Cache gets totals")
-                .buildWithCallback(longResult -> longResult.observe(redisCache.getStatistics().getGets(), cacheNameAttribute));
+                .buildWithCallback(longResult -> longResult.record(redisCache.getStatistics().getGets(), cacheNameAttribute));
         meter.counterBuilder("redis_cache_puts")
                 .setDescription("Cache puts totals")
-                .buildWithCallback(longResult -> longResult.observe(redisCache.getStatistics().getPuts(), cacheNameAttribute));
+                .buildWithCallback(longResult -> longResult.record(redisCache.getStatistics().getPuts(), cacheNameAttribute));
         meter.counterBuilder("redis_cache_misses")
                 .setDescription("Cache misses totals")
-                .buildWithCallback(longResult -> longResult.observe(redisCache.getStatistics().getMisses(), cacheNameAttribute));
+                .buildWithCallback(longResult -> longResult.record(redisCache.getStatistics().getMisses(), cacheNameAttribute));
         // TODO overlap between gets, hits,and misses
         meter.counterBuilder("redis_cache_hits")
                 .setDescription("Cache hits totals")
-                .buildWithCallback(longResult -> longResult.observe(redisCache.getStatistics().getHits(), cacheNameAttribute));
+                .buildWithCallback(longResult -> longResult.record(redisCache.getStatistics().getHits(), cacheNameAttribute));
     }
 }
