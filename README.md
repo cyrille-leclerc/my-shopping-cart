@@ -5,6 +5,7 @@
 * Postgresql with a database `jdbc:postgresql://localhost:5432/test` and a user `test/test`
     * Hibernate will create a bunch of tables in this `test` database. 
     * Configuration can be changed in the `application.properties` config files
+* Redis
 * Elastic APM
 * `npm`
    * `npm install copyfiles -g`
@@ -33,7 +34,7 @@ OpenTelemetry metrics are demoed here providing in the `frontend-java` app:
 
 * Install a recent java version: on Mac, see https://github.com/AdoptOpenJDK/homebrew-openjdk
 
-* Install Postgresql
+* Install and start Postgresql
 
 ```
 brew install postgresql
@@ -46,6 +47,8 @@ CREATE USER test WITH PASSWORD 'test';
 GRANT ALL PRIVILEGES ON DATABASE test TO test;
 
 ```
+
+* Install and start Redis
 
 * shell 1: start OpenTelemetry collector
    * Run the collector
