@@ -67,6 +67,7 @@ echo ""
 
 export OTEL_RESOURCE_ATTRIBUTES="service.name=anti-fraud-service,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=$OPEN_TELEMETRY_DEPLOYMENT_ENVIRONMENT"
 export OTEL_METRICS_EXPORTER="otlp"
+export OTEL_LOGS_EXPORTER="otlp"
 
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dserver.port=8081 \
