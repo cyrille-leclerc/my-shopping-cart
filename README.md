@@ -49,6 +49,10 @@ GRANT ALL PRIVILEGES ON DATABASE test TO test;
 ```
 
 * Install and start Redis
+ ```
+cd redis/
+./run-redis.sh  
+```
 
 * shell 1: start OpenTelemetry collector
    * Run the collector
