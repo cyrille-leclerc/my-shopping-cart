@@ -26,6 +26,9 @@ public class OrderProductDto {
 
     @Override
     public String toString() {
-        return new ToStringCreator(this).append("product", this.product).append("quantity", this.quantity).toString();
+        return "OrderProductDto{" +
+                "product=" + product +
+                ", quantity=" + quantity +
+                '}';
     }
 }

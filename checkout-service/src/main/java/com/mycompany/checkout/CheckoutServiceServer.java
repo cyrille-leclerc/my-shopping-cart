@@ -73,7 +73,7 @@ public class CheckoutServiceServer {
             }
             logger.info("Order successfully placed in " + millis + "ms");
             // StressTestUtils.incrementProgressBarSuccess();
-            final PlaceOrderReply placeOrderReply = PlaceOrderReply.newBuilder().setMessage("Order successfully placed!").build();
+            PlaceOrderReply placeOrderReply = PlaceOrderReply.newBuilder().setMessage("Order successfully placed!").build();
             responseObserver.onNext(placeOrderReply);
             responseObserver.onCompleted();
         }

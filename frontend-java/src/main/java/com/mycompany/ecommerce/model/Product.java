@@ -64,10 +64,10 @@ public class Product {
 
     @Override
     public String toString() {
-        return new ToStringCreator(this)
-                .append("id", id)
-                .append("name", name)
-                .append("price", price)
-                .toString();
+        return "Product{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                '}';
     }
 }
