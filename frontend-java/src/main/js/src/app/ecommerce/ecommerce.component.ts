@@ -9,7 +9,7 @@ import {OrdersComponent, PaymentStatus} from "./orders/orders.component";
     styleUrls: ['./ecommerce.component.css']
 })
 export class EcommerceComponent implements OnInit {
-    private collapsed = true;
+    collapsed = true;
     orderFinished = false;
 
     @ViewChild('productsC', {static: false})
