@@ -44,11 +44,6 @@
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
 		</dependency>
-		<!-- elastic logs-->
-		<dependency>
-			<groupId>co.elastic.logging</groupId>
-			<artifactId>logback-ecs-encoder</artifactId>
-		</dependency>
 		<!-- elastic-apm -->
 		<dependency>
 			<groupId>co.elastic.apm</groupId>

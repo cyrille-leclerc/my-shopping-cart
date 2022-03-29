@@ -9,9 +9,8 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
-        <spring-boot.version>2.6.4</spring-boot.version>
+        <spring-boot.version>2.6.5</spring-boot.version>
         <elastic-apm.version>1.30.0</elastic-apm.version>
-        <ecs-logging-java.version>1.3.2</ecs-logging-java.version>
     </properties>
     <modules>
         <module>frontend-java</module>
