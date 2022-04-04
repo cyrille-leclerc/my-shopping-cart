@@ -113,9 +113,10 @@ The symptom is the steep increase of the user facing latency. We want "find prob
    * On the "/api/orders" latency chart, a steep increase from ~600ms to >2,000ms
    * On the log categorization, the steep increase of `Cache⁕miss⁕for⁕product⁕load⁕from⁕database⁕in⁕`
    * Logs
-     * In the index `filebeat*`, count records where `event.dataset: "frontend.log" AND message: "cache miss for product"` 
+     * In the index `.ds-logs-apm.app-default-*`, count records where `service.name: "frontend" AND message: "cache miss for product"` 
    * Metrics
       * index `apm-*-metrics`, `redis_cache_misses` and `redis_cache_puts` for `service.name: frontend` steeply increasing
       * index `metricbeat`, `redis.info.stats.keyspace.misses`
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/find-probable-root-causes-redis-cache.png)
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/find-probable-root-causes-redis-cache-logs-categorization.png)
+

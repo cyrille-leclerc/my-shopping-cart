@@ -1,0 +1,206 @@
+{
+  "_index": ".ds-logs-apm.app-default-2022.03.07-000002",
+  "_id": "3TMH4H8BCVu5_7B78v8b",
+  "_version": 1,
+  "_score": 1,
+  "_source": {
+    "process": {
+      "pid": 35129,
+      "command_line": "/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home:bin:java -javaagent:./../.otel/opentelemetry-javaagent-1.12.0.jar -Dserver.port=8080",
+      "executable": "/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home:bin:java"
+    },
+    "agent": {
+      "name": "opentelemetry/java",
+      "version": "1.12.0"
+    },
+    "log": {
+      "level": "INFO"
+    },
+    "data_stream.namespace": "default",
+    "message": "SUCCESS createOrder([OrderController.OrderForm@2f5523aelist[OrderProductDto{product=Product{id=12, name='USB C adapter', price=5.0}, quantity=1}]]): totalPrice: 5.0, id:4186874",
+    "data_stream.type": "logs",
+    "processor": {
+      "name": "log",
+      "event": "log"
+    },
+    "labels": {
+      "process_runtime_description": "AdoptOpenJDK OpenJDK 64-Bit Server VM 11.0.11+9",
+      "service_namespace": "com-shoppingcart",
+      "telemetry_auto_version": "1.12.0"
+    },
+    "observer": {
+      "hostname": "8bacbea9c748",
+      "id": "8ed90c13-d060-42db-a432-ad699ad6bb20",
+      "ephemeral_id": "cfcf472e-eaf4-4670-9406-e904441836c1",
+      "type": "apm-server",
+      "version": "8.1.0",
+      "version_major": 8
+    },
+    "trace": {
+      "id": "064e86eb1dd44c9bbd4f07fe5b0d7ec1"
+    },
+    "@timestamp": "2022-03-31T12:51:30.802Z",
+    "ecs": {
+      "version": "1.12.0"
+    },
+    "service": {
+      "node": {
+        "name": "MacBook-Pro.localdomain"
+      },
+      "environment": "production",
+      "name": "frontend",
+      "runtime": {
+        "name": "OpenJDK Runtime Environment",
+        "version": "11.0.11+9"
+      },
+      "language": {
+        "name": "java"
+      },
+      "version": "1.0-SNAPSHOT"
+    },
+    "data_stream.dataset": "apm.app",
+    "host": {
+      "hostname": "MacBook-Pro.localdomain",
+      "os": {
+        "type": "macos",
+        "platform": "darwin",
+        "full": "Mac OS X 11.3"
+      },
+      "name": "MacBook-Pro.localdomain",
+      "architecture": "x86_64"
+    },
+    "event": {
+      "severity": 9,
+      "agent_id_status": "missing",
+      "ingested": "2022-03-31T12:51:31Z"
+    },
+    "span": {
+      "id": "cb88a935ee0ea2ad"
+    }
+  },
+  "fields": {
+    "labels.process_runtime_description": [
+      "AdoptOpenJDK OpenJDK 64-Bit Server VM 11.0.11+9"
+    ],
+    "host.os.full": [
+      "Mac OS X 11.3"
+    ],
+    "service.node.name": [
+      "MacBook-Pro.localdomain"
+    ],
+    "host.hostname": [
+      "MacBook-Pro.localdomain"
+    ],
+    "process.pid": [
+      35129
+    ],
+    "service.language.name": [
+      "java"
+    ],
+    "labels.telemetry_auto_version": [
+      "1.12.0"
+    ],
+    "trace.id": [
+      "064e86eb1dd44c9bbd4f07fe5b0d7ec1"
+    ],
+    "processor.event": [
+      "log"
+    ],
+    "log.level": [
+      "INFO"
+    ],
+    "agent.name": [
+      "opentelemetry/java"
+    ],
+    "host.name": [
+      "MacBook-Pro.localdomain"
+    ],
+    "event.agent_id_status": [
+      "missing"
+    ],
+    "process.executable": [
+      "/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home:bin:java"
+    ],
+    "event.severity": [
+      9
+    ],
+    "service.environment": [
+      "production"
+    ],
+    "service.name": [
+      "frontend"
+    ],
+    "host.os.type": [
+      "macos"
+    ],
+    "data_stream.namespace": [
+      "default"
+    ],
+    "processor.name": [
+      "log"
+    ],
+    "service.runtime.name": [
+      "OpenJDK Runtime Environment"
+    ],
+    "service.runtime.version": [
+      "11.0.11+9"
+    ],
+    "span.id": [
+      "cb88a935ee0ea2ad"
+    ],
+    "observer.version_major": [
+      8
+    ],
+    "message": [
+      "SUCCESS createOrder([OrderController.OrderForm@2f5523aelist[OrderProductDto{product=Product{id=12, name='USB C adapter', price=5.0}, quantity=1}]]): totalPrice: 5.0, id:4186874"
+    ],
+    "observer.hostname": [
+      "8bacbea9c748"
+    ],
+    "data_stream.type": [
+      "logs"
+    ],
+    "host.architecture": [
+      "x86_64"
+    ],
+    "event.ingested": [
+      "2022-03-31T12:51:31.000Z"
+    ],
+    "observer.id": [
+      "8ed90c13-d060-42db-a432-ad699ad6bb20"
+    ],
+    "@timestamp": [
+      "2022-03-31T12:51:30.802Z"
+    ],
+    "service.version": [
+      "1.0-SNAPSHOT"
+    ],
+    "observer.ephemeral_id": [
+      "cfcf472e-eaf4-4670-9406-e904441836c1"
+    ],
+    "observer.version": [
+      "8.1.0"
+    ],
+    "host.os.platform": [
+      "darwin"
+    ],
+    "observer.type": [
+      "apm-server"
+    ],
+    "ecs.version": [
+      "1.12.0"
+    ],
+    "data_stream.dataset": [
+      "apm.app"
+    ],
+    "process.command_line": [
+      "/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home:bin:java -javaagent:./../.otel/opentelemetry-javaagent-1.12.0.jar -Dserver.port=8080"
+    ],
+    "agent.version": [
+      "1.12.0"
+    ],
+    "labels.service_namespace": [
+      "com-shoppingcart"
+    ]
+  }
+}
