@@ -106,17 +106,17 @@ The symptom is the steep increase of the user facing latency. We want "find prob
 * Augment PostgreSQL latency to find products by ID to make hte problem more visible: http://localhost:8080/chaos/attack/latency/enable
 * Generate load for some time 
 * Verify 
-   * On Elastic APM that the "/api/orders" transaction very rarely perfoms a find product by id
+   * On Elastic APM that the "/api/orders" transaction very rarely performs a find product by id
    * On Elastic logs stream that the categorisation works
 * Make caching access noop on the products, impacting the createOrder operation: http://localhost:8080/chaos/attack/cache/enable
 * Verify
    * On the "/api/orders" latency chart, a steep increase from ~600ms to >2,000ms
    * On the log categorization, the steep increase of `Cache⁕miss⁕for⁕product⁕load⁕from⁕database⁕in⁕`
    * Logs
-     * In the index `.ds-logs-apm.app-default-*`, count records where `service.name: "frontend" AND message: "cache miss for product"` 
+     * In the index `.ds-logs-apm.app-default-*` (data stream `logs-apm.app-default`, index template `logs-apm.app`, data view `logs-*`), count records where `service.name: "frontend" AND message: "cache miss for product"` 
    * Metrics
-      * index `apm-*-metrics`, `redis_cache_misses` and `redis_cache_puts` for `service.name: frontend` steeply increasing
-      * index `metricbeat`, `redis.info.stats.keyspace.misses`
+      * index `metrics-apm.app.*` (data stream `metrics-apm.app.frontend-default`, index template `metrics-apm.app`, data view `metrics-*`), `redis_cache_misses` and `redis_cache_puts` for `service.name: frontend` steeply increasing
+      * TODO OpenTelemetry Collector Redis receiver 
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/find-probable-root-causes-redis-cache.png)
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/find-probable-root-causes-redis-cache-logs-categorization.png)
 
