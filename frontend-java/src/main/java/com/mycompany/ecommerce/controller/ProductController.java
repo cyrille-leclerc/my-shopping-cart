@@ -9,11 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/products")
@@ -28,12 +25,13 @@ public class ProductController {
     }
 
     @GetMapping(value = {"", "/"})
-    public @NotNull Iterable<Product> getProducts() {
+    public @Nonnull
+    Iterable<Product> getProducts() {
         return productService.getAllProducts();
     }
 
     @GetMapping("/{id}")
-    public @NotNull Product getProduct(@PathVariable long id, HttpServletRequest request) {
+    public @Nonnull Product getProduct(@PathVariable long id, HttpServletRequest request) {
         return productService.getProduct(id);
     }
 }

@@ -26,7 +26,7 @@ public class OrderProductDto {
 
     @Override
     public String toString() {
-        return "OrderProductDto{" +
+        return "OrderProduct{" +
                 "product=" + product +
                 ", quantity=" + quantity +
                 '}';

@@ -23,18 +23,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.annotation.Nonnull;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -79,7 +83,8 @@ public class OrderController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public @NotNull Iterable<Order> list() {
+    public @Nonnull
+    Iterable<Order> list() {
         return this.orderService.getAllOrders();
     }
 
@@ -108,7 +113,6 @@ public class OrderController {
         span.setAttribute(OpenTelemetryAttributes.ORDER_PRICE_RANGE, getPriceRange(orderPrice));
 
 
-
         Attributes attributes = Attributes.of(
                 OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry,
                 OpenTelemetryAttributes.SHIPPING_METHOD, shippingMethod,
@@ -123,7 +127,7 @@ public class OrderController {
         ResponseEntity<String> antiFraudResult;
         try {
             antiFraudResult = restTemplate.getForEntity(
-                    this.antiFraudServiceBaseUrl + (antiFraudServiceBaseUrl.endsWith("/") ? "": "/") + "fraud/checkOrder?orderPrice={q}&customerIpAddress={q}&shippingCountry={q}",
+                    this.antiFraudServiceBaseUrl + (antiFraudServiceBaseUrl.endsWith("/") ? "" : "/") + "fraud/checkOrder?orderPrice={q}&customerIpAddress={q}&shippingCountry={q}",
                     String.class,
                     orderPrice, request.getRemoteAddr(), shippingCountry);
         } catch (RestClientException e) {
@@ -155,7 +159,7 @@ public class OrderController {
 
         List<OrderProduct> orderProducts = new ArrayList<>();
         for (OrderProductDto dto : formDtos) {
-            final Product product = productService.getProduct(dto
+            Product product = productService.getProduct(dto
                     .getProduct()
                     .getId());
             orderProducts.add(orderProductService.create(new OrderProduct(order, product, dto.getQuantity())));
@@ -251,7 +255,7 @@ public class OrderController {
 
         @Override
         public String toString() {
-            return new ToStringCreator(this).append(this.productOrders).toString();
+            return "OrderForm{" + this.productOrders.stream().map(OrderProductDto::toString).collect(Collectors.joining(",")) + "}";
         }
     }
 }
