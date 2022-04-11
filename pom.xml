@@ -9,9 +9,10 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <properties>
+        <!--suppress UnresolvedMavenProperty -->
         <snyk.token>${env.SNYK_TOKEN}</snyk.token>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <spring-boot.version>2.6.5</spring-boot.version>
+        <spring-boot.version>2.6.6</spring-boot.version>
         <opentelemetry.version>1.12.0</opentelemetry.version>
     </properties>
     <modules>
