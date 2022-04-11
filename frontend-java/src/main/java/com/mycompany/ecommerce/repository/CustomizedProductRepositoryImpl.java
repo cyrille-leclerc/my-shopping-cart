@@ -2,6 +2,9 @@ package com.mycompany.ecommerce.repository;
 
 import com.mycompany.ecommerce.RandomUtils;
 import com.mycompany.ecommerce.model.Product;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.extension.annotations.SpanAttribute;
+import io.opentelemetry.extension.annotations.WithSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +28,8 @@ public class CustomizedProductRepositoryImpl implements CustomizedProductReposit
     private boolean latencyAttack;
 
     @Override
-    public Optional<Product> doFindByIdWithThrottle(Long id) {
+    public Optional<Product> doFindByIdWithThrottle(@SpanAttribute("productId") Long id) {
+        Span.current().updateName("ProductRepository.doFindById");
         long nanosBefore = System.nanoTime();
         try {
             if (latencyAttack) {

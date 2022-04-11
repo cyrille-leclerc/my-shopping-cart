@@ -3,10 +3,9 @@ package com.mycompany.ecommerce.service;
 import com.mycompany.ecommerce.exception.ResourceNotFoundException;
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.repository.ProductRepository;
-import io.opentelemetry.api.common.AttributeKey;
-import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.extension.annotations.SpanAttribute;
+import io.opentelemetry.extension.annotations.WithSpan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
@@ -40,7 +39,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getProduct(long id) throws ResourceNotFoundException {
+    @WithSpan
+    public Product getProduct(@SpanAttribute("productId") long id) throws ResourceNotFoundException {
         Object cacheKey = cacheMissAttack? UUID.randomUUID().toString() : id;
 
         final Product product = productCache.get(cacheKey, () -> {
@@ -48,7 +48,6 @@ public class ProductServiceImpl implements ProductService {
             try {
                 return productRepository.doFindByIdWithThrottle(id).orElseThrow(() -> new ResourceNotFoundException("Product " + id + " not found"));
             } finally {
-                Span.current().addEvent("cache.product", Attributes.of(AttributeKey.longKey("id"), id, AttributeKey.booleanKey("miss"), Boolean.TRUE));
                 Span.current().setAttribute("cache.miss", true);
                 logger.info("Cache miss for product " + id + ", load from database in " + TimeUnit.MILLISECONDS.convert(System.nanoTime() - beforeInNanos, TimeUnit.NANOSECONDS) + "ms");
             }
