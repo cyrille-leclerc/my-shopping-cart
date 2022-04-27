@@ -15,11 +15,9 @@
 
 ## Demoed OpenTelemetry capabilities
 
-## Demoed OpenTelemetry Traces capabilities
+### Traces 
 
-TODO
-
-## Demoed OpenTelemetry Metrics capabilities
+### Metrics
 
 OpenTelemetry metrics are demoed here providing in the `frontend-java` app:
 * Business KPIs with the `OrderValueRecorder` (and `OrderValueWithTagsRecorder`) on `com.mycompany.ecommerce.controller.OrderController to provide the following commonly adopted ecommerce KPIs:
@@ -29,6 +27,13 @@ OpenTelemetry metrics are demoed here providing in the `frontend-java` app:
    * Note that this is a "per-request" metric
 * Framework instrumentation with the instrumentation of a Guava cache on `com.mycompany.ecommerce.service.ProductServiceImpl`, implemented in `com.mycompany.ecommerce.OpenTelemetryUtils.observeGoogleGuavaCache`.
    * Note that these are "per-interval" metrics.
+
+![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/ecommerce-system-dashboard.png)
+
+
+### Logs
+
+Auto instrumentation of logs that are seamlessly collected by the Otel agents
 
 # Run the sample
 
