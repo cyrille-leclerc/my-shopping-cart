@@ -30,6 +30,8 @@ OpenTelemetry metrics are demoed here providing in the `frontend-java` app:
 
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/ecommerce-system-dashboard.png)
 
+Kibana dashboard definition: https://github.com/cyrille-leclerc/my-shopping-cart/blob/open-telemetry/src/main/kibana/ecommerce-dashboard.ndjson
+
 
 ### Logs
 
