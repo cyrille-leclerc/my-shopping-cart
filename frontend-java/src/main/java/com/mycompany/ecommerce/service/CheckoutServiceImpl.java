@@ -5,6 +5,8 @@ import com.mycompany.checkout.PlaceOrderReply;
 import com.mycompany.checkout.PlaceOrderRequest;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class CheckoutServiceImpl implements CheckoutService {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
+
     String grpcEndpoint;
     ManagedChannel managedChannel;
     CheckoutServiceGrpc.CheckoutServiceBlockingStub checkoutServiceStub;
@@ -24,6 +28,7 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .usePlaintext()
                 .build();
         this.checkoutServiceStub = CheckoutServiceGrpc.newBlockingStub(managedChannel);
+        logger.info("Checkout Service: {}", grpcEndpoint);
     }
     @Override
     public PlaceOrderReply placeOrder(PlaceOrderRequest request) {

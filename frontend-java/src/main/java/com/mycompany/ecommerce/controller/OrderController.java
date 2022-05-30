@@ -38,6 +38,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +80,11 @@ public class OrderController {
         orderCountCounter = meter.counterBuilder("order_count").build();
         orderWithTagsHistogram = meter.histogramBuilder("order_with_tags").setUnit("usd").build();
         orderValueWithTagsSumCounter = meter.counterBuilder("order_value_with_tags_counter").ofDoubles().setUnit("usd").build();
+    }
+
+    @PostConstruct
+    public void init() {
+        logger.info("Anti fraud service base url: {}", this.antiFraudServiceBaseUrl);
     }
 
     @GetMapping
@@ -125,9 +131,10 @@ public class OrderController {
         span.setAttribute(OpenTelemetryAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
 
         ResponseEntity<String> antiFraudResult;
+        String url = this.antiFraudServiceBaseUrl + (antiFraudServiceBaseUrl.endsWith("/") ? "" : "/") + "fraud/checkOrder?orderPrice={q}&customerIpAddress={q}&shippingCountry={q}";
         try {
             antiFraudResult = restTemplate.getForEntity(
-                    this.antiFraudServiceBaseUrl + (antiFraudServiceBaseUrl.endsWith("/") ? "" : "/") + "fraud/checkOrder?orderPrice={q}&customerIpAddress={q}&shippingCountry={q}",
+                    url,
                     String.class,
                     orderPrice, request.getRemoteAddr(), shippingCountry);
         } catch (RestClientException e) {
@@ -137,7 +144,7 @@ public class OrderController {
             if (e.getCause() != null) {
                 exceptionShortDescription += " / " + e.getCause().getClass().getSimpleName();
             }
-            logger.info("Failure createOrder({}): price: {}, fraud.exception: {}", form, orderPrice, exceptionShortDescription);
+            logger.info("Failure createOrder({}): price: {}, fraud.exception: {} with URL {}", form, orderPrice, exceptionShortDescription, url);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
