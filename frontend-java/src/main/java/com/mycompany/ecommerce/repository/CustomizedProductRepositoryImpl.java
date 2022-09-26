@@ -3,8 +3,7 @@ package com.mycompany.ecommerce.repository;
 import com.mycompany.ecommerce.RandomUtils;
 import com.mycompany.ecommerce.model.Product;
 import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.extension.annotations.SpanAttribute;
-import io.opentelemetry.extension.annotations.WithSpan;
+import io.opentelemetry.instrumentation.annotations.SpanAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

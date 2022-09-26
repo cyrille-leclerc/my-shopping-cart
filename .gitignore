@@ -34,3 +34,6 @@ target/
 
 # ENVIRONMENT VARIABLES
 setenv.sh
+
+
+.DS_Store
