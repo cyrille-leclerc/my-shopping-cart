@@ -1,0 +1,44 @@
+server:
+  http_listen_port: 0
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - basic_auth:
+      password: ${LOKI_PASSWORD}
+      username: ${LOKI_USERNAME}
+    url: ${LOKI_URL}
+scrape_configs:
+  - job_name: my_shopping_cart_frontend
+    pipeline_stages:
+        # 2022-09-08 17:51:20.963  INFO 22952 --- [main] c.m.ecommerce.EcommerceApplication       : Starting EcommerceApplication using Java 11.0.11 on cyrillerclaptop with PID 22952 (/Users/cyrilleleclerc/git/cyrille-leclerc/my-shopping-cart/frontend-java/target/frontend-1.0-SNAPSHOT.jar started by cyrilleleclerc in /Users/cyrilleleclerc/git/cyrille-leclerc/my-shopping-cart/frontend-java)
+        # %d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}
+        # https://github.com/spring-projects/spring-boot/blob/main/spring-boot-project/spring-boot/src/main/resources/org/springframework/boot/logging/logback/defaults.xml
+        - multiline:
+            firstline: ^\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}.\d{3}\s
+        - regex:
+            expression: ^(?P<timestamp>\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}.\d{3})\s+(?P<severity_text>[^\s]+)\s(?P<process_id>\d+)\s*---\s*\[(?P<thread_name>[\w-_.]*)\]\s*(?P<instrumentation_scope>[\w._-]*)\s*(?P<message>(?:.*))
+        - labels:
+            severity_text:
+            thread_name:
+            instrumentation_scope:
+            process_id:
+        - static_labels:
+            service_name: frontend
+            service_namespace: com_shoppingcart
+            service_version: 1.2.3
+        - timestamp:
+            source: timestamp
+            format: '2006-01-02 15:04:05.000'
+            location: 'Europe/Paris'
+        - output:
+            source: message
+    static_configs:
+    - targets:
+        - localhost
+      labels:
+        __path__: /usr/local/var/log/my-shopping-cart/frontend.log
+        instance: cyrillerclaptop
+        job: my_shopping_cart_frontend
