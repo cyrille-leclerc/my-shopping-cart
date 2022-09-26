@@ -119,11 +119,7 @@ public class OrderController {
         span.setAttribute(OpenTelemetryAttributes.ORDER_PRICE_RANGE, getPriceRange(orderPrice));
 
 
-        Attributes attributes = Attributes.of(
-                OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry,
-                OpenTelemetryAttributes.SHIPPING_METHOD, shippingMethod,
-                OpenTelemetryAttributes.PAYMENT_METHOD, paymentMethod);
-        orderWithTagsHistogram.record(orderPrice, attributes);
+
 
 
         span.setAttribute(OpenTelemetryAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry);
@@ -184,10 +180,14 @@ public class OrderController {
         // Meters below are used for testing and compare with orderValueRecorder
         this.orderValueSumCounter.add(orderPrice);
         this.orderCountCounter.add(1);
+        Attributes attributes = Attributes.of(
+                OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry,
+                OpenTelemetryAttributes.SHIPPING_METHOD, shippingMethod,
+                OpenTelemetryAttributes.PAYMENT_METHOD, paymentMethod);
         this.orderWithTagsHistogram.record(orderPrice, attributes);
         this.orderValueWithTagsSumCounter.add(orderPrice, attributes);
 
-        logger.info("SUCCESS createOrder({}): totalPrice: {}, id:{}", form, orderPrice, order.getId());
+        logger.info("SUCCESS placeOrder orderId={} customerId={} price={} paymentMethod={} shippingMethod={} shippingCountry={}", order.getId(), customerId, orderPrice, paymentMethod, shippingMethod, shippingCountry);
 
         String uri = ServletUriComponentsBuilder
                 .fromCurrentServletMapping()
