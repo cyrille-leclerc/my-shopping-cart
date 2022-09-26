@@ -11,8 +11,6 @@
 	<artifactId>anti-fraud</artifactId>
 
 	<properties>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.compiler.source>1.8</maven.compiler.source>
 		<!--suppress UnresolvedMavenProperty -->
 		<container-registry.username>${env.CONTAINER_REGISTRY_USERNAME}</container-registry.username>
 		<!--suppress UnresolvedMavenProperty -->

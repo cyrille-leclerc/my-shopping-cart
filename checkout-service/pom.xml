@@ -11,8 +11,6 @@
     <artifactId>checkout-service</artifactId>
 
     <properties>
-        <maven.compiler.target>11</maven.compiler.target>
-        <maven.compiler.source>11</maven.compiler.source>
         <!--suppress UnresolvedMavenProperty -->
         <container-registry.username>${env.CONTAINER_REGISTRY_USERNAME}</container-registry.username>
         <!--suppress UnresolvedMavenProperty -->
