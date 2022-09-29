@@ -153,7 +153,7 @@ traces:
       otlp:
         protocols:
           grpc:
-            endpoint: '127.0.0.1:4317'
+            endpoint: '127.0.0.1:4318'
     # spanmetrics supports aggregating Request, Error and Duration (R.E.D) metrics
     # from span data.
     #
