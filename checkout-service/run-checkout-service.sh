@@ -44,11 +44,10 @@ if [ -r "$OPEN_TELEMETRY_AGENT_JAR" ]; then
 else
     echo "Couldn't find $OPEN_TELEMETRY_AGENT_JAR, downloading it ..."
     jarUrl="https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v$OPEN_TELEMETRY_AGENT_VERSION/opentelemetry-javaagent.jar"
-
     if command -v wget > /dev/null; then
         wget "$jarUrl" -O "$OPEN_TELEMETRY_AGENT_JAR"
     elif command -v curl > /dev/null; then
-        curl -o "$OPEN_TELEMETRY_AGENT_JAR" "$jarUrl"
+        curl -L --max-redirs 5 -o "$OPEN_TELEMETRY_AGENT_JAR" "$jarUrl"
     else
         echo "FAILURE: OpenTelemetry agent not found and  none of curl and wget found"
         exit 1;
