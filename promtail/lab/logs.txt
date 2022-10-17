@@ -1,3 +1,0 @@
-{"remote_ip":"1.2.3.4","request_id":"-","response_code":"200","request_method":"POST","request_path":"/actual-endpoint","request_querystring":"","request_timetaken":"6120","response_length":"22"}
-{"remote_ip":"2.3.4.5","request_id":"-","response_code":"200","request_method":"GET","request_path":"/metrics","request_querystring":"","request_timetaken":"2476","response_length":"4227"}
-{"remote_ip":"1.2.3.4","request_id":"-","response_code":"204","request_method":"GET","request_path":"/healthcheck","request_querystring":"","request_timetaken":"1198","response_length":"0"}

@@ -96,6 +96,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<Order> create(@RequestBody OrderForm form, HttpServletRequest request) {
+        long beforeInNanos = System.nanoTime();
         Span span = Span.current();
 
         List<OrderProductDto> formDtos = form.getProductOrders();
@@ -117,10 +118,6 @@ public class OrderController {
                 OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry));
 
         span.setAttribute(OpenTelemetryAttributes.ORDER_PRICE_RANGE, getPriceRange(orderPrice));
-
-
-
-
 
         span.setAttribute(OpenTelemetryAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry);
         span.setAttribute(OpenTelemetryAttributes.SHIPPING_METHOD.getKey(), shippingMethod);
@@ -187,7 +184,9 @@ public class OrderController {
         this.orderWithTagsHistogram.record(orderPrice, attributes);
         this.orderValueWithTagsSumCounter.add(orderPrice, attributes);
 
-        logger.info("SUCCESS placeOrder orderId={} customerId={} price={} paymentMethod={} shippingMethod={} shippingCountry={}", order.getId(), customerId, orderPrice, paymentMethod, shippingMethod, shippingCountry);
+        long durationInNanos = System.nanoTime() - beforeInNanos;
+
+        logger.info("SUCCESS placeOrder orderId={} customerId={} price={} paymentMethod={} shippingMethod={} shippingCountry={} durationInNanos={}", order.getId(), customerId, orderPrice, paymentMethod, shippingMethod, shippingCountry, durationInNanos);
 
         String uri = ServletUriComponentsBuilder
                 .fromCurrentServletMapping()

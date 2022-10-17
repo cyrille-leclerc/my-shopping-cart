@@ -4,12 +4,18 @@ integrations:
   #   enabled: true
   node_exporter:
     enabled: true
+    disable_collectors:
+      - thermal # disable on Apple Silicon
     metric_relabel_configs:
       - action: keep
-        regex: node_memory_internal_bytes|node_filesystem_files_free|node_network_receive_packets_total|node_filesystem_avail_bytes|node_disk_read_bytes_total|node_network_transmit_packets_total|node_textfile_scrape_error|node_memory_Buffers_bytes|node_network_receive_bytes_total|node_network_transmit_bytes_total|node_filesystem_readonly|node_disk_io_time_weighted_seconds_total|node_network_transmit_drop_total|node_memory_wired_bytes|node_network_transmit_errs_total|node_vmstat_pgmajfault|node_network_receive_drop_total|node_memory_compressed_bytes|node_disk_written_bytes_total|node_memory_Slab_bytes|node_load1|node_uname_info|node_load15|node_network_receive_errs_total|node_memory_MemAvailable_bytes|node_memory_MemFree_bytes|node_load5|node_memory_purgeable_bytes|node_memory_total_bytes|node_cpu_seconds_total|node_filesystem_files|node_memory_MemTotal_bytes|node_disk_io_time_seconds_total|node_filesystem_size_bytes|node_memory_Cached_bytes
+        regex: node_load1|node_filesystem_avail_bytes|node_disk_read_bytes_total|node_network_receive_drop_total|node_memory_compressed_bytes|node_memory_total_bytes|node_memory_wired_bytes|node_disk_written_bytes_total|node_memory_purgeable_bytes|node_textfile_scrape_error|node_memory_Cached_bytes|node_memory_Slab_bytes|node_memory_internal_bytes|node_network_transmit_packets_total|node_network_transmit_drop_total|node_disk_io_time_weighted_seconds_total|node_load5|node_filesystem_files|node_network_transmit_errs_total|node_memory_Buffers_bytes|node_network_receive_bytes_total|node_filesystem_size_bytes|node_load15|node_cpu_seconds_total|node_vmstat_pgmajfault|node_filesystem_files_free|node_network_receive_errs_total|node_network_receive_packets_total|node_memory_MemFree_bytes|node_memory_MemTotal_bytes|node_network_transmit_bytes_total|node_disk_io_time_seconds_total|node_uname_info|node_filesystem_readonly|node_memory_MemAvailable_bytes
         source_labels:
           - __name__
     relabel_configs:
+      - replacement: cyrille-le-clerc-macbook
+        source_labels:
+          - agent_hostname
+        target_label: instance
       - replacement: cyrillerclaptop
         source_labels:
           - agent_hostname
