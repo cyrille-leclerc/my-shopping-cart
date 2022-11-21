@@ -71,7 +71,7 @@ public class CheckoutServiceServer {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            logger.info("Order successfully placed in " + millis + "ms");
+            logger.info("Order successfully placed customerId=" + request.getName() + " durationInMillis=" + millis);
             // StressTestUtils.incrementProgressBarSuccess();
             PlaceOrderReply placeOrderReply = PlaceOrderReply.newBuilder().setMessage("Order successfully placed!").build();
             responseObserver.onNext(placeOrderReply);
