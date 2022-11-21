@@ -1,0 +1,55 @@
+prometheus.integration.node_exporter {
+        set_collectors = ["cpu", "diskstats"]
+}
+
+prometheus.scrape "scrape_node" {
+        // https://grafana.com/docs/agent/latest/flow/reference/components/prometheus.scrape/
+        targets    = prometheus.integration.node_exporter.targets
+        forward_to = [prometheus.remote_write.default.receiver]
+}
+
+prometheus.remote_write "default" {
+        // https://grafana.com/docs/agent/latest/flow/reference/components/prometheus.remote_write/
+        endpoint {
+                url = env("PROMETHEUS_URL")
+                http_client_config {
+                        basic_auth {
+                                username = env("PROMETHEUS_USERNAME")
+                                password = env("PROMETHEUS_PASSWORD")
+                        }
+                }
+        }
+}
+
+// https://grafana.com/blog/2022/11/09/grafana-agent-0.29.0-release-new-opentelemetry-components/
+otelcol.receiver.otlp "default_otlp_receiver" {
+        // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.receiver.otlp/
+        grpc {
+                endpoint = "0.0.0.0:4318"
+        }
+
+        output {
+                metrics = [otelcol.exporter.prometheus.default.input]
+                // logs    = [...]
+                traces = [otelcol.exporter.otlp.tempo.input]
+        }
+}
+
+otelcol.exporter.prometheus "default" {
+        // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.prometheus/
+        forward_to = [prometheus.remote_write.default.receiver]
+}
+
+otelcol.exporter.otlp "tempo" {
+        // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.otlp/
+        client {
+                endpoint = env("TEMPO_ENDPOINT")
+                auth     = otelcol.auth.basic.tempo.handler
+        }
+}
+
+otelcol.auth.basic "tempo" {
+        // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.auth.basic/
+        username = env("TEMPO_USERNAME")
+        password = env("TEMPO_PASSWORD")
+}

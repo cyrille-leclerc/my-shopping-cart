@@ -3,7 +3,7 @@ integrations:
   #   address: http://localhost:9200
   #   enabled: true
   node_exporter:
-    enabled: true
+    enabled: false
     disable_collectors:
       - thermal # disable on Apple Silicon
     metric_relabel_configs:
