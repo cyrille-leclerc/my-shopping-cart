@@ -56,6 +56,19 @@ prometheus.remote_write "default" {
 	}
 }
 
+loki.write "default" {
+    // https://grafana.com/docs/agent/latest/flow/reference/components/loki.write/
+    endpoint {
+        url = env("LOKI_URL")
+        http_client_config {
+            basic_auth {
+                username = env("LOKI_USERNAME")
+                password = env("LOKI_PASSWORD")
+            }
+        }
+    }
+}
+
 otelcol.receiver.otlp "default" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.receiver.otlp/
 	grpc {
@@ -86,10 +99,15 @@ otelcol.processor.memory_limiter "default" {
 
 	output {
 		metrics = [otelcol.exporter.prometheus.default.input]
-		// logs    = [...] // TODO export to Loki when solution is available
+		// logs    = [otelcol.exporter.loki.default.input] // PROPOSED NEW PIPELINE STEP
 		traces = [otelcol.exporter.otlp.grafana_cloud_tempo.input]
 	}
 }
+
+// PROPOSED NEW PIPELINE STEP
+//otelcol.exporter.loki "default" {
+//	forward_to = [loki.write.default.receiver]
+//}
 
 otelcol.exporter.prometheus "default" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.prometheus/
