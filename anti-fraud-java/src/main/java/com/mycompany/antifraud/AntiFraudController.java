@@ -62,13 +62,13 @@ public class AntiFraudController {
 
 
     public AntiFraudController(Meter meter, DataSource dataSource) {
-        this.approvedOrderRecorder = meter.histogramBuilder("antifraud_approved_order").build();
-        this.approvedOrderValueCounter = meter.counterBuilder("antifraud_approved_order_value").ofDoubles().build();
-        this.approvedOrderCountCounter = meter.counterBuilder("antifraud_approved_order_count").build();
+        this.approvedOrderRecorder = meter.histogramBuilder("antifraud.approved.order").build();
+        this.approvedOrderValueCounter = meter.counterBuilder("antifraud.approved.order_value").ofDoubles().build();
+        this.approvedOrderCountCounter = meter.counterBuilder("antifraud.approved.order_count").build();
 
-        this.rejectedOrderRecorder = meter.histogramBuilder("antifraud_rejected_order").build();
-        this.rejectedOrderValueCounter = meter.counterBuilder("antifraud_rejected_order_value").ofDoubles().build();
-        this.rejectedOrderCountCounter = meter.counterBuilder("antifraud_rejected_order_count").build();
+        this.rejectedOrderRecorder = meter.histogramBuilder("antifraud.rejected.order").build();
+        this.rejectedOrderValueCounter = meter.counterBuilder("antifraud.rejected.order_value").ofDoubles().build();
+        this.rejectedOrderCountCounter = meter.counterBuilder("antifraud.rejected.order_count").build();
 
         this.dataSource = dataSource;
     }

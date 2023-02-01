@@ -61,9 +61,6 @@ public class OrderController {
     RestTemplate restTemplate;
     String antiFraudServiceBaseUrl;
     final DoubleHistogram orderValueHistogram;
-    final DoubleCounter orderValueSumCounter;
-    final DoubleCounter orderValueWithTagsSumCounter;
-    final LongCounter orderCountCounter;
     final DoubleHistogram orderWithTagsHistogram;
 
 
@@ -73,13 +70,9 @@ public class OrderController {
         this.orderProductService = orderProductService;
         this.checkoutService = checkoutService;
 
-        orderValueHistogram = meter.histogramBuilder("order").setUnit("usd").build();
-
         // Meters below are used for testing and compare with orderValueRecorder
-        orderValueSumCounter = meter.counterBuilder("order_sum").setUnit("usd").ofDoubles().build();
-        orderCountCounter = meter.counterBuilder("order_count").build();
-        orderWithTagsHistogram = meter.histogramBuilder("order_with_tags").setUnit("usd").build();
-        orderValueWithTagsSumCounter = meter.counterBuilder("order_value_with_tags_counter").ofDoubles().setUnit("usd").build();
+        orderValueHistogram = meter.histogramBuilder("order").setUnit("usd").build();
+        orderWithTagsHistogram = meter.histogramBuilder("orderWithTags").setUnit("usd").build();
     }
 
     @PostConstruct
@@ -174,15 +167,11 @@ public class OrderController {
         // UPDATE METRICS
         this.orderValueHistogram.record(orderPrice);
 
-        // Meters below are used for testing and compare with orderValueRecorder
-        this.orderValueSumCounter.add(orderPrice);
-        this.orderCountCounter.add(1);
         Attributes attributes = Attributes.of(
                 OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry,
                 OpenTelemetryAttributes.SHIPPING_METHOD, shippingMethod,
                 OpenTelemetryAttributes.PAYMENT_METHOD, paymentMethod);
         this.orderWithTagsHistogram.record(orderPrice, attributes);
-        this.orderValueWithTagsSumCounter.add(orderPrice, attributes);
 
         long durationInNanos = System.nanoTime() - beforeInNanos;
 
