@@ -71,6 +71,22 @@ loki.write "default" {
 
 otelcol.receiver.otlp "default" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.receiver.otlp/
+	// OTEL COLLECTOR CONFIG FOR LOKI (WAITING FOR GRAFANA AGENT TO SUPPORT otelcol.processor.resource
+	// processors:
+    //   resource:
+    //     attributes:
+    //     - action: insert
+    //       key: service_name
+    //       from_attribute: service.name
+    //     - action: insert
+    //       key: service_namespace
+    //       from_attribute: service.namespace
+    //     - action: insert
+    //       key: deployment_environment
+    //       from_attribute: deployment.environment
+    //     - action: insert
+    //       key: loki.resource.labels
+    //       value: service_namespace, service_name, deployment_environment
 	grpc {
 		endpoint = "0.0.0.0:4318"
 	}
@@ -95,19 +111,19 @@ otelcol.processor.memory_limiter "default" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.processor.memory_limiter/
 	check_interval = "1s"
 
-	limit = "50MiB" // alternatively, set `limit_percentage` and `spike_limit_percentage`
+	limit = "150MiB" // alternatively, set `limit_percentage` and `spike_limit_percentage`
 
 	output {
 		metrics = [otelcol.exporter.prometheus.default.input]
-		// logs    = [otelcol.exporter.loki.default.input] // PROPOSED NEW PIPELINE STEP
+		logs    = [otelcol.exporter.loki.default.input]
 		traces = [otelcol.exporter.otlp.grafana_cloud_tempo.input]
 	}
 }
 
-// PROPOSED NEW PIPELINE STEP
-//otelcol.exporter.loki "default" {
-//	forward_to = [loki.write.default.receiver]
-//}
+otelcol.exporter.loki "default" {
+    // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.loki/
+	forward_to = [loki.write.default.receiver]
+}
 
 otelcol.exporter.prometheus "default" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.prometheus/
