@@ -29,5 +29,5 @@ if [ -r "$PRGDIR/setenv.sh" ]; then
   . "$PRGDIR/setenv.sh"
 fi
 
-export EXPERIMENTAL_ENABLE_FLOW=true
+export AGENT_MODE=flow
 grafana-agent run "$PRGDIR/agent-config.flow"
