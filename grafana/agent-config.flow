@@ -4,20 +4,20 @@ otelcol.receiver.otlp "default" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.receiver.otlp/
 	// NOTE ADD OTEL COLLECTOR CONFIG FOR LOKI (WAITING FOR GRAFANA AGENT TO SUPPORT otelcol.processor.resource)
 	// processors:
-    //   resource:
-    //     attributes:
-    //     - action: insert
-    //       key: service_name
-    //       from_attribute: service.name
-    //     - action: insert
-    //       key: service_namespace
-    //       from_attribute: service.namespace
-    //     - action: insert
-    //       key: deployment_environment
-    //       from_attribute: deployment.environment
-    //     - action: insert
-    //       key: loki.resource.labels
-    //       value: service_namespace, service_name, deployment_environment
+	//   resource:
+	//     attributes:
+	//     - action: insert
+	//       key: service_name
+	//       from_attribute: service.name
+	//     - action: insert
+	//       key: service_namespace
+	//       from_attribute: service.namespace
+	//     - action: insert
+	//       key: deployment_environment
+	//       from_attribute: deployment.environment
+	//     - action: insert
+	//       key: loki.resource.labels
+	//       value: service_namespace, service_name, deployment_environment
 	grpc {
 		endpoint = "0.0.0.0:4318"
 	}
@@ -47,12 +47,12 @@ otelcol.processor.memory_limiter "default" {
 	output {
 		metrics = [otelcol.exporter.prometheus.default.input]
 		logs    = [otelcol.exporter.loki.default.input]
-		traces = [otelcol.exporter.otlp.grafana_cloud_tempo.input]
+		traces  = [otelcol.exporter.otlp.grafana_cloud_tempo.input]
 	}
 }
 
 otelcol.exporter.loki "default" {
-    // https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.loki/
+	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.loki/
 	forward_to = [loki.write.default.receiver]
 }
 
@@ -65,26 +65,24 @@ prometheus.remote_write "default" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/prometheus.remote_write/
 	endpoint {
 		url = env("PROMETHEUS_URL")
-		http_client_config {
-			basic_auth {
-				username = env("PROMETHEUS_USERNAME")
-				password = env("PROMETHEUS_PASSWORD")
-			}
+
+		basic_auth {
+			username = env("PROMETHEUS_USERNAME")
+			password = env("PROMETHEUS_PASSWORD")
 		}
 	}
 }
 
 loki.write "default" {
-    // https://grafana.com/docs/agent/latest/flow/reference/components/loki.write/
-    endpoint {
-        url = env("LOKI_URL")
-        http_client_config {
-            basic_auth {
-                username = env("LOKI_USERNAME")
-                password = env("LOKI_PASSWORD")
-            }
-        }
-    }
+	// https://grafana.com/docs/agent/latest/flow/reference/components/loki.write/
+	endpoint {
+		url = env("LOKI_URL")
+
+		basic_auth {
+			username = env("LOKI_USERNAME")
+			password = env("LOKI_PASSWORD")
+		}
+	}
 }
 
 otelcol.exporter.otlp "grafana_cloud_tempo" {
