@@ -12,7 +12,7 @@
         <!--suppress UnresolvedMavenProperty -->
         <snyk.token>${env.SNYK_TOKEN}</snyk.token>
         <spring-boot.version>2.7.7</spring-boot.version>
-        <opentelemetry.version>1.21.0</opentelemetry.version>
+        <opentelemetry.version>1.24.0</opentelemetry.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
