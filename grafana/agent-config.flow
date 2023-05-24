@@ -1,26 +1,10 @@
-// INGEST OPEN TELEMETRY OTLP
-
 otelcol.receiver.otlp "default" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.receiver.otlp/
-	// NOTE ADD OTEL COLLECTOR CONFIG FOR LOKI (WAITING FOR GRAFANA AGENT TO SUPPORT otelcol.processor.resource)
-	// processors:
-	//   resource:
-	//     attributes:
-	//     - action: insert
-	//       key: service_name
-	//       from_attribute: service.name
-	//     - action: insert
-	//       key: service_namespace
-	//       from_attribute: service.namespace
-	//     - action: insert
-	//       key: deployment_environment
-	//       from_attribute: deployment.environment
-	//     - action: insert
-	//       key: loki.resource.labels
-	//       value: service_namespace, service_name, deployment_environment
-	grpc {
-		endpoint = "0.0.0.0:4318"
-	}
+
+	// configures the default grpc endpoint "0.0.0.0:4317"
+	grpc { }
+	// configures the default http/protobuf endpoint "0.0.0.0:4318"
+	http { }
 
 	output {
 		metrics = [otelcol.processor.batch.default.input]
@@ -32,55 +16,42 @@ otelcol.receiver.otlp "default" {
 otelcol.processor.batch "default" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.processor.batch/
 	output {
-		metrics = [otelcol.processor.memory_limiter.default.input]
-		logs    = [otelcol.processor.memory_limiter.default.input]
-		traces  = [otelcol.processor.memory_limiter.default.input]
-	}
-}
-
-otelcol.processor.memory_limiter "default" {
-	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.processor.memory_limiter/
-	check_interval = "1s"
-
-	limit = "150MiB" // alternatively, set `limit_percentage` and `spike_limit_percentage`
-
-	output {
-		metrics = [otelcol.exporter.prometheus.default.input]
-		logs    = [otelcol.exporter.loki.default.input]
+		metrics = [otelcol.exporter.prometheus.grafana_cloud_prometheus.input]
+		logs    = [otelcol.exporter.loki.grafana_cloud_loki.input]
 		traces  = [otelcol.exporter.otlp.grafana_cloud_tempo.input]
 	}
 }
 
-otelcol.exporter.loki "default" {
+otelcol.exporter.loki "grafana_cloud_loki" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.loki/
-	forward_to = [loki.write.default.receiver]
+	forward_to = [loki.write.grafana_cloud_loki.receiver]
 }
 
-otelcol.exporter.prometheus "default" {
+otelcol.exporter.prometheus "grafana_cloud_prometheus" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.prometheus/
-	forward_to = [prometheus.remote_write.default.receiver]
+	forward_to = [prometheus.remote_write.grafana_cloud_prometheus.receiver]
 }
 
-prometheus.remote_write "default" {
+prometheus.remote_write "grafana_cloud_prometheus" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/prometheus.remote_write/
 	endpoint {
-		url = env("PROMETHEUS_URL")
+		url = "https://prometheus-***.grafana.net/api/prom/push"
 
 		basic_auth {
-			username = env("PROMETHEUS_USERNAME")
-			password = env("PROMETHEUS_PASSWORD")
+			username = "<<grafana_cloud_metrics_user>>"
+			password = "<<grafana_cloud_api_key>>"
 		}
 	}
 }
 
-loki.write "default" {
+loki.write "grafana_cloud_loki" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/loki.write/
 	endpoint {
-		url = env("LOKI_URL")
+		url = "https://logs-***.grafana.net/loki/api/v1/push"
 
 		basic_auth {
-			username = env("LOKI_USERNAME")
-			password = env("LOKI_PASSWORD")
+			username = "<<grafana_cloud_logs_user>>"
+			password = "<<grafana_cloud_api_key>>"
 		}
 	}
 }
@@ -88,13 +59,13 @@ loki.write "default" {
 otelcol.exporter.otlp "grafana_cloud_tempo" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.exporter.otlp/
 	client {
-		endpoint = env("TEMPO_ENDPOINT")
+		endpoint = "tempo-***-us-central-0.grafana.net:443"
 		auth     = otelcol.auth.basic.grafana_cloud_tempo.handler
 	}
 }
 
 otelcol.auth.basic "grafana_cloud_tempo" {
 	// https://grafana.com/docs/agent/latest/flow/reference/components/otelcol.auth.basic/
-	username = env("TEMPO_USERNAME")
-	password = env("TEMPO_PASSWORD")
-}
+	username = "<<grafana_cloud_traces_user>>"
+	password = "<<grafana_cloud_api_key>>"
+} %
