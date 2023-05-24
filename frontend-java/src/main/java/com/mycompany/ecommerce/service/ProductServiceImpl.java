@@ -46,9 +46,10 @@ public class ProductServiceImpl implements ProductService {
         final Product product = productCache.get(cacheKey, () -> {
             long beforeInNanos = System.nanoTime();
             try {
-                return productRepository.doFindByIdWithThrottle(id).orElseThrow(() -> new ResourceNotFoundException("Product " + id + " not found"));
+                Product product1 = productRepository.doFindByIdWithThrottle(id).orElseThrow(() -> new ResourceNotFoundException("Product " + id + " not found"));
+                Span.current().setAttribute("cache.miss", false);
+                return product1;
             } finally {
-                Span.current().setAttribute("cache.miss", true);
                 logger.info("Cache miss for product " + id + ", load from database in " + TimeUnit.MILLISECONDS.convert(System.nanoTime() - beforeInNanos, TimeUnit.NANOSECONDS) + "ms");
             }
         });

@@ -9,9 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,7 +19,7 @@ public class FrontendMonitor {
 
     final static Random RANDOM = new Random();
 
-    final static int SLEEP_MAX_DURATION_MILLIS = 1_000;
+    final static int SLEEP_MAX_DURATION_MILLIS = 50;
 
     enum PaymentMethod {VISA, AMEX, PAYPAL}
 
@@ -104,8 +103,36 @@ public class FrontendMonitor {
 
     final Distribution distribution = new Distribution();
 
-    public FrontendMonitor(List<String> frontBaseUrls) {
-        this.urls = frontBaseUrls;
+    public FrontendMonitor(List<String> urls) {
+        this.urls = urls;
+    }
+
+    public void post() {
+        ExecutorService executorService = Executors.newFixedThreadPool(4);
+
+        for (int i = 0; i < 100_000; i++) {
+            int productIdx = RANDOM.nextInt(this.products.size());
+            int quantity = 1 + RANDOM.nextInt(2);
+            Product product = this.products.get(productIdx);
+            PaymentMethod paymentMethod = getPaymentMethod(product, quantity);
+            executorService.execute(() -> {
+                try {
+                    placeOrder(quantity, product, paymentMethod);
+                } catch (ConnectException e) {
+                    StressTestUtils.incrementProgressBarConnectionFailure();
+                } catch (Exception e) {
+                    StressTestUtils.incrementProgressBarFailure();
+                    System.err.println(e);
+                } finally {
+                    try {
+                        Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            });
+        }
+
     }
 
     private PaymentMethod getPaymentMethod(Product product, int quantity) {
@@ -121,27 +148,13 @@ public class FrontendMonitor {
         return result;
     }
 
-
-    private void placeRandomOrder() {
-        int productIdx = RANDOM.nextInt(products.size());
-        int quantity = 1 + RANDOM.nextInt(2);
-        String frontendBaseUrl = urls.get(RANDOM.nextInt(urls.size()));
-        Product product = products.get(productIdx);
-        PaymentMethod paymentMethod = getPaymentMethod(product, quantity);
-        try {
-            Thread.sleep(RANDOM.nextInt(SLEEP_MAX_DURATION_MILLIS));
-            getProduct(product, frontendBaseUrl);
-            createOrder(quantity, product, paymentMethod, frontendBaseUrl);
-        } catch (ConnectException e) {
-            StressTestUtils.incrementProgressBarConnectionFailure();
-        } catch (Exception e) {
-            StressTestUtils.incrementProgressBarFailure();
-            System.err.println(e);
-        }
+    public void placeOrder(int quantity, Product product, PaymentMethod paymentMethod) throws IOException {
+        getProduct(product);
+        createOrder(quantity, product, paymentMethod);
     }
 
-    public void createOrder(int quantity, Product product, PaymentMethod paymentMethod, String frontendBaseUrl) throws IOException {
-        URL createProductUrl = new URL(frontendBaseUrl + "/api/orders");
+    public void createOrder(int quantity, Product product, PaymentMethod paymentMethod) throws IOException {
+        URL createProductUrl = new URL(getRandomUrl() + "/api/orders");
         HttpURLConnection createOrderConnection = (HttpURLConnection) createProductUrl.openConnection();
         createOrderConnection.setRequestMethod("POST");
         createOrderConnection.addRequestProperty("Accept", "application/json");
@@ -149,10 +162,10 @@ public class FrontendMonitor {
         createOrderConnection.setDoOutput(true);
 
         distribution.increment(paymentMethod, product.price * quantity);
-        //if (StressTestUtils.isEndOfLine()) {
-        //    System.out.println();
-        //    System.out.println(distribution.toPrettyString());
-        //}
+        if (StressTestUtils.isEndOfLine()) {
+            System.out.println();
+            System.out.println(distribution.toPrettyString());
+        }
 
         String createOrderJsonPayload = product.toJson(quantity, paymentMethod.name());
         try (OutputStream os = createOrderConnection.getOutputStream()) {
@@ -164,15 +177,15 @@ public class FrontendMonitor {
         if (statusCode == HttpURLConnection.HTTP_CREATED) {
             StressTestUtils.incrementProgressBarSuccess();
             InputStream responseStream = createOrderConnection.getInputStream();
-            FrontendMonitorUtils.toString(responseStream, "utf-8");
+            InjectorUtils.toString(responseStream, "utf-8");
             responseStream.close();
         } else {
             StressTestUtils.incrementProgressBarFailure();
         }
     }
 
-    public void getProduct(Product product, String frontendBaseUrl) throws IOException {
-        URL getProductUrl = new URL(frontendBaseUrl + "/api/products/" + product.id);
+    public void getProduct(Product product) throws IOException {
+        URL getProductUrl = new URL(getRandomUrl() + "/api/products/" + product.id);
         HttpURLConnection getProductConnection = (HttpURLConnection) getProductUrl.openConnection();
         getProductConnection.addRequestProperty("Accept", "application/json");
         int statusCode = getProductConnection.getResponseCode();
@@ -182,7 +195,7 @@ public class FrontendMonitor {
             // failure
         }
         InputStream responseStream = getProductConnection.getInputStream();
-        FrontendMonitorUtils.toString(responseStream, "utf-8");
+        InjectorUtils.toString(responseStream, "utf-8");
         responseStream.close();
     }
 
@@ -192,12 +205,12 @@ public class FrontendMonitor {
         List<String> frontendUrls = Stream.of(frontEndUrlsAsString.split(",")).map(String::trim).collect(Collectors.toList());
         System.out.println("Frontend URLS: " + frontendUrls.stream().collect(Collectors.joining(", ")));
         FrontendMonitor frontendMonitor = new FrontendMonitor(frontendUrls);
-        int parallelThreads = 20;
-        ScheduledExecutorService executorService = Executors.newScheduledThreadPool(parallelThreads);
+        frontendMonitor.post();
 
-        for (int i = 0; i < parallelThreads; i++) {
-            executorService.scheduleAtFixedRate(() -> frontendMonitor.placeRandomOrder(), RANDOM.nextInt(5_000), 5_000, TimeUnit.MILLISECONDS);
-        }
+    }
+
+    public String getRandomUrl() {
+        return urls.get(RANDOM.nextInt(urls.size()));
     }
 
     private static class Product {
