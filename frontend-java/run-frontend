@@ -44,6 +44,7 @@ if [ -r "$OPEN_TELEMETRY_AGENT_JAR" ]; then
 else
     echo "Couldn't find $OPEN_TELEMETRY_AGENT_JAR, downloading it ..."
     jarUrl="https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v$OPEN_TELEMETRY_AGENT_VERSION/opentelemetry-javaagent.jar"
+
     if command -v wget > /dev/null; then
         wget "$jarUrl" -O "$OPEN_TELEMETRY_AGENT_JAR"
     elif command -v curl > /dev/null; then
@@ -56,18 +57,18 @@ fi
 
 $PRGDIR/../mvnw -DskipTests package
 
-echo "##########################"
-echo "# START CHECKOUT SERVICE #"
-echo "##########################"
+echo "##################"
+echo "# START FRONTEND #"
+echo "##################"
 echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
-echo ""
 
-export OTEL_RESOURCE_ATTRIBUTES="service.name=checkout-service,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=$OPEN_TELEMETRY_DEPLOYMENT_ENVIRONMENT"
+INSTANCE_NUMBER=1
+export OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.0-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-$INSTANCE_NUMBER,host.name=host-$INSTANCE_NUMBER"
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_LOGS_EXPORTER="otlp"
 
-java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
-     -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
-     -jar target/checkout-service-1.0-SNAPSHOT.jar
-
+java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log \
+     -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
+     -Dserver.port=8080 \
+     -jar target/frontend-1.0-SNAPSHOT.jar

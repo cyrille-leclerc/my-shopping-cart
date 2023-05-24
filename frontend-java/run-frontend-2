@@ -63,11 +63,12 @@ echo "##################"
 echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 
-export OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=$OPEN_TELEMETRY_DEPLOYMENT_ENVIRONMENT"
-export OTEL_METRICS_EXPORTER="otlp,prometheus"
+INSTANCE_NUMBER=5
+export OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.0-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-$INSTANCE_NUMBER,host.name=host-$INSTANCE_NUMBER"
+export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_LOGS_EXPORTER="otlp"
 
 java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log \
      -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
-     -Dserver.port=8080 \
+     -Dserver.port=808$INSTANCE_NUMBER \
      -jar target/frontend-1.0-SNAPSHOT.jar

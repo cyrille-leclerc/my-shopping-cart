@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# set -x
+
 ##########################################################################################
 # PARENT DIRECTORY
 # code copied from Tomcat's `catalina.sh`
@@ -20,15 +22,21 @@ done
 PRGDIR=`dirname "$PRG"`
 
 # LOAD ENVIRONMENT VARIABLES
-if [ -r "$PRGDIR/../setenv.sh" ]; then
+if [ -r "$PRGDIR/setenv.sh" ]; then
+  . "$PRGDIR/setenv.sh"
+elif [ -r "$PRGDIR/../setenv.sh" ]; then
   . "$PRGDIR/../setenv.sh"
 else
   . "$PRGDIR/../setenv.default.sh"
 fi
-if [ -r "$PRGDIR/setenv.sh" ]; then
-  . "$PRGDIR/setenv.sh"
-fi
 
-export AGENT_MODE=flow
-#grafana-agent run "$PRGDIR/agent-config.flow"
-grafana-agent run "/Users/cyrilleleclerc/git/grafana/opentelemetry-docs/docs/sources/instrumentation/grafana-agent/agent-config.river"
+$PRGDIR/../mvnw -DskipTests package
+
+
+echo "##################"
+echo "# START MONITOR #"
+echo "##################"
+
+java -classpath target/dependency/*:target/classes/ \
+     -Dfrontend.urls="http://localhost:8080, http://localhost:8085" \
+     FrontendMonitor

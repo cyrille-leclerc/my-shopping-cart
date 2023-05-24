@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -x
+# set -x
 
 ##########################################################################################
 # PARENT DIRECTORY
@@ -44,7 +44,6 @@ if [ -r "$OPEN_TELEMETRY_AGENT_JAR" ]; then
 else
     echo "Couldn't find $OPEN_TELEMETRY_AGENT_JAR, downloading it ..."
     jarUrl="https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v$OPEN_TELEMETRY_AGENT_VERSION/opentelemetry-javaagent.jar"
-
     if command -v wget > /dev/null; then
         wget "$jarUrl" -O "$OPEN_TELEMETRY_AGENT_JAR"
     elif command -v curl > /dev/null; then
@@ -57,18 +56,18 @@ fi
 
 $PRGDIR/../mvnw -DskipTests package
 
-
-echo "####################"
-echo "# START ANTI FRAUD #"
-echo "####################"
+echo "##########################"
+echo "# START CHECKOUT SERVICE #"
+echo "##########################"
 echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 echo ""
 
-export OTEL_RESOURCE_ATTRIBUTES="service.name=anti-fraud-service,service.namespace=com-shoppingcart,service.version=1.0-SNAPSHOT,deployment.environment=$OPEN_TELEMETRY_DEPLOYMENT_ENVIRONMENT"
+export OTEL_RESOURCE_ATTRIBUTES="service.name=checkout-service,service.namespace=$SERVICE_NAMESPACE,service.version=1.0-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT"
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_LOGS_EXPORTER="otlp"
 
-java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
-     -Dserver.port=8081 \
-     -jar target/anti-fraud-1.0-SNAPSHOT.jar
+java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
+     -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info \
+     -jar target/checkout-service-1.0-SNAPSHOT.jar
+
