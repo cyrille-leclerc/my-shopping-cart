@@ -1,0 +1,109 @@
+{
+  "traces": [
+    {
+      "traceID": "111f5594ff52b1f917f4deca8e38243a",
+      "rootServiceName": "frontend",
+      "rootTraceName": "GET /api/products/{id}",
+      "startTimeUnixNano": "1680118368360666000",
+      "durationMs": 1,
+      "spanSet": {
+        "spans": [
+          {
+            "spanID": "16c5b71421a9c9a9",
+            "startTimeUnixNano": "1680118368362117250",
+            "durationNanos": "10708",
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "frontend"
+                }
+              }
+            ]
+          },
+          {
+            "spanID": "8ab7f2158d0e9ab1",
+            "startTimeUnixNano": "1680118368361661291",
+            "durationNanos": "434000",
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "frontend"
+                }
+              }
+            ]
+          },
+          {
+            "spanID": "e560211fc3f4ab97",
+            "startTimeUnixNano": "1680118368361049916",
+            "durationNanos": "1214959",
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "frontend"
+                }
+              }
+            ]
+          }
+        ],
+        "matched": 3
+      }
+    },
+    {
+      "traceID": "1902cf68e48c3d84146317d4be05b773",
+      "rootServiceName": "frontend",
+      "rootTraceName": "GET /api/products/{id}",
+      "startTimeUnixNano": "1680118368163772000",
+      "durationMs": 1,
+      "spanSet": {
+        "spans": [
+          {
+            "spanID": "9f89e97412e6f1dd",
+            "startTimeUnixNano": "1680118368165346041",
+            "durationNanos": "12625",
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "frontend"
+                }
+              }
+            ]
+          },
+          {
+            "spanID": "0a6c923a40c3c9c8",
+            "startTimeUnixNano": "1680118368164948083",
+            "durationNanos": "379083",
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "frontend"
+                }
+              }
+            ]
+          },
+          {
+            "spanID": "d8899cf93f687d25",
+            "startTimeUnixNano": "1680118368164238916",
+            "durationNanos": "1375750",
+            "attributes": [
+              {
+                "key": "service.name",
+                "value": {
+                  "stringValue": "frontend"
+                }
+              }
+            ]
+          }
+        ],
+        "matched": 3
+      }
+    }
+  ],
+  "metrics": {
+    "inspectedBlocks": 34
+  }
+}

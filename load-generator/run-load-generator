@@ -39,5 +39,5 @@ echo "##################"
 
 
 
-java -classpath target/classes/ FrontendMonitor
+java -classpath target/classes/ FrontendLoadGenerator
 

@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @ManagedResource
 @RestController()
-public class AntiFraudController {
+public class FraudDetectionController {
 
     final static Random RANDOM = new Random();
     final static BigDecimal FIVE_PERCENT = new BigDecimal(5).divide(new BigDecimal(100), RoundingMode.HALF_UP);
@@ -61,7 +61,7 @@ public class AntiFraudController {
     final DataSource dataSource;
 
 
-    public AntiFraudController(Meter meter, DataSource dataSource) {
+    public FraudDetectionController(Meter meter, DataSource dataSource) {
         this.approvedOrderRecorder = meter.histogramBuilder("antifraud.approved.order").build();
         this.approvedOrderValueCounter = meter.counterBuilder("antifraud.approved.order_value").ofDoubles().build();
         this.approvedOrderCountCounter = meter.counterBuilder("antifraud.approved.order_count").build();

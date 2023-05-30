@@ -58,9 +58,9 @@ fi
 $PRGDIR/../mvnw -DskipTests package
 
 
-echo "####################"
-echo "# START ANTI FRAUD #"
-echo "####################"
+echo "#########################"
+echo "# START FRAUD DETECTION #"
+echo "#########################"
 echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 echo ""

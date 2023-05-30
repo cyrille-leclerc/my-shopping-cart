@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-public class AntiFraudApplication {
+public class FraudDetectionApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AntiFraudApplication.class, args);
+        SpringApplication.run(FraudDetectionApplication.class, args);
     }
 
     @Bean

@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FrontendMonitor {
+public class FrontendLoadGenerator {
 
     final static Random RANDOM = new Random();
 
@@ -103,7 +103,7 @@ public class FrontendMonitor {
 
     final Distribution distribution = new Distribution();
 
-    public FrontendMonitor(List<String> urls) {
+    public FrontendLoadGenerator(List<String> urls) {
         this.urls = urls;
     }
 
@@ -204,8 +204,8 @@ public class FrontendMonitor {
         String frontEndUrlsAsString = System.getProperty("frontend.urls", "http://localhost:8080");
         List<String> frontendUrls = Stream.of(frontEndUrlsAsString.split(",")).map(String::trim).collect(Collectors.toList());
         System.out.println("Frontend URLS: " + frontendUrls.stream().collect(Collectors.joining(", ")));
-        FrontendMonitor frontendMonitor = new FrontendMonitor(frontendUrls);
-        frontendMonitor.post();
+        FrontendLoadGenerator frontendLoadGenerator = new FrontendLoadGenerator(frontendUrls);
+        frontendLoadGenerator.post();
 
     }
 

@@ -21,9 +21,9 @@
     </properties>
     <modules>
         <module>checkout-service-protobuff</module>
-        <module>frontend-java</module>
-        <module>anti-fraud-java</module>
-        <module>monitor-java</module>
+        <module>frontend</module>
+        <module>fraud-detection</module>
+        <module>load-generator</module>
         <module>checkout-service</module>
     </modules>
     <dependencyManagement>

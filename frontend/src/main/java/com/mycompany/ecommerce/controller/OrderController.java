@@ -2,6 +2,7 @@ package com.mycompany.ecommerce.controller;
 
 import com.mycompany.checkout.PlaceOrderReply;
 import com.mycompany.checkout.PlaceOrderRequest;
+import com.mycompany.ecommerce.EcommerceApplication;
 import com.mycompany.ecommerce.OpenTelemetryAttributes;
 import com.mycompany.ecommerce.dto.OrderProductDto;
 import com.mycompany.ecommerce.exception.ResourceNotFoundException;
@@ -19,6 +20,8 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.core.MessageDeliveryMode;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -56,11 +59,11 @@ public class OrderController {
     final OrderService orderService;
     final OrderProductService orderProductService;
     final CheckoutService checkoutService;
+    RabbitTemplate rabbitTemplate;
     RestTemplate restTemplate;
     String antiFraudServiceBaseUrl;
     final DoubleHistogram orderValueHistogram;
     final DoubleHistogram orderWithTagsHistogram;
-
 
     public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService, CheckoutService checkoutService, Meter meter) {
         this.productService = productService;
@@ -132,16 +135,23 @@ public class OrderController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
-            String exceptionShortDescription = "status-" + antiFraudResult.getStatusCode();
+            String exceptionShortDescription = "fraudDetection-status-" + antiFraudResult.getStatusCode();
             span.recordException(new Exception(exceptionShortDescription));
             logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (!"OK".equals(antiFraudResult.getBody())) {
-            String exceptionShortDescription = "response-" + antiFraudResult.getBody();
+            String exceptionShortDescription = "fraudDetection-" + antiFraudResult.getBody();
             span.recordException(new Exception(exceptionShortDescription));
             logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        // test uninstrumented backend
+        ResponseEntity<String> exampleDotComResponse = restTemplate.getForEntity("https://example.com/", String.class);
+        if (exampleDotComResponse.getStatusCode() != HttpStatus.OK) {
+            String exceptionShortDescription = "exampleDotCom-status-" + antiFraudResult.getStatusCode();
+            span.recordException(new Exception(exceptionShortDescription));
         }
 
         Order order = new Order();
@@ -160,6 +170,8 @@ public class OrderController {
 
         this.orderService.update(order);
 
+        rabbitTemplate.convertAndSend(EcommerceApplication.AMQP_EXCHANGE, EcommerceApplication.AMQP_ROUTING_KEY, order.toString());
+
         final PlaceOrderReply placeOrderReply = this.checkoutService.placeOrder(PlaceOrderRequest.newBuilder().setName(customerId).build());
 
         // UPDATE METRICS
@@ -173,7 +185,8 @@ public class OrderController {
 
         long durationInNanos = System.nanoTime() - beforeInNanos;
 
-        logger.info("SUCCESS placeOrder orderId={} customerId={} price={} paymentMethod={} shippingMethod={} shippingCountry={} durationInNanos={}", order.getId(), customerId, orderPrice, paymentMethod, shippingMethod, shippingCountry, durationInNanos);
+        logger.info("SUCCESS placeOrder orderId={} customerId={} price={} paymentMethod={} shippingMethod={} shippingCountry={} durationInNanos={}",
+                order.getId(), customerId, orderPrice, paymentMethod, shippingMethod, shippingCountry, durationInNanos);
 
         String uri = ServletUriComponentsBuilder
                 .fromCurrentServletMapping()
@@ -212,6 +225,11 @@ public class OrderController {
     public String randomShippingMethod() {
         String[] shippingMethods = {"standard", "express"};
         return shippingMethods[RANDOM.nextInt(shippingMethods.length)];
+    }
+
+    @Autowired
+    public void setRabbitTemplate(RabbitTemplate rabbitTemplate) {
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Autowired
