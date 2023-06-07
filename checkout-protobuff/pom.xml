@@ -8,7 +8,7 @@
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>checkout-service-protobuff</artifactId>
+    <artifactId>checkout-protobuff</artifactId>
 
     <properties>
         <!-- -->

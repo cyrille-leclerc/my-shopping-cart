@@ -20,11 +20,11 @@
         <maven.compiler.source>17</maven.compiler.source>
     </properties>
     <modules>
-        <module>checkout-service-protobuff</module>
+        <module>checkout-protobuff</module>
         <module>frontend</module>
         <module>fraud-detection</module>
         <module>load-generator</module>
-        <module>checkout-service</module>
+        <module>checkout</module>
     </modules>
     <dependencyManagement>
         <dependencies>
