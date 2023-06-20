@@ -1,0 +1,3261 @@
+{
+  "batches": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8080"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16917"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.tomcat-7.0",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "0ZCvAKM7ZkQ=",
+              "name": "POST /api/orders",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1680118421662975000",
+              "endTimeUnixNano": "1680118421851701291",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "http.request_content_length",
+                  "value": {
+                    "intValue": "170"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/api/orders"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.addr",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "net.host.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.port",
+                  "value": {
+                    "intValue": "56839"
+                  }
+                },
+                {
+                  "key": "net.sock.host.addr",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Java/19.0.2"
+                  }
+                },
+                {
+                  "key": "http.route",
+                  "value": {
+                    "stringValue": "/api/orders"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "8080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "POST"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "201"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8080"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16917"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.spring-webmvc-3.1",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "iqCUrC4PGUk=",
+              "parentSpanId": "0ZCvAKM7ZkQ=",
+              "name": "OrderController.create",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421663119458",
+              "endTimeUnixNano": "1680118421851585875",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "customer_id",
+                  "value": {
+                    "stringValue": "customer-22"
+                  }
+                },
+                {
+                  "key": "shipping_country",
+                  "value": {
+                    "stringValue": "GB"
+                  }
+                },
+                {
+                  "key": "payment_method",
+                  "value": {
+                    "stringValue": "credit_cart"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "shipping_method",
+                  "value": {
+                    "stringValue": "express"
+                  }
+                },
+                {
+                  "key": "order_price_range",
+                  "value": {
+                    "stringValue": "small"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1680118421663233250",
+                  "name": "order-creation",
+                  "attributes": [
+                    {
+                      "key": "customer_id",
+                      "value": {
+                        "stringValue": "customer-22"
+                      }
+                    },
+                    {
+                      "key": "order_price",
+                      "value": {
+                        "doubleValue": 5
+                      }
+                    },
+                    {
+                      "key": "payment_method",
+                      "value": {
+                        "stringValue": "credit_cart"
+                      }
+                    },
+                    {
+                      "key": "shipping_country",
+                      "value": {
+                        "stringValue": "GB"
+                      }
+                    },
+                    {
+                      "key": "shipping_method",
+                      "value": {
+                        "stringValue": "express"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8080"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16917"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.http-url-connection",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "odV98UF0Ix8=",
+              "parentSpanId": "iqCUrC4PGUk=",
+              "name": "GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1680118421663375541",
+              "endTimeUnixNano": "1680118421774595791",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "8081"
+                  }
+                },
+                {
+                  "key": "http.response_content_length",
+                  "value": {
+                    "intValue": "2"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://localhost:8081/fraud/checkOrder?orderPrice=5.0\u0026customerIpAddress=127.0.0.1\u0026shippingCountry=GB"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8081"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16747"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "anti-fraud-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.tomcat-7.0",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "e+2IRRb4YFE=",
+              "parentSpanId": "odV98UF0Ix8=",
+              "name": "GET /fraud/checkOrder",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1680118421663738000",
+              "endTimeUnixNano": "1680118421774468709",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8081-exec-9"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/fraud/checkOrder?orderPrice=5.0\u0026customerIpAddress=127.0.0.1\u0026shippingCountry=GB"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.addr",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "net.host.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "53"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.port",
+                  "value": {
+                    "intValue": "56633"
+                  }
+                },
+                {
+                  "key": "net.sock.host.addr",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Java/19.0.2"
+                  }
+                },
+                {
+                  "key": "http.route",
+                  "value": {
+                    "stringValue": "/fraud/checkOrder"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "8081"
+                  }
+                },
+                {
+                  "key": "http.response_content_length",
+                  "value": {
+                    "intValue": "2"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8081"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16747"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "anti-fraud-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.spring-webmvc-3.1",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "xqTd0NtpVs8=",
+              "parentSpanId": "e+2IRRb4YFE=",
+              "name": "AntiFraudController.checkOrder",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421663972167",
+              "endTimeUnixNano": "1680118421774353209",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8081-exec-9"
+                  }
+                },
+                {
+                  "key": "shipping_country",
+                  "value": {
+                    "stringValue": "GB"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "53"
+                  }
+                },
+                {
+                  "key": "fraud_score",
+                  "value": {
+                    "intValue": "-6"
+                  }
+                },
+                {
+                  "key": "order_price",
+                  "value": {
+                    "doubleValue": 5
+                  }
+                },
+                {
+                  "key": "customer_ip_address",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8081"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16747"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "anti-fraud-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.jdbc",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "RvQHUFK+1HQ=",
+              "parentSpanId": "xqTd0NtpVs8=",
+              "name": "my_shopping_cart",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1680118421664072625",
+              "endTimeUnixNano": "1680118421664334709",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8081-exec-9"
+                  }
+                },
+                {
+                  "key": "db.name",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "53"
+                  }
+                },
+                {
+                  "key": "db.statement",
+                  "value": {
+                    "stringValue": ""
+                  }
+                },
+                {
+                  "key": "db.system",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "db.connection_string",
+                  "value": {
+                    "stringValue": "postgresql://localhost:5432"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "db.user",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "5432"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "X3fbAMJbT+s=",
+              "parentSpanId": "xqTd0NtpVs8=",
+              "name": "SELECT my_shopping_cart",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1680118421664353750",
+              "endTimeUnixNano": "1680118421715880959",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8081-exec-9"
+                  }
+                },
+                {
+                  "key": "db.name",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "db.operation",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "53"
+                  }
+                },
+                {
+                  "key": "db.statement",
+                  "value": {
+                    "stringValue": "select pg_sleep(?)"
+                  }
+                },
+                {
+                  "key": "db.system",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "db.connection_string",
+                  "value": {
+                    "stringValue": "postgresql://localhost:5432"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "db.user",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "5432"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8080"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16917"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.spring-data-1.8",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "w5Bpi+As0Gg=",
+              "parentSpanId": "iqCUrC4PGUk=",
+              "name": "OrderRepository.save",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421774900375",
+              "endTimeUnixNano": "1680118421775654583",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "code.function",
+                  "value": {
+                    "stringValue": "save"
+                  }
+                },
+                {
+                  "key": "code.namespace",
+                  "value": {
+                    "stringValue": "com.mycompany.ecommerce.repository.OrderRepository"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "+Oy+UgQ/1Ik=",
+              "parentSpanId": "iqCUrC4PGUk=",
+              "name": "OrderProductRepository.save",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421776697208",
+              "endTimeUnixNano": "1680118421777049625",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "code.function",
+                  "value": {
+                    "stringValue": "save"
+                  }
+                },
+                {
+                  "key": "code.namespace",
+                  "value": {
+                    "stringValue": "com.mycompany.ecommerce.repository.OrderProductRepository"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "zDR4LmNO9/E=",
+              "parentSpanId": "iqCUrC4PGUk=",
+              "name": "OrderRepository.save",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421777586875",
+              "endTimeUnixNano": "1680118421777934708",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "code.function",
+                  "value": {
+                    "stringValue": "save"
+                  }
+                },
+                {
+                  "key": "code.namespace",
+                  "value": {
+                    "stringValue": "com.mycompany.ecommerce.repository.OrderRepository"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8080"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16917"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.hibernate-4.0",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "+vw/TefMS4I=",
+              "parentSpanId": "w5Bpi+As0Gg=",
+              "name": "Session.persist com.mycompany.ecommerce.model.Order",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421774938375",
+              "endTimeUnixNano": "1680118421775628250",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "jPCDmdXrdE8=",
+              "parentSpanId": "iqCUrC4PGUk=",
+              "name": "Transaction.commit",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421775663916",
+              "endTimeUnixNano": "1680118421776058666",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "vOf95s3wlLw=",
+              "parentSpanId": "iqCUrC4PGUk=",
+              "name": "Transaction.commit",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421776603416",
+              "endTimeUnixNano": "1680118421776610166",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "6n8z6QuBxkM=",
+              "parentSpanId": "+Oy+UgQ/1Ik=",
+              "name": "Session.merge com.mycompany.ecommerce.model.OrderProduct",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421776723000",
+              "endTimeUnixNano": "1680118421777031125",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "iEN9mmVil/E=",
+              "parentSpanId": "iqCUrC4PGUk=",
+              "name": "Transaction.commit",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421777053875",
+              "endTimeUnixNano": "1680118421777504541",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "tZChbooJ74Y=",
+              "parentSpanId": "zDR4LmNO9/E=",
+              "name": "Session.merge com.mycompany.ecommerce.model.Order",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421777595458",
+              "endTimeUnixNano": "1680118421777926208",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "ugiHweqDZmM=",
+              "parentSpanId": "iqCUrC4PGUk=",
+              "name": "Transaction.commit",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421777938000",
+              "endTimeUnixNano": "1680118421778017083",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8080"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16917"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.jdbc",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "uzH+Nbjnbd8=",
+              "parentSpanId": "+vw/TefMS4I=",
+              "name": "INSERT my_shopping_cart.orders",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1680118421775194041",
+              "endTimeUnixNano": "1680118421775601958",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "db.name",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "db.sql.table",
+                  "value": {
+                    "stringValue": "orders"
+                  }
+                },
+                {
+                  "key": "db.operation",
+                  "value": {
+                    "stringValue": "INSERT"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "db.statement",
+                  "value": {
+                    "stringValue": "insert into orders (date_created, status) values (?, ?)"
+                  }
+                },
+                {
+                  "key": "db.system",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "db.connection_string",
+                  "value": {
+                    "stringValue": "postgresql://localhost:5432"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "db.user",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "5432"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "jE09j0MP+H0=",
+              "parentSpanId": "6n8z6QuBxkM=",
+              "name": "SELECT my_shopping_cart.order_product",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1680118421776789291",
+              "endTimeUnixNano": "1680118421776928833",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "db.name",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "db.sql.table",
+                  "value": {
+                    "stringValue": "order_product"
+                  }
+                },
+                {
+                  "key": "db.operation",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "db.statement",
+                  "value": {
+                    "stringValue": "select orderprodu0_.order_id as order_id2_0_0_, orderprodu0_.product_id as product_3_0_0_, orderprodu0_.quantity as quantity1_0_0_ from order_product orderprodu0_ where orderprodu0_.order_id=? and orderprodu0_.product_id=?"
+                  }
+                },
+                {
+                  "key": "db.system",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "db.connection_string",
+                  "value": {
+                    "stringValue": "postgresql://localhost:5432"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "db.user",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "5432"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "0hD4rdnWJh0=",
+              "parentSpanId": "iEN9mmVil/E=",
+              "name": "INSERT my_shopping_cart.order_product",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1680118421777101875",
+              "endTimeUnixNano": "1680118421777284500",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "db.name",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "db.sql.table",
+                  "value": {
+                    "stringValue": "order_product"
+                  }
+                },
+                {
+                  "key": "db.operation",
+                  "value": {
+                    "stringValue": "INSERT"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "db.statement",
+                  "value": {
+                    "stringValue": "insert into order_product (quantity, order_id, product_id) values (?, ?, ?)"
+                  }
+                },
+                {
+                  "key": "db.system",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "db.connection_string",
+                  "value": {
+                    "stringValue": "postgresql://localhost:5432"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "db.user",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "5432"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "fQCrQbOZ7BQ=",
+              "parentSpanId": "tZChbooJ74Y=",
+              "name": "SELECT my_shopping_cart.orders",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1680118421777612833",
+              "endTimeUnixNano": "1680118421777695791",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "db.name",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "db.sql.table",
+                  "value": {
+                    "stringValue": "orders"
+                  }
+                },
+                {
+                  "key": "db.operation",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "db.statement",
+                  "value": {
+                    "stringValue": "select order0_.id as id1_1_0_, order0_.date_created as date_cre2_1_0_, order0_.status as status3_1_0_ from orders order0_ where order0_.id=?"
+                  }
+                },
+                {
+                  "key": "db.system",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "db.connection_string",
+                  "value": {
+                    "stringValue": "postgresql://localhost:5432"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "db.user",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "5432"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "0Mk1TtgFzFk=",
+              "parentSpanId": "tZChbooJ74Y=",
+              "name": "SELECT my_shopping_cart.order_product",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1680118421777804458",
+              "endTimeUnixNano": "1680118421777883916",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "db.name",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "db.sql.table",
+                  "value": {
+                    "stringValue": "order_product"
+                  }
+                },
+                {
+                  "key": "db.operation",
+                  "value": {
+                    "stringValue": "SELECT"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "db.statement",
+                  "value": {
+                    "stringValue": "select orderprodu0_.order_id as order_id2_0_0_, orderprodu0_.product_id as product_3_0_0_, orderprodu0_.quantity as quantity1_0_0_ from order_product orderprodu0_ where orderprodu0_.order_id=? and orderprodu0_.product_id=?"
+                  }
+                },
+                {
+                  "key": "db.system",
+                  "value": {
+                    "stringValue": "postgresql"
+                  }
+                },
+                {
+                  "key": "db.connection_string",
+                  "value": {
+                    "stringValue": "postgresql://localhost:5432"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "db.user",
+                  "value": {
+                    "stringValue": "my_shopping_cart"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "5432"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8080"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16917"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.opentelemetry-instrumentation-annotations-1.16",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "9UJ4cxzWILE=",
+              "parentSpanId": "iqCUrC4PGUk=",
+              "name": "ProductServiceImpl.getProduct",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1680118421776206375",
+              "endTimeUnixNano": "1680118421776591500",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "code.function",
+                  "value": {
+                    "stringValue": "getProduct"
+                  }
+                },
+                {
+                  "key": "code.namespace",
+                  "value": {
+                    "stringValue": "com.mycompany.ecommerce.service.ProductServiceImpl"
+                  }
+                },
+                {
+                  "key": "productId",
+                  "value": {
+                    "intValue": "4"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8080"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16917"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.lettuce-5.1",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "/XNAep9mbE8=",
+              "parentSpanId": "9UJ4cxzWILE=",
+              "name": "GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1680118421776302375",
+              "endTimeUnixNano": "1680118421776532750",
+              "attributes": [
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "lettuce-nioEventLoop-4-1"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "72"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.port",
+                  "value": {
+                    "intValue": "6379"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.addr",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "db.statement",
+                  "value": {
+                    "stringValue": "GET productCache::4"
+                  }
+                },
+                {
+                  "key": "db.system",
+                  "value": {
+                    "stringValue": "redis"
+                  }
+                },
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1680118421776320250",
+                  "name": "redis.encode.start"
+                },
+                {
+                  "timeUnixNano": "1680118421776329833",
+                  "name": "redis.encode.end"
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dserver.port=8080"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16917"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "frontend"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.grpc-1.6",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "CMJ+vXhFUdo=",
+              "parentSpanId": "iqCUrC4PGUk=",
+              "name": "com.mycompany.checkout.CheckoutService/PlaceOrder",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1680118421778043250",
+              "endTimeUnixNano": "1680118421850810708",
+              "attributes": [
+                {
+                  "key": "rpc.system",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                },
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "http-nio-8080-exec-6"
+                  }
+                },
+                {
+                  "key": "rpc.grpc.status_code",
+                  "value": {
+                    "intValue": "0"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "57"
+                  }
+                },
+                {
+                  "key": "rpc.service",
+                  "value": {
+                    "stringValue": "com.mycompany.checkout.CheckoutService"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.addr",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "rpc.method",
+                  "value": {
+                    "stringValue": "PlaceOrder"
+                  }
+                },
+                {
+                  "key": "net.peer.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "50051"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1680118421778210708",
+                  "name": "message",
+                  "attributes": [
+                    {
+                      "key": "message.id",
+                      "value": {
+                        "intValue": "1"
+                      }
+                    },
+                    {
+                      "key": "message.type",
+                      "value": {
+                        "stringValue": "SENT"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "timeUnixNano": "1680118421850775541",
+                  "name": "message",
+                  "attributes": [
+                    {
+                      "key": "message.id",
+                      "value": {
+                        "intValue": "2"
+                      }
+                    },
+                    {
+                      "key": "message.type",
+                      "value": {
+                        "stringValue": "RECEIVED"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "deployment.environment",
+            "value": {
+              "stringValue": "production"
+            }
+          },
+          {
+            "key": "host.arch",
+            "value": {
+              "stringValue": "aarch64"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Mac OS X 13.2.1"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "darwin"
+            }
+          },
+          {
+            "key": "process.command_line",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java -javaagent:./../.otel/opentelemetry-javaagent-1.24.0.jar -Dio.opentelemetry.auto.slf4j.simpleLogger.defaultLogLevel=info"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/opt/homebrew/Cellar/openjdk/19.0.2/libexec/openjdk.jdk/Contents/Home/bin/java"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "16839"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "Homebrew OpenJDK 64-Bit Server VM 19.0.2"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "OpenJDK Runtime Environment"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "19.0.2"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "com-shoppingcart"
+            }
+          },
+          {
+            "key": "service.version",
+            "value": {
+              "stringValue": "1.0-SNAPSHOT"
+            }
+          },
+          {
+            "key": "telemetry.auto.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.24.0"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "cyrille-le-clerc-macbook.local"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "checkout-service"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "io.opentelemetry.grpc-1.6",
+            "version": "1.24.0-alpha"
+          },
+          "spans": [
+            {
+              "traceId": "A6n+r9iIZnXMAjdg++gGaQ==",
+              "spanId": "HMmXVqAACLo=",
+              "parentSpanId": "CMJ+vXhFUdo=",
+              "name": "com.mycompany.checkout.CheckoutService/PlaceOrder",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1680118421778418000",
+              "endTimeUnixNano": "1680118421850208667",
+              "attributes": [
+                {
+                  "key": "rpc.system",
+                  "value": {
+                    "stringValue": "grpc"
+                  }
+                },
+                {
+                  "key": "thread.id",
+                  "value": {
+                    "intValue": "406"
+                  }
+                },
+                {
+                  "key": "thread.name",
+                  "value": {
+                    "stringValue": "grpc-default-executor-133"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.port",
+                  "value": {
+                    "intValue": "56638"
+                  }
+                },
+                {
+                  "key": "rpc.grpc.status_code",
+                  "value": {
+                    "intValue": "0"
+                  }
+                },
+                {
+                  "key": "rpc.service",
+                  "value": {
+                    "stringValue": "com.mycompany.checkout.CheckoutService"
+                  }
+                },
+                {
+                  "key": "net.sock.peer.addr",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "50051"
+                  }
+                },
+                {
+                  "key": "rpc.method",
+                  "value": {
+                    "stringValue": "PlaceOrder"
+                  }
+                },
+                {
+                  "key": "net.host.name",
+                  "value": {
+                    "stringValue": "localhost"
+                  }
+                },
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                }
+              ],
+              "events": [
+                {
+                  "timeUnixNano": "1680118421778497542",
+                  "name": "message",
+                  "attributes": [
+                    {
+                      "key": "message.id",
+                      "value": {
+                        "intValue": "1"
+                      }
+                    },
+                    {
+                      "key": "message.type",
+                      "value": {
+                        "stringValue": "RECEIVED"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "timeUnixNano": "1680118421850179042",
+                  "name": "message",
+                  "attributes": [
+                    {
+                      "key": "message.id",
+                      "value": {
+                        "intValue": "2"
+                      }
+                    },
+                    {
+                      "key": "message.type",
+                      "value": {
+                        "stringValue": "SENT"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    }
