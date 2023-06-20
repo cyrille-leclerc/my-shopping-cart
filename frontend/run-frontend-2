@@ -55,11 +55,9 @@ else
     fi
 fi
 
-$PRGDIR/../mvnw -DskipTests package
-
-echo "##################"
-echo "# START FRONTEND #"
-echo "##################"
+echo "####################"
+echo "# START FRONTEND $INSTANCE_NUMBER #"
+echo "####################"
 echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 
@@ -68,7 +66,8 @@ export OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVIC
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_LOGS_EXPORTER="otlp"
 
-java -Xlog:gc*=info:file=/usr/local/var/log/my-shopping-cart/frontent_gc.log \
+java \
      -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dserver.port=808$INSTANCE_NUMBER \
+     -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -jar target/frontend-1.0-SNAPSHOT.jar

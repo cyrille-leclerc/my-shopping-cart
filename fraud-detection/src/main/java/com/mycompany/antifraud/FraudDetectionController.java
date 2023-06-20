@@ -41,7 +41,7 @@ public class FraudDetectionController {
 
     int fraudPercentageOnSmallShoppingCarts = 0;
     int fraudPercentageOnMediumShoppingCarts = 0;
-    int fraudPercentageOnLargeShoppingCarts = 10;
+    int fraudPercentageOnLargeShoppingCarts = 20;
 
     int priceUpperBoundaryDollarsOnSmallShoppingCart = 10;
     int priceUpperBoundaryDollarsOnMediumShoppingCarts = 100;
@@ -116,10 +116,14 @@ public class FraudDetectionController {
                     long actualSleepInMillis = TimeUnit.MILLISECONDS.convert(actualSleepInNanos, TimeUnit.NANOSECONDS);
 
                     long deltaPercents = Math.abs(actualSleepInMillis - checkOrderDurationMillis) * 100 / checkOrderDurationMillis;
-                    logger.info("checkOrder(totalPrice: {}, shippingCountry: {}, customerIpAddress: {}): fraudScore: {}, rejected: {}, " +
-                                    "expectedSleep: {}ms, actualSleep: {}ms, delta:{}%",
-                            new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, fraudScore, rejected,
-                            checkOrderDurationMillis, actualSleepInMillis, deltaPercents);
+                    if (rejected) {
+                        logger.warn("checkOrder(totalPrice={}, shippingCountry={}, customerIpAddress={}) fraudScore={}, status=REJECTED",
+                                new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, fraudScore);
+                    } else {
+                        logger.info("checkOrder(totalPrice={}, shippingCountry={}, customerIpAddress={}) fraudScore={}, status=ACCEPTED",
+                                new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, fraudScore);
+                    }
+
 
                 }
                 // Thread.sleep(checkOrderDurationMillis);

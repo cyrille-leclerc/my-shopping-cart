@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -201,6 +202,7 @@ public class FrontendLoadGenerator {
 
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> System.out.println("\nBye " + LocalDateTime.now())));
         String frontEndUrlsAsString = System.getProperty("frontend.urls", "http://localhost:8080");
         List<String> frontendUrls = Stream.of(frontEndUrlsAsString.split(",")).map(String::trim).collect(Collectors.toList());
         System.out.println("Frontend URLS: " + frontendUrls.stream().collect(Collectors.joining(", ")));

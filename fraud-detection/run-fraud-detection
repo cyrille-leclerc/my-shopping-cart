@@ -71,4 +71,5 @@ export OTEL_LOGS_EXPORTER="otlp"
 
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dserver.port=8081 \
+     -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -jar target/fraud-detection-1.0-SNAPSHOT.jar

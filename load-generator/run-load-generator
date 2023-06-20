@@ -33,11 +33,17 @@ fi
 $PRGDIR/../mvnw -DskipTests package
 
 
-echo "##################"
-echo "# START MONITOR #"
-echo "##################"
+echo "########################"
+echo "# START LOAD GENERATOR #"
+echo "########################"
 
+export OTEL_RESOURCE_ATTRIBUTES="service.name=load-generartor,service.namespace=$SERVICE_NAMESPACE,service.version=1.0-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-$INSTANCE_NUMBER,host.name=host-$INSTANCE_NUMBER"
+export OTEL_TRACES_EXPORTER="none"
+export OTEL_METRICS_EXPORTER="otlp"
+export OTEL_LOGS_EXPORTER="otlp"
 
-
-java -classpath target/classes/ FrontendLoadGenerator
+java \
+     -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
+     -classpath target/classes/ \
+     FrontendLoadGenerator
 

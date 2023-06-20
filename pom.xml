@@ -22,6 +22,7 @@
     <modules>
         <module>checkout-protobuff</module>
         <module>frontend</module>
+        <module>warehouse</module>
         <module>fraud-detection</module>
         <module>load-generator</module>
         <module>checkout</module>

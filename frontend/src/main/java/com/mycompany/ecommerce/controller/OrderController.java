@@ -131,19 +131,19 @@ public class OrderController {
             if (e.getCause() != null) {
                 exceptionShortDescription += " / " + e.getCause().getClass().getSimpleName();
             }
-            logger.info("Failure createOrder({}): price: {}, fraud.exception: {} with URL {}", form, orderPrice, exceptionShortDescription, url);
+            logger.warn("FAILURE createOrder({}): price: {}, fraud.exception: {} with URL {}", form, orderPrice, exceptionShortDescription, url);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
             String exceptionShortDescription = "fraudDetection-status-" + antiFraudResult.getStatusCode();
             span.recordException(new Exception(exceptionShortDescription));
-            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
+            logger.warn("FAILURE createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (!"OK".equals(antiFraudResult.getBody())) {
             String exceptionShortDescription = "fraudDetection-" + antiFraudResult.getBody();
             span.recordException(new Exception(exceptionShortDescription));
-            logger.info("Failure createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
+            logger.warn("FAILURE createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -185,7 +185,7 @@ public class OrderController {
 
         long durationInNanos = System.nanoTime() - beforeInNanos;
 
-        logger.info("SUCCESS placeOrder orderId={} customerId={} price={} paymentMethod={} shippingMethod={} shippingCountry={} durationInNanos={}",
+        logger.info("Success placeOrder orderId={} customerId={} price={} paymentMethod={} shippingMethod={} shippingCountry={} durationInNanos={}",
                 order.getId(), customerId, orderPrice, paymentMethod, shippingMethod, shippingCountry, durationInNanos);
 
         String uri = ServletUriComponentsBuilder
