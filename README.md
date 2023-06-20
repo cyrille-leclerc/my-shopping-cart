@@ -6,7 +6,9 @@
     * Hibernate will create a bunch of tables in this `test` database. 
     * Configuration can be changed in the `application.properties` config files
 * Redis
-* Elastic APM
+* RabbitMQ
+* A DNS service that maps www.example.com like Google DNS `8.8.8.8`
+* Grafana Cloud
 * `npm`
    * `npm install copyfiles -g`
 # Architecture
@@ -30,7 +32,6 @@ OpenTelemetry metrics are demoed here providing in the `frontend-java` app:
 
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/ecommerce-system-dashboard.png)
 
-Kibana dashboard definition: https://github.com/cyrille-leclerc/my-shopping-cart/blob/open-telemetry/src/main/kibana/ecommerce-dashboard.ndjson
 
 
 ### Logs
@@ -47,11 +48,11 @@ Auto instrumentation of logs that are seamlessly collected by the Otel agents
 brew install postgresql
 brew services start postgresql
 psql postgre
-create database test;
-CREATE USER test WITH PASSWORD 'test';
+create database my_shopping_cart;
+CREATE USER my_shopping_cart WITH PASSWORD 'my_shopping_cart';
 
 // TODO create role test
-GRANT ALL PRIVILEGES ON DATABASE test TO test;
+GRANT ALL PRIVILEGES ON DATABASE my_shopping_cart TO my_shopping_cart;
 
 ```
 
@@ -61,47 +62,40 @@ cd redis/
 ./run-redis.sh  
 ```
 
-* shell 1: start OpenTelemetry collector
-   * Run the collector
- ```
-cd opentelemetry-collector/
-./run-opentelemetry-collector.sh  
-```
+* Install and start RabbitMQ
 
-* shell 2: Anti Fraud service
+* shell : Fraud Detection service
  
 ```
- cd anti-fraud-java/
- ./run-anti-fraud.sh  
+ cd fraud-detection/
+ ./run-fraud-detection  
  ```
 
-* shell 3: Checkout Service
+* shell 3: Checkout service
 
 ```
- cd checkout-service/
- ./run-checkout-service.sh 
+ cd checkout/
+ ./run-checkout 
  ```
 
 * shell 4: Frontend
  
 ```
- cd fronten-java/
- ./run-frontend.sh  
+ cd fronten/
+ ./run-frontend
  ```
 
 
-* shell 5: Monitor to inject load on the application
+* shell 5: Load generator to inject load on the application
  ```
-cd monitor-java
-./run-monitor.sh  
+cd load-generator
+./run-load-generator  
 ```
 
+* shell 6: Grafana Agent or OpenTelemetry Collector to send all the data to your Observability backend
 
 # Sample execution
 
-
-
-* shell 1: start OpenTelemetry collector
 
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/elastic-apm-distributed-trace-opentelemetry.png)
 
