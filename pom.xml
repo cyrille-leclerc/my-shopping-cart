@@ -41,7 +41,7 @@
                 https://github.com/opentracing-contrib/java-jdbc/commit/b45d56de6ae61ee83bf079504458c20545fa45d6
                 use 0.1.1
                 -->
-                <version>0.2.12</version>
+                <version>0.2.15</version>
             </dependency>
             <dependency>
                 <groupId>io.opentracing.contrib</groupId>
