@@ -77,8 +77,7 @@ public class FraudDetectionController {
     public String checkOrder(
             @RequestParam double orderPrice,
             @RequestParam String shippingCountry,
-            @RequestParam String customerIpAddress,
-            HttpServletRequest request) {
+            @RequestParam String customerIpAddress) {
 
         Span.current().setAttribute("order_price", orderPrice);
         Span.current().setAttribute("customer_ip_address", customerIpAddress);
