@@ -43,6 +43,7 @@ public class ShippingController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return "ok";
     }
 }

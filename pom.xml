@@ -24,7 +24,6 @@
         <module>frontend</module>
         <module>warehouse</module>
         <module>fraud-detection</module>
-        <module>load-generator</module>
         <module>checkout</module>
         <module>shipping</module>
     </modules>

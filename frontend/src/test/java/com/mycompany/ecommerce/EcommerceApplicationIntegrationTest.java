@@ -103,6 +103,7 @@ public class EcommerceApplicationIntegrationTest {
         productDto.setProduct(new Product(1L, "TV Set", 300.00, "http://placehold.it/200x100"));
         productDto.setQuantity(2);
         orderForm.setProductOrders(Collections.singletonList(productDto));
+        orderForm.setPaymentMethod("visa");
 
         return orderForm;
     }

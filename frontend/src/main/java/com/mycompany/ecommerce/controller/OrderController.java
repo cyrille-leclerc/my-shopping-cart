@@ -20,7 +20,6 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.MessageDeliveryMode;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,12 +27,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -100,9 +94,9 @@ public class OrderController {
         span.setAttribute(OpenTelemetryAttributes.CUSTOMER_ID, customerId);
 
         double orderPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
-        String shippingCountry = getCountryCode(request.getRemoteAddr());
-        String shippingMethod = randomShippingMethod();
-        String paymentMethod = randomPaymentMethod();
+        String shippingCountry = form.getShippingCountry();
+        String shippingMethod = form.getShippingMethod();
+        String paymentMethod = form.getPaymentMethod();
 
         span.addEvent("order-creation", Attributes.of(
                 OpenTelemetryAttributes.CUSTOMER_ID, customerId,
@@ -117,10 +111,10 @@ public class OrderController {
         span.setAttribute(OpenTelemetryAttributes.SHIPPING_METHOD.getKey(), shippingMethod);
         span.setAttribute(OpenTelemetryAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
 
-        ResponseEntity<String> antiFraudResult;
+        ResponseEntity<String> fraudDetectionResult;
         String url = this.antiFraudServiceBaseUrl + (antiFraudServiceBaseUrl.endsWith("/") ? "" : "/") + "fraud/checkOrder?orderPrice={q}&customerIpAddress={q}&shippingCountry={q}";
         try {
-            antiFraudResult = restTemplate.getForEntity(
+            fraudDetectionResult = restTemplate.getForEntity(
                     url,
                     String.class,
                     orderPrice, request.getRemoteAddr(), shippingCountry);
@@ -134,14 +128,14 @@ public class OrderController {
             logger.warn("FAILURE createOrder({}): price: {}, fraud.exception: {} with URL {}", form, orderPrice, exceptionShortDescription, url);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (antiFraudResult.getStatusCode() != HttpStatus.OK) {
-            String exceptionShortDescription = "fraudDetection-status-" + antiFraudResult.getStatusCode();
+        if (fraudDetectionResult.getStatusCode() != HttpStatus.OK) {
+            String exceptionShortDescription = "fraudDetection-status-" + fraudDetectionResult.getStatusCode();
             span.recordException(new Exception(exceptionShortDescription));
             logger.warn("FAILURE createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (!"OK".equals(antiFraudResult.getBody())) {
-            String exceptionShortDescription = "fraudDetection-" + antiFraudResult.getBody();
+        if (!"OK".equals(fraudDetectionResult.getBody())) {
+            String exceptionShortDescription = "fraudDetection-" + fraudDetectionResult.getBody();
             span.recordException(new Exception(exceptionShortDescription));
             logger.warn("FAILURE createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -150,7 +144,7 @@ public class OrderController {
         // test uninstrumented backend
         ResponseEntity<String> exampleDotComResponse = restTemplate.getForEntity("https://example.com/", String.class);
         if (exampleDotComResponse.getStatusCode() != HttpStatus.OK) {
-            String exceptionShortDescription = "exampleDotCom-status-" + antiFraudResult.getStatusCode();
+            String exceptionShortDescription = "exampleDotCom-status-" + fraudDetectionResult.getStatusCode();
             span.recordException(new Exception(exceptionShortDescription));
         }
 
@@ -212,21 +206,6 @@ public class OrderController {
         }
     }
 
-    public String getCountryCode(String ip) {
-        String[] countries = {"US", "FR", "GB"};
-        return countries[RANDOM.nextInt(countries.length)];
-    }
-
-    public String randomPaymentMethod() {
-        String[] paymentMethods = {"credit_cart", "paypal"};
-        return paymentMethods[RANDOM.nextInt(paymentMethods.length)];
-    }
-
-    public String randomShippingMethod() {
-        String[] shippingMethods = {"standard", "express"};
-        return shippingMethods[RANDOM.nextInt(shippingMethods.length)];
-    }
-
     @Autowired
     public void setRabbitTemplate(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
@@ -256,6 +235,12 @@ public class OrderController {
 
         private List<OrderProductDto> productOrders;
 
+        private String paymentMethod;
+
+        private String shippingCountry;
+
+        private String shippingMethod;
+
         public List<OrderProductDto> getProductOrders() {
             return productOrders;
         }
@@ -264,9 +249,38 @@ public class OrderController {
             this.productOrders = productOrders;
         }
 
+        public String getPaymentMethod() {
+            return paymentMethod;
+        }
+
+        public void setPaymentMethod(String paymentMethod) {
+            this.paymentMethod = paymentMethod;
+        }
+
+        public String getShippingCountry() {
+            return shippingCountry;
+        }
+
+        public void setShippingCountry(String shippingCountry) {
+            this.shippingCountry = shippingCountry;
+        }
+
+        public String getShippingMethod() {
+            return shippingMethod;
+        }
+
+        public void setShippingMethod(String shippingMethod) {
+            this.shippingMethod = shippingMethod;
+        }
+
         @Override
         public String toString() {
-            return "OrderForm{" + this.productOrders.stream().map(OrderProductDto::toString).collect(Collectors.joining(",")) + "}";
+            return "OrderForm{" +
+                    "paymentMethod='" + paymentMethod + '\'' +
+                    ", shippingCountry='" + shippingCountry + '\'' +
+                    ", shippingMethod='" + shippingMethod + '\'' +
+                    ", productOrders=" + productOrders.stream().map(OrderProductDto::toString).collect(Collectors.joining(",")) +
+                    '}';
         }
     }
 }
