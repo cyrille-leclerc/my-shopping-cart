@@ -1,9 +1,7 @@
 package com.mycompany.ecommerce.model;
 
-import org.springframework.core.style.ToStringCreator;
-
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Product {

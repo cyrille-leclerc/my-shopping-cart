@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-import javax.persistence.*;
-import javax.validation.Valid;
+import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;

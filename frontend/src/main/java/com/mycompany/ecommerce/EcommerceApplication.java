@@ -1,7 +1,7 @@
 package com.mycompany.ecommerce;
 
 import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
 import eu.rekawek.toxiproxy.ToxiproxyClient;
@@ -103,7 +103,7 @@ public class EcommerceApplication {
 
     @Bean
     public Module getJacksonHibernate5Module() {
-        return new Hibernate5Module();
+        return new Hibernate6Module();
     }
 
     @Bean

@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -32,7 +32,8 @@ public class EcommerceApplicationIntegrationTest {
 
     @Autowired private TestRestTemplate restTemplate;
 
-    @LocalServerPort private int port;
+    @LocalServerPort
+    private int port;
 
     @Autowired private ProductController productController;
 
@@ -91,7 +92,7 @@ public class EcommerceApplicationIntegrationTest {
         Order order = postResponse.getBody();
         Assertions
           .assertThat(postResponse.getStatusCode())
-          .isEqualByComparingTo(HttpStatus.CREATED);
+          .isEqualTo(HttpStatus.CREATED);
 
         assertThat(order, hasProperty("status", is("PAID")));
         assertThat(order.getOrderProducts(), hasItem(hasProperty("quantity", is(2))));
