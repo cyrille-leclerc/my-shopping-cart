@@ -2,13 +2,10 @@ package com.mycompany.ecommerce;
 
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.RedisStringCommands;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.core.types.Expiration;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 public class RedisCacheSpammer {
     public static void main(String[] args) {
@@ -20,7 +17,7 @@ public class RedisCacheSpammer {
         for (int i = 0; i < 3_000; i++) {
             final byte[] value = new byte[1024];
             random.nextBytes(value);
-            connection.set(
+            connection.stringCommands().set(
                     ("spam-key-" + i).getBytes(StandardCharsets.UTF_8),
                     value/*,
                     Expiration.from(365, TimeUnit.DAYS),
