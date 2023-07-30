@@ -8,12 +8,13 @@
 * Redis
 * RabbitMQ
 * A DNS service that maps www.example.com like Google DNS `8.8.8.8`
+* K6 installed
 * Grafana Cloud
 * `npm`
    * `npm install copyfiles -g`
 # Architecture
 
-![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/demo-architecture.png)
+![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/shopping-cart.drawio.svg)
 
 ## Demoed OpenTelemetry capabilities
 
@@ -64,21 +65,37 @@ cd redis/
 
 * Install and start RabbitMQ
 
-* shell : Fraud Detection service
+TODO
+
+* shell : Fraud Detection service (HTTP endpoint, OTel auto instrumentation)
  
 ```
  cd fraud-detection/
  ./run-fraud-detection  
  ```
 
-* shell 3: Checkout service
+* shell 3: Checkout service (gRPC endpoint, OTel auto instrumentation)
 
 ```
  cd checkout/
  ./run-checkout 
  ```
 
-* shell 4: Frontend
+* shell 4: Warehouse service (RabbitMQ consumer, OTel auto instrumentation)
+
+```
+ cd warehouse/
+ ./run-warehouse 
+ ```
+* shell 5: Shipping service (HTTP endpoint, Jaeger instrumentation)
+
+```
+ cd shipping/
+ ./run-shipping 
+ ```
+
+
+* shell 6: Frontend (HTTP endpoint, OTel auto instrumentation)
  
 ```
  cd fronten/
@@ -86,7 +103,7 @@ cd redis/
  ```
 
 
-* shell 5: Load generator to inject load on the application
+* shell 7: Load generator to inject load on the frontend (K6)
  ```
 cd load-generator
 ./run-load-generator  
