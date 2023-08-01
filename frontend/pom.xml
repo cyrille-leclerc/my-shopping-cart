@@ -21,10 +21,6 @@
 			<artifactId>checkout-protobuff</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>eu.rekawek.toxiproxy</groupId>
-			<artifactId>toxiproxy-java</artifactId>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -171,10 +167,10 @@
 			<plugin>
 				<groupId>com.github.eirslett</groupId>
 				<artifactId>frontend-maven-plugin</artifactId>
-				<version>1.12.1</version>
+				<version>1.13.4</version>
 				<configuration>
-					<nodeVersion>v16.14.0</nodeVersion>
-					<npmVersion>8.5.4</npmVersion>
+					<nodeVersion>v18.17.0</nodeVersion>
+					<npmVersion>9.8.1</npmVersion>
 					<workingDirectory>src/main/js</workingDirectory>
 				</configuration>
 				<executions>

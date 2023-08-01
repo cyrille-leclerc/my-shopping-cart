@@ -2,7 +2,7 @@ version: '3'
 
 services:
   frontend:
-    image: 'frontend:1.0-SNAPSHOT'
+    image: 'frontend:1.1-SNAPSHOT'
     container_name: frontend
     depends_on:
       - postgres
@@ -19,7 +19,7 @@ services:
     ports:
       - "8080:8080"
   anti-fraud:
-    image: 'anti-fraud:1.0-SNAPSHOT'
+    image: 'anti-fraud:1.1-SNAPSHOT'
     container_name: anti-fraud
     depends_on:
       - postgres
@@ -33,7 +33,7 @@ services:
     ports:
       - "8081:8081"
   checkout:
-    image: 'checkout-service:1.0-SNAPSHOT'
+    image: 'checkout-service:1.1-SNAPSHOT'
     container_name: checkout
     depends_on:
       - postgres

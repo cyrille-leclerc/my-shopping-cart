@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
-import eu.rekawek.toxiproxy.ToxiproxyClient;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 import org.springframework.amqp.core.*;
@@ -28,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 @SpringBootApplication
 public class EcommerceApplication {
@@ -46,7 +46,7 @@ public class EcommerceApplication {
             productService.save(new Product(1L, "TV Set", 300.00, "http://placehold.it/200x100"));
             productService.save(new Product(2L, "Game Console", 200.00, "http://placehold.it/200x100"));
             productService.save(new Product(3L, "Sofa", 100.00, "http://placehold.it/200x100"));
-            productService.save(new Product(4L, "Icecream", 5.00, "http://placehold.it/200x100"));
+            productService.save(new Product(4L, "Ice cream", 5.00, "http://placehold.it/200x100"));
             productService.save(new Product(5L, "Beer", 3.00, "http://placehold.it/200x100"));
             productService.save(new Product(6L, "Phone", 500.00, "http://placehold.it/200x100"));
             productService.save(new Product(7L, "Watch", 30.00, "http://placehold.it/200x100"));
@@ -133,13 +133,7 @@ public class EcommerceApplication {
     @Bean("productCache")
     public RedisCache getProductCache(RedisCacheManager cacheManager, Meter meter) {
         RedisCache productCache = (RedisCache) cacheManager.getCache("productCache");
-        OpenTelemetryUtils.observeRedisCache(productCache, meter);
+        OpenTelemetryUtils.observeRedisCache(Objects.requireNonNull(productCache), meter);
         return productCache;
-    }
-
-    @Bean
-    public ToxiproxyClient toxiproxyClient() {
-        // FIXME get hostname and port from cfg
-        return new ToxiproxyClient("127.0.0.1", 8474);
     }
 }

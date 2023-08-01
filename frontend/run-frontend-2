@@ -62,7 +62,7 @@ echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 
 INSTANCE_NUMBER=5
-export OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.0-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-$INSTANCE_NUMBER,host.name=host-$INSTANCE_NUMBER"
+export OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.1-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-$INSTANCE_NUMBER,host.name=host-$INSTANCE_NUMBER"
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_LOGS_EXPORTER="otlp"
 
@@ -70,4 +70,4 @@ java \
      -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dserver.port=808$INSTANCE_NUMBER \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
-     -jar target/frontend-1.0-SNAPSHOT.jar
+     -jar target/frontend-1.1-SNAPSHOT.jar

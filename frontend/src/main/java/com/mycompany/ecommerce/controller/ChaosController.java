@@ -2,9 +2,6 @@ package com.mycompany.ecommerce.controller;
 
 import com.mycompany.ecommerce.repository.CustomizedProductRepositoryImpl;
 import com.mycompany.ecommerce.service.ProductServiceImpl;
-import eu.rekawek.toxiproxy.ToxiproxyClient;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,17 +11,12 @@ public class ChaosController {
 
     ProductServiceImpl productServiceImpl;
     CustomizedProductRepositoryImpl customizedProductRepositoryImpl;
-    ToxiproxyClient toxiproxyClient;
-    RedisConnectionFactory redisConnectionFactory;
 
     public ChaosController(
             ProductServiceImpl productServiceImpl,
-            CustomizedProductRepositoryImpl customizedProductRepositoryImpl,
-            ToxiproxyClient toxiproxyClient) {
+            CustomizedProductRepositoryImpl customizedProductRepositoryImpl) {
         this.productServiceImpl = productServiceImpl;
-        this.customizedProductRepositoryImpl = customizedProductRepositoryImpl;
-        this.toxiproxyClient = toxiproxyClient;
-        this.redisConnectionFactory = redisConnectionFactory;
+        this.customizedProductRepositoryImpl = customizedProductRepositoryImpl;;
     }
 
     @RequestMapping("/attack/cache/enable")
