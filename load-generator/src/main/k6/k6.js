@@ -1,6 +1,6 @@
 import {sleep, group} from 'k6'
 import http from 'k6/http'
-import { randomIntBetween, randomItem } from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
+import {uuidv4, randomIntBetween, randomItem} from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
 
 export const options = {
     ext: {
@@ -16,7 +16,7 @@ export const options = {
             gracefulStop: '30s',
             stages: [
                 {target: 5, duration: '1m'},
-                {target: 5, duration: '30m'},
+                {target: 5, duration: '180m'},
                 {target: 0, duration: '1m'},
             ],
             gracefulRampDown: '30s',
@@ -35,23 +35,26 @@ export function scenario_1() {
     }
     const frontendServerRootUrls = frontendServerRootUrlsAsString.split(",")
 
+    const sessionUid = uuidv4()
+
     let response
 
     group('Purchase', function () {
         let frontendRootUrl = randomItem(frontendServerRootUrls)
 
         // Home
-        response = http.get(frontendRootUrl)
+        response = http.get(frontendRootUrl, { headers: {baggage: "frontend_instrumentation.sessionId=" + sessionUid}})
 
         // Get Products
         response = http.get(frontendRootUrl + "/api/products", {
             headers: {
                 accept: 'application/json, text/plain, */*',
+                baggage: "embrace.sessionId=" + sessionUid
             },
         })
 
         let product = randomItem(products)
-        let quantity = randomIntBetween(1,3)
+        let quantity = randomIntBetween(1, 3)
         let price = product.price * quantity
 
         let paymentMethod = price > priceUpperBoundaryDollarsOnMediumShoppingCarts ?
@@ -66,11 +69,11 @@ export function scenario_1() {
                 "quantity": quantity
             }],
             "paymentMethod": paymentMethod,
-            "shippingMethod" : shippingMethod,
-            "shippingCountry" : shippingCountry
+            "shippingMethod": shippingMethod,
+            "shippingCountry": shippingCountry
         }
 
-        sleep(randomIntBetween(1,5))
+        sleep(randomIntBetween(1, 5))
         // Place Order
         response = http.post(
             frontendRootUrl + "/api/orders",
@@ -78,15 +81,17 @@ export function scenario_1() {
             {
                 headers: {
                     accept: 'application/json, text/plain, */*',
+                    baggage: "embrace.sessionId=" + sessionUid,
                     'content-type': 'application/json'
                 },
             }
         )
-        sleep(randomIntBetween(1,5))
+        sleep(randomIntBetween(1, 5))
         // Get Products
         response = http.get(frontendRootUrl + "/api/products", {
             headers: {
-                accept: 'application/json, text/plain, */*'
+                accept: 'application/json, text/plain, */*',
+                baggage: "embrace.sessionId=" + sessionUid
             },
         })
     })
@@ -96,7 +101,7 @@ const products = [
     {"id": 1, "name": "TV Set", "price": 300.0, "pictureUrl": "https://placehold.it/200x100"},
     {"id": 2, "name": "Game Console", "price": 200.0, "pictureUrl": "https://placehold.it/200x100"},
     {"id": 3, "name": "Sofa", "price": 100.0, "pictureUrl": "https://placehold.it/200x100"},
-    {"id": 4, "name": "Icecream", "price": 5.0, "pictureUrl": "https://placehold.it/200x100"},
+    {"id": 4, "name": "Ice cream", "price": 5.0, "pictureUrl": "https://placehold.it/200x100"},
     {"id": 5, "name": "Beer", "price": 3.0, "pictureUrl": "https://placehold.it/200x100"},
     {"id": 6, "name": "Phone", "price": 500.0, "pictureUrl": "https://placehold.it/200x100"},
     {"id": 7, "name": "Watch", "price": 30.0, "pictureUrl": "https://placehold.it/200x100"},
