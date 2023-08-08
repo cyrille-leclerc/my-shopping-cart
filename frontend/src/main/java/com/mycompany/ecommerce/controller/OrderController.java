@@ -5,7 +5,6 @@ import com.mycompany.checkout.PlaceOrderRequest;
 import com.mycompany.ecommerce.EcommerceApplication;
 import com.mycompany.ecommerce.OpenTelemetryAttributes;
 import com.mycompany.ecommerce.dto.OrderProductDto;
-import com.mycompany.ecommerce.exception.ResourceNotFoundException;
 import com.mycompany.ecommerce.model.Order;
 import com.mycompany.ecommerce.model.OrderProduct;
 import com.mycompany.ecommerce.model.OrderStatus;
@@ -18,6 +17,8 @@ import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -26,18 +27,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.annotation.Nonnull;
-import jakarta.annotation.PostConstruct;
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -88,7 +85,6 @@ public class OrderController {
         Span span = Span.current();
 
         List<OrderProductDto> formDtos = form.getProductOrders();
-        //validateProductsExistence(formDtos);
 
         String customerId = "customer-" + RANDOM.nextInt(100);
         span.setAttribute(OpenTelemetryAttributes.CUSTOMER_ID, customerId);
@@ -141,7 +137,7 @@ public class OrderController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        // test uninstrumented backend
+        // test un-instrumented backend. Note that the 8.8.8.8 DNS resolves the example.com domain
         ResponseEntity<String> exampleDotComResponse = restTemplate.getForEntity("https://example.com/", String.class);
         if (exampleDotComResponse.getStatusCode() != HttpStatus.OK) {
             String exceptionShortDescription = "exampleDotCom-status-" + fraudDetectionResult.getStatusCode();
@@ -191,19 +187,6 @@ public class OrderController {
         headers.add("Location", uri);
 
         return new ResponseEntity<>(order, headers, HttpStatus.CREATED);
-    }
-
-    private void validateProductsExistence(List<OrderProductDto> orderProducts) {
-        List<OrderProductDto> list = orderProducts
-                .stream()
-                .filter(op -> Objects.isNull(productService.getProduct(op
-                        .getProduct()
-                        .getId())))
-                .collect(Collectors.toList());
-
-        if (!CollectionUtils.isEmpty(list)) {
-            new ResourceNotFoundException("Product not found");
-        }
     }
 
     @Autowired
