@@ -9,17 +9,17 @@
 PRG="$0"
 
 while [ -h "$PRG" ]; do
-  ls=`ls -ld "$PRG"`
-  link=`expr "$ls" : '.*-> \(.*\)$'`
+  ls=$(ls -ld "$PRG")
+  link=$(expr "$ls" : '.*-> \(.*\)$')
   if expr "$link" : '/.*' > /dev/null; then
     PRG="$link"
   else
-    PRG=`dirname "$PRG"`/"$link"
+    PRG=$(dirname "$PRG")/"$link"
   fi
 done
 
 # Get standard environment variables
-PRGDIR=`dirname "$PRG"`
+PRGDIR=$(dirname "$PRG")
 
 # LOAD ENVIRONMENT VARIABLES
 if [ -r "$PRGDIR/../setenv.sh" ]; then
@@ -66,7 +66,7 @@ echo ""
 export OTEL_RESOURCE_ATTRIBUTES="service.name=checkout,service.namespace=$SERVICE_NAMESPACE,service.version=1.1-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT"
 export OTEL_METRICS_EXPORTER="otlp"
 export OTEL_LOGS_EXPORTER="otlp"
-export OTEL_PROPAGATORS="tracecontext,jaeger"
+export OTEL_PROPAGATORS="tracecontext,jaeger,baggage"
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
