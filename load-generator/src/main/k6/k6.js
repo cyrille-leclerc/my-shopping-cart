@@ -49,7 +49,7 @@ export function scenario_1() {
         response = http.get(frontendRootUrl + "/api/products", {
             headers: {
                 accept: 'application/json, text/plain, */*',
-                baggage: "embrace.sessionId=" + sessionUid
+                baggage: "frontend_instrumentation.sessionId=" + sessionUid
             },
         })
 
@@ -81,7 +81,7 @@ export function scenario_1() {
             {
                 headers: {
                     accept: 'application/json, text/plain, */*',
-                    baggage: "embrace.sessionId=" + sessionUid,
+                    baggage: "frontend_instrumentation.sessionId=" + sessionUid,
                     'content-type': 'application/json'
                 },
             }
@@ -91,7 +91,7 @@ export function scenario_1() {
         response = http.get(frontendRootUrl + "/api/products", {
             headers: {
                 accept: 'application/json, text/plain, */*',
-                baggage: "embrace.sessionId=" + sessionUid
+                baggage: "frontend_instrumentation.sessionId=" + sessionUid
             },
         })
     })
