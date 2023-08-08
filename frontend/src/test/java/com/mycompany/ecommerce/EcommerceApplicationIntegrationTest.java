@@ -105,6 +105,8 @@ public class EcommerceApplicationIntegrationTest {
         productDto.setQuantity(2);
         orderForm.setProductOrders(Collections.singletonList(productDto));
         orderForm.setPaymentMethod("visa");
+        orderForm.setShippingCountry("FR");
+        orderForm.setShippingMethod("standard");
 
         return orderForm;
     }
