@@ -68,14 +68,6 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
 		</dependency>
-
-		<!--
-		<dependency>
-			<groupId>de.codecentric</groupId>
-			<artifactId>chaos-monkey-spring-boot</artifactId>
-		</dependency>
-		-->
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -102,6 +94,16 @@
 				<version>${spring-boot.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-api</artifactId>
+				<version>${opentelemetry.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-context</artifactId>
+				<version>${opentelemetry.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
