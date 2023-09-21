@@ -62,7 +62,7 @@ echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 
 INSTANCE_NUMBER=5
-export OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.2-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-$INSTANCE_NUMBER,host.name=host-$INSTANCE_NUMBER"
+export OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.2,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-$INSTANCE_NUMBER,host.name=host-$INSTANCE_NUMBER"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,host.arch=amd64,host.id=4817932875823745425,host.name=gke-dev-us-west-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER.mycompany-prod.internal"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,k8s.cluster.name=prod-us-west-0,k8s.namespace.name=ecommerce,k8s.node.name=gke-dev-us-west-0-otel-n2s4-1-f04acab8-cwff-$INSTANCE_NUMBER,k8s.pod.name=ecommerce-frontend-4a6a8ca8ee-rg717"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,cloud.account.id=mycompany-prod,cloud.availability_zone=us-west1-a,cloud.provider=gcp"
