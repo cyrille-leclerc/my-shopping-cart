@@ -72,4 +72,6 @@ export OTEL_LOGS_EXPORTER="otlp"
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dserver.port=8089 \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+     -Dotel.instrumentation.micrometer.base-time-unit=s \
+     -Dotel.semconv-stability.opt-in=http/dup \
      -jar target/warehouse-1.1-SNAPSHOT.jar

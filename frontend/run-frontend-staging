@@ -78,4 +78,6 @@ java \
      -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dserver.port=808$INSTANCE_NUMBER \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+     -Dotel.instrumentation.micrometer.base-time-unit=s \
+     -Dotel.semconv-stability.opt-in=http/dup \
      -jar target/frontend-1.1-SNAPSHOT.jar

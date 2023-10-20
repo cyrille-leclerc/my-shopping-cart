@@ -75,4 +75,6 @@ export OTEL_PROPAGATORS="tracecontext,baggage"
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dserver.port=8081 \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+     -Dotel.instrumentation.micrometer.base-time-unit=s \
+     -Dotel.semconv-stability.opt-in=http/dup \
      -jar target/fraud-detection-1.1-SNAPSHOT.jar
