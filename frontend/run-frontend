@@ -62,6 +62,7 @@ echo "# START FRONTEND $INSTANCE_NUMBER #"
 echo "####################"
 echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
+echo "OTEL_EXPORTER_OTLP_PROTOCOL: $OTEL_EXPORTER_OTLP_PROTOCOL"
 
 INSTANCE_NUMBER=1
 
@@ -83,14 +84,13 @@ INSTANCE_NUMBER=1
 
 
 OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-$INSTANCE_NUMBER"
-OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,host.arch=amd64,host.id=5929043986934855635,host.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER.mycompany-prod.internal"
-OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,k8s.cluster.name=prod-us-central-0,k8s.namespace.name=ecommerce,k8s.node.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER,k8s.pod.name=ecommerce-frontend-5b7b9db9ff-sh828"
-OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,cloud.account.id=mycompany-prod,cloud.availability_zone=us-central1-a,cloud.provider=gcp"
+# OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,host.arch=amd64,host.id=5929043986934855635,host.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER.mycompany-prod.internal"
+# OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,k8s.cluster.name=prod-us-central-0,k8s.namespace.name=ecommerce,k8s.node.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER,k8s.pod.name=ecommerce-frontend-5b7b9db9ff-sh828"
+# OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,cloud.account.id=mycompany-prod,cloud.availability_zone=us-central1-a,cloud.provider=gcp"
+# OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=$DEPLOYMENT_ENVIRONMENT"
 
 
 export OTEL_RESOURCE_ATTRIBUTES
-export OTEL_METRICS_EXPORTER="otlp"
-export OTEL_LOGS_EXPORTER="otlp"
 export OTEL_PROPAGATORS="tracecontext,baggage"
 
 # https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/logback/logback-appender-1.0/javaagent

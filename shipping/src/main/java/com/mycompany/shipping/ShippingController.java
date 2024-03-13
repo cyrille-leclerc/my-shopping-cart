@@ -1,5 +1,7 @@
 package com.mycompany.shipping;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,7 +17,8 @@ import java.util.Random;
 
 @RestController()
 public class ShippingController {
-    final static Random RANDOM = new Random();
+
+    final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     final DataSource dataSource;
 
@@ -34,7 +37,7 @@ public class ShippingController {
                 msg += " " + headerName + "=" + headerValue;
             }
         }
-        System.out.println(msg);
+        logger.info("Ship order for " + msg);
 
         try (Connection cnn = dataSource.getConnection()) {
             try (Statement stmt = cnn.createStatement()) {

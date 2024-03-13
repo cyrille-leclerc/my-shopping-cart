@@ -66,8 +66,6 @@ echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 echo ""
 
 export OTEL_RESOURCE_ATTRIBUTES="service.name=warehouse,service.namespace=$SERVICE_NAMESPACE,service.version=1.1-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT"
-export OTEL_METRICS_EXPORTER="otlp"
-export OTEL_LOGS_EXPORTER="otlp"
 
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dserver.port=8089 \

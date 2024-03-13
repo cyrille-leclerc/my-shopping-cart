@@ -63,13 +63,14 @@ echo "# START FRAUD DETECTION #"
 echo "#########################"
 echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
+echo "OTEL_EXPORTER_OTLP_PROTOCOL: $OTEL_EXPORTER_OTLP_PROTOCOL"
 echo ""
 
 
-export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="http://localhost:4317"
-export OTEL_RESOURCE_ATTRIBUTES="service.name=fraud-detection,service.namespace=$SERVICE_NAMESPACE,service.version=1.1-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT"
-export OTEL_METRICS_EXPORTER="otlp"
-export OTEL_LOGS_EXPORTER="otlp"
+OTEL_RESOURCE_ATTRIBUTES="service.name=fraud-detection,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-1"
+OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=production"
+
+export OTEL_RESOURCE_ATTRIBUTES
 export OTEL_PROPAGATORS="tracecontext,baggage"
 
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
