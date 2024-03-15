@@ -55,6 +55,30 @@ else
     fi
 fi
 
+export PYROSCOPE_AGENT_HOME=$PRGDIR/../.pyroscope
+mkdir -p "$PYROSCOPE_AGENT_HOME"
+
+##########################################################################################
+# DOWNLOAD PYROSCOPE AGENT IF NOT FOUND
+# code copied from Maven Wrappers's mvnw`
+##########################################################################################
+export PYROSCOPE_AGENT_JAR=$PYROSCOPE_AGENT_HOME/pyroscope-javaagent-$PYROSCOPE_AGENT_VERSION.jar
+if [ -r "$PYROSCOPE_AGENT_JAR" ]; then
+    echo "Found $PYROSCOPE_AGENT_JAR"
+else
+    echo "Couldn't find $PYROSCOPE_AGENT_JAR, downloading it ..."
+    jarUrl="https://github.com/grafana/pyroscope-java/releases/download/v$PYROSCOPE_AGENT_VERSION/pyroscope.jar"
+
+    if command -v wget > /dev/null; then
+        wget "$jarUrl" -O "$PYROSCOPE_AGENT_JAR"
+    elif command -v curl > /dev/null; then
+        curl -L --max-redirs 5 -o "$PYROSCOPE_AGENT_JAR" "$jarUrl"
+    else
+        echo "FAILURE: pyroscope agent not found and  none of curl and wget found"
+        exit 1;
+    fi
+fi
+
 $PRGDIR/../mvnw -DskipTests package
 
 echo "####################"
@@ -93,11 +117,17 @@ OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMES
 export OTEL_RESOURCE_ATTRIBUTES
 export OTEL_PROPAGATORS="tracecontext,baggage"
 
+# /!\ PYROSCOPE_LABELS doesn't support `.` but supports `_`
+# /!\ `_` in labels doesn't work with Pyroscope Tags explorer
+export PYROSCOPE_APPLICATION_NAME="frontend"
+export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT,namespace=$SERVICE_NAMESPACE,instance=instance-$INSTANCE_NUMBER"
+
 # https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/logback/logback-appender-1.0/javaagent
 # https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/log4j/log4j-appender-2.17/javaagent
 # -Dotel.instrumentation.log4j-appender.experimental-log-attributes=true
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
+     -javaagent:$PYROSCOPE_AGENT_JAR \
      -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.micrometer.base-time-unit=s \

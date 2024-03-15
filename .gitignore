@@ -30,6 +30,7 @@ target/
 
 .otel/
 .prometheus*
+.pyroscope/
 
 
 # ENVIRONMENT VARIABLES

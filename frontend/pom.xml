@@ -93,7 +93,6 @@
 			<groupId>io.pyroscope</groupId>
 			<artifactId>agent</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-okhttp</artifactId>
