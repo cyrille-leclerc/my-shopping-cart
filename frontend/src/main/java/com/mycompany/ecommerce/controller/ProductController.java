@@ -2,7 +2,6 @@ package com.mycompany.ecommerce.controller;
 
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -18,7 +17,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -47,23 +45,29 @@ public class ProductController {
         return productService.getProduct(id);
     }
 
+    /**
+     * https://www.baeldung.com/java-resize-image
+     */
     @GetMapping(path = "resizedImg/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<ByteArrayResource> getImage(@PathVariable("id") long id) throws Exception {
         long nanosBefore = System.nanoTime();
         try {
             Callable<ResponseEntity<ByteArrayResource>> callable = () -> {
                 try (InputStream originalImageAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("img/sweet-celebration-decoration-food-christmas-dessert-768342-pxhere.com.jpg")) {
-                    BufferedImage resizedImage = resizeImage(ImageIO.read(Objects.requireNonNull(originalImageAsStream)), 50, 50);
-                    MediaType contentType = MediaType.IMAGE_JPEG;
+                    BufferedImage originalImage = ImageIO.read(Objects.requireNonNull(originalImageAsStream));
+                    Image resultingImage = originalImage.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
+                    BufferedImage outputImage = new BufferedImage(50, 50, BufferedImage.TYPE_INT_RGB);
+                    outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
-                    ImageIO.write(resizedImage, "jpg", out);
+                    ImageIO.write(outputImage, "jpg", out);
                     return ResponseEntity.ok()
-                            .contentType(contentType)
+                            .contentType(MediaType.IMAGE_JPEG)
                             .body(new ByteArrayResource(out.toByteArray()));
                 }
             };
 
-            // FIXME java.lang.UnsatisfiedLinkError: no asyncProfiler in java.library.path:
+            // FIXME invoking `Pyroscope.LabelsWrapper.run(...)` fails in unit tests with
+            //  "java.lang.UnsatisfiedLinkError: no asyncProfiler in java.library.path:"
             // return Pyroscope.LabelsWrapper.run(new LabelsSet("spanId", Span.current().getSpanContext().getSpanId()), callable);
             return callable.call();
         } finally {
@@ -71,14 +75,5 @@ public class ProductController {
         }
     }
 
-    /**
-     * https://www.baeldung.com/java-resize-image
-     */
-    BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight)  {
-        Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_DEFAULT);
-        BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-        outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
-        return outputImage;
-    }
 
 }
