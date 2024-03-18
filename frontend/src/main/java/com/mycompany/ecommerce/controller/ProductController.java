@@ -2,14 +2,10 @@ package com.mycompany.ecommerce.controller;
 
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
-import io.opentelemetry.api.trace.Span;
-import io.pyroscope.labels.LabelsSet;
-import io.pyroscope.labels.Pyroscope;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -29,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/products")
@@ -49,38 +43,38 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public @Nonnull Product getProduct(@PathVariable("id") long id, HttpServletRequest request) {
+    public @Nonnull Product getProduct(@PathVariable("id") long id) {
         return productService.getProduct(id);
     }
 
     @GetMapping(path = "resizedImg/{id}", produces = MediaType.IMAGE_JPEG_VALUE)
     public ResponseEntity<ByteArrayResource> getImage(@PathVariable("id") long id) throws Exception {
-        Callable<ResponseEntity<ByteArrayResource>> callable = () -> {
-            try (InputStream originalImageAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("img/sweet-celebration-decoration-food-christmas-dessert-768342-pxhere.com.jpg")) {
-                BufferedImage resizedImage = resizeImage(ImageIO.read(Objects.requireNonNull(originalImageAsStream)), 50, 50);
-                MediaType contentType = MediaType.IMAGE_JPEG;
-                ByteArrayOutputStream out = new ByteArrayOutputStream();
-                ImageIO.write(resizedImage, "jpg", out);
-                return ResponseEntity.ok()
-                        .contentType(contentType)
-                        .body(new ByteArrayResource(out.toByteArray()));
-            }
-        };
+        long nanosBefore = System.nanoTime();
+        try {
+            Callable<ResponseEntity<ByteArrayResource>> callable = () -> {
+                try (InputStream originalImageAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("img/sweet-celebration-decoration-food-christmas-dessert-768342-pxhere.com.jpg")) {
+                    BufferedImage resizedImage = resizeImage(ImageIO.read(Objects.requireNonNull(originalImageAsStream)), 50, 50);
+                    MediaType contentType = MediaType.IMAGE_JPEG;
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    ImageIO.write(resizedImage, "jpg", out);
+                    return ResponseEntity.ok()
+                            .contentType(contentType)
+                            .body(new ByteArrayResource(out.toByteArray()));
+                }
+            };
 
-        LabelsSet labelSet = new LabelsSet("spanId", Span.current().getSpanContext().getSpanId());
-        return Pyroscope.LabelsWrapper.run(labelSet, callable);
+            // FIXME java.lang.UnsatisfiedLinkError: no asyncProfiler in java.library.path:
+            // return Pyroscope.LabelsWrapper.run(new LabelsSet("spanId", Span.current().getSpanContext().getSpanId()), callable);
+            return callable.call();
+        } finally {
+            logger.info("Generated image {} in {} ms", id, TimeUnit.MILLISECONDS.convert(System.nanoTime() - nanosBefore, TimeUnit.NANOSECONDS));
+        }
     }
 
     /**
      * https://www.baeldung.com/java-resize-image
-     *
-     * @param originalImage
-     * @param targetWidth
-     * @param targetHeight
-     * @return
-     * @throws IOException
      */
-    BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight) throws IOException {
+    BufferedImage resizeImage(BufferedImage originalImage, int targetWidth, int targetHeight)  {
         Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_DEFAULT);
         BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
         outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);

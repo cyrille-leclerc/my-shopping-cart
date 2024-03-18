@@ -90,8 +90,9 @@
 		</dependency>
 
 		<dependency>
+			<!-- just want the Pyroscope APIs to add Pyroscope labels in the code -->
 			<groupId>io.pyroscope</groupId>
-			<artifactId>agent</artifactId>
+			<artifactId>otel</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>

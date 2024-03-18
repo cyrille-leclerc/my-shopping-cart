@@ -59,22 +59,22 @@ export PYROSCOPE_AGENT_HOME=$PRGDIR/../.pyroscope
 mkdir -p "$PYROSCOPE_AGENT_HOME"
 
 ##########################################################################################
-# DOWNLOAD PYROSCOPE AGENT IF NOT FOUND
+# DOWNLOAD PYROSCOPE OTEL AGENT EXTENSION IF NOT FOUND
 # code copied from Maven Wrappers's mvnw`
 ##########################################################################################
-export PYROSCOPE_AGENT_JAR=$PYROSCOPE_AGENT_HOME/pyroscope-javaagent-$PYROSCOPE_AGENT_VERSION.jar
-if [ -r "$PYROSCOPE_AGENT_JAR" ]; then
-    echo "Found $PYROSCOPE_AGENT_JAR"
+export PYROSCOPE_OTEL_AGENT_EXTENSION_JAR=$PYROSCOPE_AGENT_HOME/pyroscope-otel-agent-extension-$PYROSCOPE_OTEL_AGENT_EXTENSION_VERSION.jar
+if [ -r "$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR" ]; then
+    echo "Found $PYROSCOPE_OTEL_AGENT_EXTENSION_JAR"
 else
-    echo "Couldn't find $PYROSCOPE_AGENT_JAR, downloading it ..."
-    jarUrl="https://github.com/grafana/pyroscope-java/releases/download/v$PYROSCOPE_AGENT_VERSION/pyroscope.jar"
+    echo "Couldn't find $PYROSCOPE_OTEL_AGENT_EXTENSION_JAR, downloading it ..."
+    jarUrl="https://repo1.maven.org/maven2/io/pyroscope/otel/$PYROSCOPE_OTEL_AGENT_EXTENSION_VERSION/otel-$PYROSCOPE_OTEL_AGENT_EXTENSION_VERSION.jar"
 
     if command -v wget > /dev/null; then
-        wget "$jarUrl" -O "$PYROSCOPE_AGENT_JAR"
+        wget "$jarUrl" -O "$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR"
     elif command -v curl > /dev/null; then
-        curl -L --max-redirs 5 -o "$PYROSCOPE_AGENT_JAR" "$jarUrl"
+        curl -L --max-redirs 5 -o "$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR" "$jarUrl"
     else
-        echo "FAILURE: pyroscope agent not found and  none of curl and wget found"
+        echo "FAILURE: pyroscope otel agent extension not found and  none of curl and wget found"
         exit 1;
     fi
 fi
@@ -104,7 +104,7 @@ export PYROSCOPE_APPLICATION_NAME="fraud-detection"
 export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT,namespace=$SERVICE_NAMESPACE,instance=instance-1,version=1.1"
 
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
-     -javaagent:$PYROSCOPE_AGENT_JAR \
+     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \
      -Dserver.port=8081 \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.micrometer.base-time-unit=s \

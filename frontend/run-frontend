@@ -79,6 +79,27 @@ else
     fi
 fi
 
+##########################################################################################
+# DOWNLOAD PYROSCOPE OTEL AGENT EXTENSION IF NOT FOUND
+# code copied from Maven Wrappers's mvnw`
+##########################################################################################
+export PYROSCOPE_OTEL_AGENT_EXTENSION_JAR=$PYROSCOPE_AGENT_HOME/pyroscope-otel-agent-extension-$PYROSCOPE_OTEL_AGENT_EXTENSION_VERSION.jar
+if [ -r "$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR" ]; then
+    echo "Found $PYROSCOPE_OTEL_AGENT_EXTENSION_JAR"
+else
+    echo "Couldn't find $PYROSCOPE_OTEL_AGENT_EXTENSION_JAR, downloading it ..."
+    jarUrl="https://repo1.maven.org/maven2/io/pyroscope/otel/$PYROSCOPE_OTEL_AGENT_EXTENSION_VERSION/otel-$PYROSCOPE_OTEL_AGENT_EXTENSION_VERSION.jar"
+
+    if command -v wget > /dev/null; then
+        wget "$jarUrl" -O "$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR"
+    elif command -v curl > /dev/null; then
+        curl -L --max-redirs 5 -o "$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR" "$jarUrl"
+    else
+        echo "FAILURE: pyroscope otel agent extension not found and  none of curl and wget found"
+        exit 1;
+    fi
+fi
+
 $PRGDIR/../mvnw -DskipTests package
 
 echo "####################"
@@ -134,3 +155,6 @@ java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_V
      -Dotel.semconv-stability.opt-in=http/dup \
      -Dserver.port=8080 \
      -jar target/frontend-1.1-SNAPSHOT.jar
+
+# otel-prrofiling-java doesn't work for me :-(
+#     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \
