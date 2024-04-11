@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!--
+    See org/springframework/boot/logging/logback/console-appender.xml
+    -->
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+        <level>${CONSOLE_LOG_THRESHOLD}</level>
+    </filter>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE2" />
+    </root>
+
+    <appender name="CONSOLE2" class="ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.JsonEncoder">
+            <withFormattedMessage>true</withFormattedMessage>
+            <withMessage>false</withMessage>
+            <withArguments>false</withArguments>
+            <withSequenceNumber>false</withSequenceNumber>
+            <withNanoseconds>false</withNanoseconds>
+        </encoder>
+    </appender>
+</configuration>
