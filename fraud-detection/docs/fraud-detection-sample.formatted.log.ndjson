@@ -1,22 +1,4 @@
 {
-  "timestamp": 1712785904424,
-  "level": "INFO",
-  "threadName": "http-nio-8081-exec-4",
-  "loggerName": "com.mycompany.antifraud.FraudDetectionController",
-  "context": {
-    "name": "default",
-    "birthdate": 1712785879505,
-    "properties": {}
-  },
-  "mdc": {
-    "trace_id": "cc5ae8e7f93a97e3d7fa41d83efbe33b",
-    "trace_flags": "01",
-    "span_id": "211e7ae278455eb7"
-  },
-  "formattedMessage": "checkOrder(totalPrice=300, shippingCountry=DE, customerIpAddress=127.0.0.1) fraudScore=-23, status=ACCEPTED",
-  "throwable": null
-}
-{
   "timestamp": 1712785918846,
   "level": "ERROR",
   "threadName": "http-nio-8081-exec-10",
@@ -380,4 +362,22 @@
       }
     ]
   }
+}
+{
+  "timestamp": 1712870251077,
+  "level": "INFO",
+  "threadName": "http-nio-8081-exec-10",
+  "loggerName": "com.mycompany.antifraud.FraudDetectionController",
+  "context": {
+    "name": "default",
+    "birthdate": 1712869192463,
+    "properties": {}
+  },
+  "mdc": {
+    "trace_id": "f4e08518bc5306f2b303459a66a12e6b",
+    "trace_flags": "01",
+    "span_id": "4b1a83fa793d2152"
+  },
+  "formattedMessage": "checkOrder(totalPrice=900, shippingCountry=DE, customerIpAddress=127.0.0.1) fraudScore=-30, status=ACCEPTED",
+  "throwable": null
 }
