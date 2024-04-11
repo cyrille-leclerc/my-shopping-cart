@@ -11,9 +11,27 @@
 
     <root level="INFO">
         <appender-ref ref="CONSOLE2" />
+        <appender-ref ref="FILE" />
     </root>
 
-    <appender name="CONSOLE2" class="ConsoleAppender">
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>fraud-detection.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>fraud-detection-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.JsonEncoder">
+            <withFormattedMessage>true</withFormattedMessage>
+            <withMessage>false</withMessage>
+            <withArguments>false</withArguments>
+            <withSequenceNumber>false</withSequenceNumber>
+            <withNanoseconds>false</withNanoseconds>
+        </encoder>
+    </appender>
+
+    <appender name="CONSOLE2" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.JsonEncoder">
             <withFormattedMessage>true</withFormattedMessage>
             <withMessage>false</withMessage>
