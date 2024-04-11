@@ -2,6 +2,8 @@ package com.mycompany.ecommerce.controller;
 
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
+import io.pyroscope.labels.LabelsSet;
+import io.pyroscope.labels.Pyroscope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -68,8 +70,8 @@ public class ProductController {
 
             // FIXME invoking `Pyroscope.LabelsWrapper.run(...)` fails in unit tests with
             //  "java.lang.UnsatisfiedLinkError: no asyncProfiler in java.library.path:"
-            // return Pyroscope.LabelsWrapper.run(new LabelsSet("spanId", Span.current().getSpanContext().getSpanId()), callable);
-            return callable.call();
+            return Pyroscope.LabelsWrapper.run(new LabelsSet("my_transaction", "getResizedImage"), callable);
+            // return callable.call();
         } finally {
             logger.info("Generated image {} in {} ms", id, TimeUnit.MILLISECONDS.convert(System.nanoTime() - nanosBefore, TimeUnit.NANOSECONDS));
         }
