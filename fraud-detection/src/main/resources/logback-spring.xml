@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-
-    <!--
-    See org/springframework/boot/logging/logback/console-appender.xml
-    -->
-    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-        <level>${CONSOLE_LOG_THRESHOLD}</level>
-    </filter>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE2" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE_WITH_SPAN_CONTEXT" />
+        <appender-ref ref="FILE_NDJSON" />
     </root>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>fraud-detection.log</file>
+    <appender name="FILE_NDJSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>fraud-detection.ndjson.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>fraud-detection-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>fraud-detection-%d{yyyy-MM-dd}.%i.ndjson.log</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
@@ -31,7 +27,25 @@
         </encoder>
     </appender>
 
-    <appender name="CONSOLE2" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="FILE_WITH_SPAN_CONTEXT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${FILE_LOG_THRESHOLD}</level>
+        </filter>
+        <encoder>
+            <pattern>%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- %applicationName[%t] ${LOG_CORRELATION_PATTERN:-}%-40.40logger{39} : %m - trace_id=%mdc{trace_id}, span_id=%mdc{span_id}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+            <charset>${FILE_LOG_CHARSET}</charset>
+        </encoder>
+        <file>fraud-detection.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>fraud-detection-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+
+    <appender name="CONSOLE_NDJSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.JsonEncoder">
             <withFormattedMessage>true</withFormattedMessage>
             <withMessage>false</withMessage>
