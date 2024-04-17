@@ -1,5 +1,14 @@
 receivers:
   filelog/fraud-detection-ndjson:
+    # logback config
+    #<encoder class="ch.qos.logback.classic.encoder.JsonEncoder">
+    #   <withFormattedMessage>true</withFormattedMessage>
+    #   <withMessage>false</withMessage>
+    #   <withArguments>false</withArguments>
+    #   <withSequenceNumber>false</withSequenceNumber>
+    #   <withNanoseconds>false</withNanoseconds>
+    #</encoder>
+    #
     # debug
     # start_at: beginning
     include: [/Users/cyrilleleclerc/git/cyrille-leclerc/my-shopping-cart/fraud-detection/fraud-detection.ndjson.log]
@@ -74,6 +83,11 @@ receivers:
       service.namespace: ndjson_logs
       deployment.environment: production
   filelog/fraud-detection-raw:
+    # logback config - same as Spring Boot default config + append trace_id and span_id
+    # <encoder>
+    #   <pattern>%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- %applicationName[%t] ${LOG_CORRELATION_PATTERN:-}%-40.40logger{39} : %m - trace_id=%mdc{trace_id}, span_id=%mdc{span_id}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+    #   <charset>${FILE_LOG_CHARSET}</charset>
+    # </encoder>
     # debug
     # start_at: beginning
     include: [/Users/cyrilleleclerc/git/cyrille-leclerc/my-shopping-cart/fraud-detection/fraud-detection.log]
