@@ -1,5 +1,6 @@
 package com.mycompany.antifraud;
 
+import com.google.common.math.IntMath;
 import io.opentelemetry.api.metrics.DoubleCounter;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongCounter;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletRequest;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,7 +23,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @ManagedResource
@@ -34,6 +33,8 @@ public class FraudDetectionController {
     final static BigDecimal FIVE_PERCENT = new BigDecimal(5).divide(new BigDecimal(100), RoundingMode.HALF_UP);
 
     final Logger logger = LoggerFactory.getLogger(getClass());
+
+    int exceptionPercentage = 20;
 
     int averageDurationMillisOnSmallShoppingCarts = 50;
     int averageDurationMillisOnMediumShoppingCarts = 50;
@@ -51,11 +52,11 @@ public class FraudDetectionController {
     final AtomicInteger fraudChecksCounter = new AtomicInteger();
     final AtomicInteger fraudChecksPriceInDollarsCounter = new AtomicInteger();
 
-    final DoubleHistogram approvedOrderRecorder ;
+    final DoubleHistogram approvedOrderRecorder;
     final DoubleCounter approvedOrderValueCounter;
     final LongCounter approvedOrderCountCounter;
-    final DoubleHistogram rejectedOrderRecorder ;
-    final DoubleCounter rejectedOrderValueCounter ;
+    final DoubleHistogram rejectedOrderRecorder;
+    final DoubleCounter rejectedOrderValueCounter;
     final LongCounter rejectedOrderCountCounter;
 
     final DataSource dataSource;
@@ -108,26 +109,24 @@ public class FraudDetectionController {
             try (Connection cnn = dataSource.getConnection()) {
                 try (Statement stmt = cnn.createStatement()) {
 
-                    long nanosBefore = System.nanoTime();
                     stmt.execute("select pg_sleep(0.05)");
                     Thread.sleep(checkOrderDurationMillis);
-                    long actualSleepInNanos = System.nanoTime() - nanosBefore;
-                    long actualSleepInMillis = TimeUnit.MILLISECONDS.convert(actualSleepInNanos, TimeUnit.NANOSECONDS);
-
-                    long deltaPercents = Math.abs(actualSleepInMillis - checkOrderDurationMillis) * 100 / checkOrderDurationMillis;
-                    if (rejected) {
-                        logger.warn("checkOrder(totalPrice={}, shippingCountry={}, customerIpAddress={}) fraudScore={}, status=REJECTED",
-                                new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, fraudScore);
-                    } else {
-                        logger.info("checkOrder(totalPrice={}, shippingCountry={}, customerIpAddress={}) fraudScore={}, status=ACCEPTED",
-                                new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, fraudScore);
-                    }
-
-
                 }
-                // Thread.sleep(checkOrderDurationMillis);
-            } catch (SQLException | InterruptedException e) {
+                if (RANDOM.nextInt(IntMath.divide(100, exceptionPercentage, RoundingMode.CEILING)) == 1) {
+                    throw new RuntimeException("Fraud Detection Processing Exception");
+                }
+
+                if (rejected) {
+                    logger.warn("checkOrder(totalPrice={}, shippingCountry={}, customerIpAddress={}) fraudScore={}, status=REJECTED",
+                            new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, fraudScore);
+                } else {
+                    logger.info("checkOrder(totalPrice={}, shippingCountry={}, customerIpAddress={}) fraudScore={}, status=ACCEPTED",
+                            new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, fraudScore);
+                }
+            } catch (SQLException | InterruptedException | RuntimeException e) {
                 Span.current().recordException(e);
+                rejected = true;
+                logger.warn("Exception processing checkOrder(orderPrice={}, shippingCountry={}, customerIpAddress={})", new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, e);
             }
 
             String result;

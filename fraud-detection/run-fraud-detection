@@ -97,6 +97,7 @@ OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=production"
 
 export OTEL_RESOURCE_ATTRIBUTES
 export OTEL_PROPAGATORS="tracecontext,baggage"
+export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment"
 
 # /!\ PYROSCOPE_LABELS doesn't support `.` but supports `_`
 # /!\ `_` in labels doesn't work with Pyroscope Tags explorer

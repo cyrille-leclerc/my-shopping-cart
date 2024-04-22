@@ -1,28 +1,54 @@
 {
-  "timestamp": 1712785918846,
-  "level": "ERROR",
-  "threadName": "http-nio-8081-exec-10",
+  "timestamp": 1713518428639,
+  "level": "INFO",
+  "threadName": "http-nio-8081-exec-4",
   "loggerName": "com.mycompany.antifraud.FraudDetectionController",
   "context": {
     "name": "default",
-    "birthdate": 1712785879505,
+    "birthdate": 1713518391467,
     "properties": {}
   },
   "mdc": {
-    "trace_id": "af3b03297dce14fe9965fdf47c8a16ec",
+    "trace_id": "e0d41363bee10632f06ff0838e20504a",
     "trace_flags": "01",
-    "span_id": "2b2d4f0b45481efc"
+    "service.name": "fraud-detection",
+    "service.instance.id": "instance-1",
+    "span_id": "a8b8a8a2d9b1534e",
+    "service.namespace": "ecommerce",
+    "deployment.environment": "production"
   },
-  "formattedMessage": "Rejected",
+  "formattedMessage": "checkOrder(totalPrice=090, shippingCountry=GB, customerIpAddress=127.0.0.1) fraudScore=-68, status=ACCEPTED",
+  "throwable": null
+}
+{
+  "timestamp": 1713745825450,
+  "level": "WARN",
+  "threadName": "http-nio-8081-exec-4",
+  "loggerName": "com.mycompany.antifraud.FraudDetectionController",
+  "context": {
+    "name": "default",
+    "birthdate": 1713734043297,
+    "properties": {}
+  },
+  "mdc": {
+    "trace_id": "ac8404f1e5779674ce15327c423fca22",
+    "trace_flags": "01",
+    "service.name": "fraud-detection",
+    "service.instance.id": "instance-1",
+    "span_id": "803caa9d621f561b",
+    "service.namespace": "ecommerce",
+    "deployment.environment": "production"
+  },
+  "formattedMessage": "Exception processing checkOrder(orderPrice=006, shippingCountry=GB, customerIpAddress=127.0.0.1)",
   "throwable": {
     "className": "java.lang.RuntimeException",
-    "message": "Fraud detected",
+    "message": "Fraud Detection Processing Exception",
     "stepArray": [
       {
         "className": "com.mycompany.antifraud.FraudDetectionController",
         "methodName": "checkOrder",
         "fileName": "FraudDetectionController.java",
-        "lineNumber": 121
+        "lineNumber": 117
       },
       {
         "className": "jdk.internal.reflect.DirectMethodHandleAccessor",
@@ -40,13 +66,13 @@
         "className": "org.springframework.web.method.support.InvocableHandlerMethod",
         "methodName": "doInvoke",
         "fileName": "InvocableHandlerMethod.java",
-        "lineNumber": 259
+        "lineNumber": 255
       },
       {
         "className": "org.springframework.web.method.support.InvocableHandlerMethod",
         "methodName": "invokeForRequest",
         "fileName": "InvocableHandlerMethod.java",
-        "lineNumber": 192
+        "lineNumber": 188
       },
       {
         "className": "org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod",
@@ -58,7 +84,7 @@
         "className": "org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter",
         "methodName": "invokeHandlerMethod",
         "fileName": "RequestMappingHandlerAdapter.java",
-        "lineNumber": 920
+        "lineNumber": 925
       },
       {
         "className": "org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter",
@@ -362,22 +388,4 @@
       }
     ]
   }
-}
-{
-  "timestamp": 1712870251077,
-  "level": "INFO",
-  "threadName": "http-nio-8081-exec-10",
-  "loggerName": "com.mycompany.antifraud.FraudDetectionController",
-  "context": {
-    "name": "default",
-    "birthdate": 1712869192463,
-    "properties": {}
-  },
-  "mdc": {
-    "trace_id": "f4e08518bc5306f2b303459a66a12e6b",
-    "trace_flags": "01",
-    "span_id": "4b1a83fa793d2152"
-  },
-  "formattedMessage": "checkOrder(totalPrice=900, shippingCountry=DE, customerIpAddress=127.0.0.1) fraudScore=-30, status=ACCEPTED",
-  "throwable": null
 }

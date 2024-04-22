@@ -106,8 +106,6 @@ receivers:
         type: remove
         field: attributes.formattedMessage
       #- type: stdout # for debugging
-    resource:
-      service.namespace: ndjson_logs
   filelog/fraud-detection-raw:
     # logback config - same as Spring Boot default config + append trace_id and span_id
     # 1. add resource attributes to logback MDC
@@ -164,7 +162,7 @@ receivers:
         type: move
         from: attributes.thread
         to: attributes["thread.name"]
-      - id: move_throwable_stacktrace
+      - id: move_throwable_stack_trace
         type: move
         if: 'attributes["throwable"] != nil'
         from: attributes["throwable"]
@@ -190,62 +188,36 @@ receivers:
         type: remove
         field: attributes.message
       # - type: stdout # for debugging
-    resource:
-      service.namespace: raw_logs
-
 processors:
   batch:
   resourcedetection:
     detectors: ["env", "system"]
     override: false
 
-extensions:
-  basicauth/grafana_cloud_tempo:
-    client_auth:
-      username: "${env:GRAFANA_CLOUD_TEMPO_USERNAME}"
-      password: "${env:GRAFANA_CLOUD_API_KEY}"
-  basicauth/grafana_cloud_prometheus:
-    client_auth:
-      username: "${env:GRAFANA_CLOUD_PROMETHEUS_USERNAME}"
-      password: "${env:GRAFANA_CLOUD_API_KEY}"
-  basicauth/grafana_cloud_loki:
-    client_auth:
-      username: "${env:GRAFANA_CLOUD_LOKI_USERNAME}"
-      password: "${env:GRAFANA_CLOUD_API_KEY}"
-
 exporters:
   debug:
     verbosity: detailed
-  otlp/grafana_cloud_traces:
-    endpoint: "${env:GRAFANA_CLOUD_TEMPO_ENDPOINT}"
+  otlphttp/grafana_cloud:
+    # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
+    endpoint: "${env:OTEL_EXPORTER_OTLP_ENDPOINT}"
     auth:
-      authenticator: basicauth/grafana_cloud_tempo
+      authenticator: basicauth/grafana_cloud
 
-  loki/grafana_cloud_logs:
-    # https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/lokiexporter/README.md
-    endpoint: "${env:GRAFANA_CLOUD_LOKI_URL}"
-    default_labels_enabled:
-      # TODO Is it a best practice to use `level`as a loki label
-      level: false
-    auth:
-      authenticator: basicauth/grafana_cloud_loki
-
-  prometheusremotewrite/grafana_cloud_metrics:
-    endpoint: "${env:GRAFANA_CLOUD_PROMETHEUS_URL}"
-    auth:
-      authenticator: basicauth/grafana_cloud_prometheus
-    add_metric_suffixes: false
-
+extensions:
+  basicauth/grafana_cloud:
+    client_auth:
+      username: "${env:GRAFANA_CLOUD_INSTANCE_ID}"
+      password: "${env:GRAFANA_CLOUD_API_KEY}"
 
 
 service:
-  extensions: [basicauth/grafana_cloud_tempo, basicauth/grafana_cloud_prometheus, basicauth/grafana_cloud_loki]
+  extensions: [basicauth/grafana_cloud]
   pipelines:
     logs:
       receivers: [filelog/fraud-detection-raw, filelog/fraud-detection-ndjson]
 #      receivers: [filelog/fraud-detection-raw]
       processors: []
-      exporters: [loki/grafana_cloud_logs]
+      exporters: [otlphttp/grafana_cloud]
   telemetry:
     metrics:
       level: none
