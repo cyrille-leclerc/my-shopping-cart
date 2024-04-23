@@ -1,11 +1,13 @@
 package com.mycompany.antifraud;
 
 import com.google.common.math.IntMath;
+import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.metrics.DoubleCounter;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.LongCounter;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
@@ -79,6 +81,14 @@ public class FraudDetectionController {
             @RequestParam double orderPrice,
             @RequestParam String shippingCountry,
             @RequestParam String customerIpAddress) {
+
+        // for Mohan
+        try (var baggageScope = Baggage.builder()
+                .put("my.baggage.attribute", "I'm a teapot")
+                .build()
+                .storeInContext(Context.current()).makeCurrent()) {
+            logger.warn("this log message should be enriched with a baggage[my.baggage.attribute]");
+        }
 
         Span.current().setAttribute("order_price", orderPrice);
         Span.current().setAttribute("customer_ip_address", customerIpAddress);

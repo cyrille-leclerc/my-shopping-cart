@@ -9,12 +9,15 @@ import java.util.logging.Logger;
 public class MyAutoConfigurationCustomizerProvider implements AutoConfigurationCustomizerProvider {
 
     private final Logger logger = Logger.getLogger(getClass().getName());
+
     @Override
     public void customize(AutoConfigurationCustomizer autoConfigurationCustomizer) {
-        logger.log(Level.INFO, "OpenTelemetry SDK configuration: Add " + BaggageSpanProcessor.class.getName());
-        autoConfigurationCustomizer.addTracerProviderCustomizer((sdkTracerProviderBuilder, configProperties) -> {
-            sdkTracerProviderBuilder.addSpanProcessor(new BaggageSpanProcessor());
-            return sdkTracerProviderBuilder;
-        });
+        logger.log(Level.INFO, "OpenTelemetry SDK configuration: Add " + BaggageSpanProcessor.class + " and " + BaggageLogRecordProcessor.class);
+        autoConfigurationCustomizer
+                .addTracerProviderCustomizer(
+                        (sdkTracerProviderBuilder, configProperties) -> sdkTracerProviderBuilder.addSpanProcessor(new BaggageSpanProcessor()));
+        autoConfigurationCustomizer
+                .addLoggerProviderCustomizer(
+                        (sdkLoggerProviderBuilder, configProperties) -> sdkLoggerProviderBuilder.addLogRecordProcessor(new BaggageLogRecordProcessor()));
     }
 }
