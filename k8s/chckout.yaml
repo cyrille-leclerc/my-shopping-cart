@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: checkout
-        image: checkout-service:1.0-SNAPSHOT
+        image: checkout:1.0-SNAPSHOT
         imagePullPolicy: Never
         ports:
         - containerPort: 50051
