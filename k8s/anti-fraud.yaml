@@ -7,8 +7,8 @@ spec:
     app: anti-fraud
   ports:
     - protocol: TCP
-      port: 8081
-      targetPort: 8081
+      port: 8080
+      targetPort: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -26,10 +26,10 @@ spec:
     spec:
       containers:
       - name: anti-fraud
-        image: fraud-detection:1.0-SNAPSHOT
+        image: fraud-detection:1.1-SNAPSHOT
         imagePullPolicy: Never
         ports:
-        - containerPort: 8081
+        - containerPort: 8080
         env:
         - name: SPRING_DATASOURCE_URL
           value: jdbc:postgresql://postgres:5432/compose-postgres
@@ -39,8 +39,6 @@ spec:
           value: compose-postgres
         - name: SPRING_JPA_HIBERNATE_DDL_AUTO
           value: update
-        - name: SERVER_PORT
-          value: "8081"
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: "http://lgtm:4318"
         - name: LOGGING_FILE_NAME

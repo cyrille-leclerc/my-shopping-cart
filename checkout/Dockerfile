@@ -14,7 +14,7 @@ FROM eclipse-temurin:21-jre
 
 WORKDIR /usr/src/app/
 
-COPY --from=builder /usr/src/app/checkout/target/checkout-1.0-SNAPSHOT.jar ./app.jar
+COPY --from=builder /usr/src/app/checkout/target/checkout-1.1-SNAPSHOT.jar ./app.jar
 COPY --from=builder /usr/src/app/checkout/target/lib ./lib
 # we ignore the version (which is from upstream) and use the latest version of the grafana distribution
 ADD --chmod=644 https://github.com/grafana/grafana-opentelemetry-java/releases/latest/download/grafana-opentelemetry-java.jar /usr/src/app/opentelemetry-javaagent.jar
