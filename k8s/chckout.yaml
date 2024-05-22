@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkout
+spec:
+  selector:
+    app: checkout
+  ports:
+    - protocol: TCP
+      port: 50051
+      targetPort: 50051
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: checkout
+  template:
+    metadata:
+      labels:
+        app: checkout
+    spec:
+      containers:
+      - name: checkout
+        image: checkout:1.1-SNAPSHOT
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 50051
+        env:
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://lgtm:4318"
+          - name: LOGGING_FILE_NAME
+            value: application.log
+          - name: SHIPPING_SERVICE_URL
+            value: "http://shipping:8080"
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: service.name=checkout,service.namespace=shop,service.version=1.1,deployment.environment=staging
+
