@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkout
+spec:
+  selector:
+    app: checkout
+  ports:
+    - protocol: TCP
+      port: 50051
+      targetPort: 50051
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: checkout
+  template:
+    metadata:
+      labels:
+        app: checkout
+    spec:
+      containers:
+      - name: checkout
+        image: checkout-service:1.0-SNAPSHOT
+        ports:
+        - containerPort: 50051
+        # Add your environment variables here

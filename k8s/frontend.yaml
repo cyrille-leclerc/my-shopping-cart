@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:1.0-SNAPSHOT
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://postgres:5432/compose-postgres
+        - name: SPRING_DATASOURCE_USERNAME
+          value: compose-postgres
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: compose-postgres
+        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+          value: update
+        - name: ANTIFRAUDSERVICE_BASEURL
+          value: http://anti-fraud:8081
+        - name: CHECKOUTSERVICE_GRPCENDPOINT
+          value: checkout:50051
+        - name: LOGGING_FILE_NAME
+          value: application.log
