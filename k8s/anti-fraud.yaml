@@ -26,7 +26,8 @@ spec:
     spec:
       containers:
       - name: anti-fraud
-        image: anti-fraud:1.0-SNAPSHOT
+        image: fraud-detection:1.0-SNAPSHOT
+        imagePullPolicy: Never
         ports:
         - containerPort: 8081
         env:
