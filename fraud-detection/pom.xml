@@ -8,7 +8,7 @@
 		<version>1.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<artifactId>anti-fraud</artifactId>
+	<artifactId>fraud-detection</artifactId>
 
 	<properties>
 		<!--suppress UnresolvedMavenProperty -->
