@@ -39,9 +39,13 @@ spec:
           value: compose-postgres
         - name: SPRING_JPA_HIBERNATE_DDL_AUTO
           value: update
+        - name: SPRING_REDIS_HOST
+          value: redis
         - name: ANTIFRAUDSERVICE_BASEURL
           value: http://anti-fraud:8081
         - name: CHECKOUTSERVICE_GRPCENDPOINT
           value: checkout:50051
         - name: LOGGING_FILE_NAME
           value: application.log
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://lgtm:4318"
