@@ -30,4 +30,9 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 50051
-        # Add your environment variables here
+        env:
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://lgtm:4318"
+          - name: LOGGING_FILE_NAME
+            value: application.log
+

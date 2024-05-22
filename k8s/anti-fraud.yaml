@@ -41,5 +41,7 @@ spec:
           value: update
         - name: SERVER_PORT
           value: "8081"
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://lgtm:4318"
         - name: LOGGING_FILE_NAME
           value: application.log
