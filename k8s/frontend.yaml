@@ -51,3 +51,5 @@ spec:
           value: "http://lgtm:4318"
         - name: SPRING_RABBITMQ_HOST
           value: "rabbitmq"
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: service.name=frontend,service.namespace=shop,service.version=1.1,deployment.environment=staging

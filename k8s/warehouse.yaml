@@ -37,4 +37,5 @@ spec:
             value: application.log
           - name: SPRING_RABBITMQ_HOST
             value: "rabbitmq"
-
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: service.name=warehouse,service.namespace=shop,service.version=1.1,deployment.environment=staging
