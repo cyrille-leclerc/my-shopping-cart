@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: shipping
+spec:
+  selector:
+    app: shipping
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shipping
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shipping
+  template:
+    metadata:
+      labels:
+        app: shipping
+    spec:
+      containers:
+      - name: shipping
+        image: shipping:1.1-SNAPSHOT
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: "http://lgtm:4318"
+          - name: LOGGING_FILE_NAME
+            value: application.log
+          - name: OTEL_RESOURCE_ATTRIBUTES
+            value: service.name=shipping,service.namespace=shop,service.version=1.1,deployment.environment=staging
