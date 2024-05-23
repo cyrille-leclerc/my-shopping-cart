@@ -53,6 +53,7 @@ public class OrderController {
     RabbitTemplate rabbitTemplate;
     RestTemplate restTemplate;
     String antiFraudServiceBaseUrl;
+    String unInstrumentedServiceUrl;
     final DoubleHistogram orderValueHistogram;
     final DoubleHistogram orderWithTagsHistogram;
 
@@ -70,6 +71,7 @@ public class OrderController {
     @PostConstruct
     public void init() {
         logger.info("Anti fraud service base url: {}", this.antiFraudServiceBaseUrl);
+        logger.info("Un instrumented service url: {}", this.unInstrumentedServiceUrl);
     }
 
     @GetMapping
@@ -124,7 +126,7 @@ public class OrderController {
             logger.warn("FAILURE createOrder({}): price: {}, fraud.exception: {} with URL {}", form, orderPrice, exceptionShortDescription, url);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (fraudDetectionResult.getStatusCode() != HttpStatus.OK) {
+        if (fraudDetectionResult.getStatusCode().isError()) {
             String exceptionShortDescription = "fraudDetection-status-" + fraudDetectionResult.getStatusCode();
             span.recordException(new Exception(exceptionShortDescription));
             logger.warn("FAILURE createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
@@ -137,10 +139,10 @@ public class OrderController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        // test un-instrumented backend. Note that the 8.8.8.8 DNS resolves the example.com domain
-        ResponseEntity<String> exampleDotComResponse = restTemplate.getForEntity("https://example.com/", String.class);
-        if (exampleDotComResponse.getStatusCode() != HttpStatus.OK) {
-            String exceptionShortDescription = "exampleDotCom-status-" + fraudDetectionResult.getStatusCode();
+        // invoke un-instrumented service.
+        ResponseEntity<String> unInstrumentedServiceResponse = restTemplate.getForEntity(this.unInstrumentedServiceUrl, String.class);
+        if (unInstrumentedServiceResponse.getStatusCode() != HttpStatus.OK) {
+            String exceptionShortDescription = unInstrumentedServiceUrl + "-status-" + fraudDetectionResult.getStatusCode();
             span.recordException(new Exception(exceptionShortDescription));
         }
 
@@ -197,6 +199,11 @@ public class OrderController {
     @Autowired
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
+    }
+
+    @Value("${unInstrumentedService.url}")
+    public void setUnInstrumentedServiceUrl(String unInstrumentedServiceUrl) {
+        this.unInstrumentedServiceUrl = unInstrumentedServiceUrl;
     }
 
     @Value("${antiFraudService.baseUrl}")
