@@ -39,4 +39,6 @@ spec:
             value: "http://shipping:8080"
           - name: OTEL_RESOURCE_ATTRIBUTES
             value: service.name=checkout,service.namespace=shop,service.version=1.1,deployment.environment=staging
+          - name: OTEL_EXPERIMENTAL_METRICS_VIEW_CONFIG
+            value: metric-config.yaml
 

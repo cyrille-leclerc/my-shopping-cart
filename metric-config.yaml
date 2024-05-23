@@ -1,0 +1,13 @@
+- selector:
+    instrument_name: http.server.request.duration
+  view:
+    attribute_keys:
+      - http.route
+      - http.request.method
+      - http.response.status_code
+      - error.type
+      - network.protocol.name
+      - network.protocol.version
+      - url.scheme
+      - server.address
+      - server.port

@@ -138,7 +138,7 @@ public class OrderController {
         }
 
         // test un-instrumented backend. Note that the 8.8.8.8 DNS resolves the example.com domain
-        ResponseEntity<String> exampleDotComResponse = restTemplate.getForEntity("https://example.com/", String.class);
+        ResponseEntity<String> exampleDotComResponse = restTemplate.getForEntity("https://google.com/", String.class);
         if (exampleDotComResponse.getStatusCode() != HttpStatus.OK) {
             String exceptionShortDescription = "exampleDotCom-status-" + fraudDetectionResult.getStatusCode();
             span.recordException(new Exception(exceptionShortDescription));
