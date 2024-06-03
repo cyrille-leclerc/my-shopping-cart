@@ -39,7 +39,7 @@ spec:
           value: compose-postgres
         - name: SPRING_JPA_HIBERNATE_DDL_AUTO
           value: update
-        - name: SPRING_REDIS_HOST
+        - name: SPRING_DATA_REDIS_HOST
           value: redis
         - name: ANTIFRAUDSERVICE_BASEURL
           value: http://anti-fraud:8080
