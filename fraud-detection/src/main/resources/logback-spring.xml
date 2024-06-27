@@ -2,55 +2,14 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
-    <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE_WITH_SPAN_CONTEXT" />
-        <appender-ref ref="FILE_NDJSON" />
+        <appender-ref ref="stdout" />
     </root>
 
-    <appender name="FILE_NDJSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>fraud-detection.ndjson.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>fraud-detection-%d{yyyy-MM-dd}.%i.ndjson.log</fileNamePattern>
-            <maxFileSize>10MB</maxFileSize>
-            <maxHistory>1</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
-        </rollingPolicy>
-        <encoder class="ch.qos.logback.classic.encoder.JsonEncoder">
-            <withFormattedMessage>true</withFormattedMessage>
-            <withMessage>false</withMessage>
-            <withArguments>false</withArguments>
-            <withSequenceNumber>false</withSequenceNumber>
-            <withNanoseconds>false</withNanoseconds>
-        </encoder>
-    </appender>
-
-    <appender name="FILE_WITH_SPAN_CONTEXT" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>${FILE_LOG_THRESHOLD}</level>
-        </filter>
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- %applicationName[%t] ${LOG_CORRELATION_PATTERN:-}%-40.40logger{39} : %m - trace_id=%mdc{trace_id}, span_id=%mdc{span_id}, service.name=%mdc{service.name}, service.namespace=%mdc{service.namespace}, service.instance.id=%mdc{service.instance.id}, deployment.environment=%mdc{deployment.environment}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
-            <charset>${FILE_LOG_CHARSET}</charset>
-        </encoder>
-        <file>fraud-detection.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>fraud-detection-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
-            <maxFileSize>10MB</maxFileSize>
-            <maxHistory>1</maxHistory>
-            <totalSizeCap>1GB</totalSizeCap>
-        </rollingPolicy>
-    </appender>
-
-    <appender name="CONSOLE_NDJSON" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.classic.encoder.JsonEncoder">
-            <withFormattedMessage>true</withFormattedMessage>
-            <withMessage>false</withMessage>
-            <withArguments>false</withArguments>
-            <withSequenceNumber>false</withSequenceNumber>
-            <withNanoseconds>false</withNanoseconds>
+            <pattern>%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX, UTC}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- %applicationName[%t] ${LOG_CORRELATION_PATTERN:-}%-40.40logger{39} : %m - trace_id=%mdc{trace_id}, span_id=%mdc{span_id}, service.name=%mdc{service.name}, service.namespace=%mdc{service.namespace}, service.instance.id=%mdc{service.instance.id}, deployment.environment=%mdc{deployment.environment}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
         </encoder>
     </appender>
 </configuration>

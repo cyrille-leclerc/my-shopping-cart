@@ -12,21 +12,19 @@ data:
       filelog/fraud-detection-raw:
         include:
           - /var/log/pods/*/anti-fraud/*.log
-        exclude:
-          # Exclude logs from all containers named otel-collector
-          - /var/log/pods/*/lgtm/*.log        
+        include_file_path: true
         operators:
         - id: container-parser
           type: container
         - id: regex_parser
           type: regex_parser
-          regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}\+\d{2}:\d{2})\s*(?P<level>\S*)\s*(?P<pid>\d*)\s*--- \[(?P<thread>\S*)\] (?P<logger>\S*)\s*: (?P<message>.*) - trace_id=(?P<trace_id>[A-Za-z0-9]*), span_id=(?P<span_id>[A-Za-z0-9]*)'
+          regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z)\s*(?P<level>\S*)\s*(?P<pid>\d*)\s*--- \[(?P<thread>\S*)\] (?P<logger>\S*)\s*: (?P<message>.*) - trace_id=(?P<trace_id>[A-Za-z0-9]*), span_id=(?P<span_id>[A-Za-z0-9]*)'
           body: attributes.message
           timestamp:
-            # TODO
+            # TODO                             
             parse_from: attributes.timestamp
             # logback pattern: yyyy-MM-dd'T'HH:mm:ss.SSSXXX -- example=2024-04-17T10:10:47.715+02:00
-            layout: '%Y-%m-%dT%H:%M:%S.%L%j'
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
           severity:
             parse_from: attributes.level
           trace:
@@ -58,12 +56,22 @@ data:
         - id: remove_message
           type: remove
           field: attributes.message
-        # TODO handle exception stack trace
-        #- type: stdout
-        resource:
-          service.name: fraud-detection
-          service.namespace: raw_logs
-          deployment.environment: production        
+        - id: remove_logtag
+          type: remove
+          field: attributes.logtag
+        - id: remove_file
+          type: remove
+          field: attributes["log.file.path"]
+        - id: remove_filename
+          type: remove                                                             
+          field: attributes["log.file.name"]
+        - id: remove_stream
+          type: remove
+          field: attributes["log.iostream"]
+        - id: remove_time
+          type: remove
+          field: attributes.time
+        # TODO handle exception stack trace  
 
         
   
@@ -122,7 +130,7 @@ data:
           processors: [ batch ]
           exporters: [ nop ]
         logs/k8s-stdout:
-          receivers: [ filelog/fraud-detection-ndjson ]
+          receivers: [ filelog/fraud-detection-raw ]
           processors: [ k8sattributes, batch ]
           exporters: [ otlphttp/logs, logging/logs ]
           
