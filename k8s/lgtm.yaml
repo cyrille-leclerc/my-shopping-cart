@@ -33,7 +33,6 @@ spec:
       labels:
         app: lgtm
     spec:
-      serviceAccountName: lgtm
       containers:
         - name: lgtm
           image: grafana/otel-lgtm:latest
