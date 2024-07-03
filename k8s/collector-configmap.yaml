@@ -20,11 +20,13 @@ data:
         include:
           - /var/log/pods/*/anti-fraud/*.log
         include_file_path: true
-        multiline:
-          line_start_pattern: '.*stdout F \d{4}-'
         operators:
         - id: container-parser
           type: container
+        - id: recombine
+          type: recombine
+          combine_field: body
+          is_first_entry: body matches "^\\d{4}-\\d{2}-\\d{2}T\\d{2}"
         - id: regex_parser
           type: regex_parser
           regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z)\s*(?P<level>\S*)\s*(?P<pid>\d*)\s*--- \[(?P<thread>\S*)\] (?P<logger>\S*)\s*: (?P<message>.*) - trace_id=(?P<trace_id>[A-Za-z0-9]*), span_id=(?P<span_id>[A-Za-z0-9]*), service.name=(?P<service_name>.*), service.namespace=(?P<service_namespace>\S*), service.instance.id=(?P<service_instance_id>\S*), deployment.environment=(?P<deployment_environment>\S*)\s*(?P<throwable>(.|\s)*)'
