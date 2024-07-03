@@ -3,78 +3,17 @@ kind: ConfigMap
 metadata:
   name: otel-collector-config
 data:
-  otel-collector-config.yaml: |- 
+  otel-collector-config.yaml: |-
     receivers:
       otlp:
         protocols:
           grpc:
           http:
-      filelog/fraud-detection-raw:
+      otlpjsonfile:
+        # needs https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/33846
         include:
           - /var/log/pods/*/anti-fraud/*.log
-        include_file_path: true
-        operators:
-        - id: container-parser
-          type: container
-        - id: regex_parser
-          type: regex_parser
-          regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z)\s*(?P<level>\S*)\s*(?P<pid>\d*)\s*--- \[(?P<thread>\S*)\] (?P<logger>\S*)\s*: (?P<message>.*) - trace_id=(?P<trace_id>[A-Za-z0-9]*), span_id=(?P<span_id>[A-Za-z0-9]*)'
-          body: attributes.message
-          timestamp:
-            # TODO                             
-            parse_from: attributes.timestamp
-            # logback pattern: yyyy-MM-dd'T'HH:mm:ss.SSSXXX -- example=2024-04-17T10:10:47.715+02:00
-            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-          severity:
-            parse_from: attributes.level
-          trace:
-            trace_id:
-              parse_from: attributes.trace_id
-            span_id:
-              parse_from: attributes.span_id
-          scope_name:
-            parse_from: attributes.logger
-        - id: move_thread_name
-          type: move
-          from: attributes.thread
-          to: attributes["thread.name"]
-        - id: remove_logger_name
-          type: remove
-          field: attributes.logger
-        - id: remove_timestamp
-          type: remove
-          field: attributes.timestamp
-        - id: remove_level
-          type: remove
-          field: attributes.level
-        - id: remove_span_id
-          type: remove
-          field: attributes.span_id
-        - id: remove_trace_id
-          type: remove
-          field: attributes.trace_id
-        - id: remove_message
-          type: remove
-          field: attributes.message
-        - id: remove_logtag
-          type: remove
-          field: attributes.logtag
-        - id: remove_file
-          type: remove
-          field: attributes["log.file.path"]
-        - id: remove_filename
-          type: remove                                                             
-          field: attributes["log.file.name"]
-        - id: remove_stream
-          type: remove
-          field: attributes["log.iostream"]
-        - id: remove_time
-          type: remove
-          field: attributes.time
-        # TODO handle exception stack trace  
-
-        
-  
+    
     processors:
       batch:
       k8sattributes:
@@ -91,14 +30,14 @@ data:
             - k8s.cluster.uid
         pod_association:
           - sources:
-             - from: resource_attribute
-               name: k8s.pod.uid
-             - from: resource_attribute
-               name: k8s.pod.ip
-             - from: connection        
+              - from: resource_attribute
+                name: k8s.pod.uid
+              - from: resource_attribute
+                name: k8s.pod.ip
+              - from: connection
       resourcedetection:
-        detectors: ["env", "system"]
-        override: false  
+        detectors: [ "env", "system" ]
+        override: false
     
     exporters:
       otlphttp/metrics:
@@ -107,14 +46,14 @@ data:
         endpoint: http://localhost:4418
       otlphttp/logs:
         endpoint: http://localhost:3100/otlp
-      logging/metrics:
+      debug/metrics:
         verbosity: detailed
-      logging/traces:
+      debug/traces:
         verbosity: detailed
-      logging/logs:
+      debug/logs:
         verbosity: detailed
       nop:
-  
+    
     service:
       pipelines:
         traces:
@@ -130,8 +69,8 @@ data:
           processors: [ batch ]
           exporters: [ nop ]
         logs/k8s-stdout:
-          receivers: [ filelog/fraud-detection-raw ]
+          receivers: [ otlpjsonfile ]
           processors: [ k8sattributes, batch ]
-          exporters: [ otlphttp/logs, logging/logs ]
+          exporters: [ otlphttp/logs, debug/logs ]
           
           
