@@ -56,6 +56,10 @@
             <artifactId>opentelemetry-instrumentation-annotations</artifactId>
         </dependency>
         <dependency>
+            <groupId>co.elastic.logging</groupId>
+            <artifactId>logback-ecs-encoder</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>

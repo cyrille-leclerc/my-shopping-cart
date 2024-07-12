@@ -11,9 +11,10 @@
     <properties>
         <!--suppress UnresolvedMavenProperty -->
         <snyk.token>${env.SNYK_TOKEN}</snyk.token>
-        <spring-boot.version>3.3.0</spring-boot.version>
-        <opentelemetry.version>1.38.0</opentelemetry.version>
-        <opentelemetry-instrumentation.version>2.4.0</opentelemetry-instrumentation.version>
+        <spring-boot.version>3.3.1</spring-boot.version>
+        <opentelemetry.version>1.39.0</opentelemetry.version>
+        <opentelemetry-instrumentation.version>2.5.0</opentelemetry-instrumentation.version>
+        <ecs-logging-java.version>1.6.0</ecs-logging-java.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
@@ -61,13 +62,24 @@
             </dependency>
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
-                <artifactId>opentelemetry-instrumentation-annotations</artifactId>
+                <artifactId>opentelemetry-instrumentation-bom</artifactId>
                 <version>${opentelemetry-instrumentation.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+                <version>${opentelemetry-instrumentation.version}-alpha</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.micrometer</groupId>
                 <artifactId>micrometer-bom</artifactId>
-                <version>1.13.0</version>
+                <version>1.13.1</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.pyroscope</groupId>
@@ -107,6 +119,12 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.13.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>co.elastic.logging</groupId>
+                <artifactId>logback-ecs-encoder</artifactId>
+                <version>${ecs-logging-java.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

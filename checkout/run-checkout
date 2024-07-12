@@ -63,14 +63,20 @@ echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 echo ""
 
-OTEL_RESOURCE_ATTRIBUTES="service.name=checkout,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-1"
+OTEL_RESOURCE_ATTRIBUTES="service.name=checkout,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment=$DEPLOYMENT_ENVIRONMENT"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=production"
 
 export OTEL_RESOURCE_ATTRIBUTES
 export OTEL_PROPAGATORS="tracecontext,jaeger,baggage"
+# don't pull service.name from the resource attributes as ECS already sets it
+export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.namespace,service.instance.id,deployment.environment"
+
+## ECS Logger Appender uses SERVICE_NAME
+export SERVICE_NAME="checkout"
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+     -Dotel.instrumentation.logback-mdc.add-baggage=true \
      -Dotel.instrumentation.micrometer.base-time-unit=s \
      -Dotel.semconv-stability.opt-in=http/dup \
      -DshippingServiceUrl="http://shipping.local:8088/" \

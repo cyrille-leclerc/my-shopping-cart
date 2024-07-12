@@ -1,11 +1,11 @@
 <configuration>
     <property name="LOGGING_FILE_NAME" value="/usr/local/var/log/my-shopping-cart/checkout.log"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml" />
+    <include resource="co/elastic/logging/logback/boot/ecs-console-appender.xml" />
+    <include resource="co/elastic/logging/logback/boot/ecs-file-appender.xml" />
 
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
@@ -19,7 +19,7 @@
         </rollingPolicy>
     </appender>
     <root level="info">
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ECS_JSON_CONSOLE"/>
         <appender-ref ref="FILE"/>
     </root>
 </configuration>

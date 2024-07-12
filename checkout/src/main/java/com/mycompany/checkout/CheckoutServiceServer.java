@@ -97,6 +97,9 @@ public class CheckoutServiceServer {
                 e.printStackTrace();
             }
 
+            if (RANDOM.nextInt(10) == 0) {
+                logger.warn("checkout internal error", new RuntimeException("random failure"));
+            }
             HttpRequest shippingRequest = HttpRequest.newBuilder()
                     .uri(shippingServiceUrl)
                     .timeout(Duration.ofMinutes(2))
