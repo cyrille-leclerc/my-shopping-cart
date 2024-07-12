@@ -1,0 +1,152 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+data:
+  otel-collector-config.yaml: |- 
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+          http:
+      filelog/fraud-detection-raw:
+      # logback config - same as Spring Boot default config + append trace_id and span_id
+      # 1. add resource attributes to logback MDC
+      # export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment"
+      # 2. configure logback appender - ch.qos.logback.core.ConsoleAppender
+      # <encoder>
+      #   <pattern>%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX, UTC}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- %applicationName[%t] ${LOG_CORRELATION_PATTERN:-}%-40.40logger{39} : %m - trace_id=%mdc{trace_id}, span_id=%mdc{span_id}, service.name=%mdc{service.name}, service.namespace=%mdc{service.namespace}, service.instance.id=%mdc{service.instance.id}, deployment.environment=%mdc{deployment.environment}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+      # </encoder>
+        include:
+          - /var/log/pods/*/anti-fraud/*.log
+        include_file_path: true
+        operators:
+        - id: container-parser
+          type: container
+        - id: recombine
+          type: recombine
+          combine_field: body
+          is_first_entry: body matches "^\\d{4}-\\d{2}-\\d{2}T\\d{2}"
+        - id: regex_parser
+          type: regex_parser
+          regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z)\s*(?P<level>\S*)\s*(?P<pid>\d*)\s*--- \[(?P<thread>\S*)\] (?P<logger>\S*)\s*: (?P<message>.*) - trace_id=(?P<trace_id>[A-Za-z0-9]*), span_id=(?P<span_id>[A-Za-z0-9]*), service.name=(?P<service_name>.*), service.namespace=(?P<service_namespace>\S*), service.instance.id=(?P<service_instance_id>\S*), deployment.environment=(?P<deployment_environment>\S*)\s*(?P<throwable>(.|\s)*)'
+          on_error: drop # TODO use 'drop_quiet' once available: https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/32220
+          body: attributes.message
+          timestamp:
+            parse_from: attributes.timestamp
+            # logback pattern: yyyy-MM-dd'T'HH:mm:ss.SSSXXX -- example=2024-04-17T10:10:47.715+02:00
+            layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+          severity:
+            parse_from: attributes.level
+          trace:
+            trace_id:
+              parse_from: attributes.trace_id
+            span_id:
+              parse_from: attributes.span_id
+          scope_name:
+            parse_from: attributes.logger
+        - id: move_service_namespace
+          type: move
+          if: 'attributes["service_namespace"] != nil'
+          from: attributes["service_namespace"]
+          to: resource["service.namespace"]
+        - id: move_service_name
+          type: move
+          from: attributes["service_name"]
+          to: resource["service.name"]
+        - id: move_service_instance_id
+          type: move
+          if: 'attributes["service_instance_id"] != nil'
+          from: attributes["service_instance_id"]
+          to: resource["service.instance.id"]
+        - id: move_deployment_environment
+          type: move
+          if: 'attributes["deployment_environment"] != nil'
+          from: attributes["deployment_environment"]
+          to: resource["deployment.environment"]
+        - id: move_thread_name
+          type: move
+          from: attributes.thread
+          to: attributes["thread.name"]
+        - id: move_throwable_stacktrace
+          type: move
+          if: 'len(attributes["throwable"]) > 0'
+          from: attributes["throwable"]
+          to: attributes["exception.stacktrace"]
+        - id: remove_logger_name
+          type: remove
+          field: attributes.logger
+        - id: remove_timestamp
+          type: remove
+          field: attributes.timestamp
+        - id: remove_level
+          type: remove
+          field: attributes.level
+        - id: remove_span_id
+          if: 'attributes["span_id"] != nil'
+          type: remove
+          field: attributes.span_id
+        - id: remove_trace_id
+          if: 'attributes["trace_id"] != nil'
+          type: remove
+          field: attributes.trace_id
+        - id: remove_message
+          type: remove
+          field: attributes.message
+        - id: remove_logtag
+          type: remove
+          field: attributes.logtag
+        - id: remove_file
+          type: remove
+          field: attributes["log.file.path"]
+        - id: remove_filename
+          type: remove                                                             
+          field: attributes["log.file.name"]
+        - id: remove_stream
+          type: remove
+          field: attributes["log.iostream"]
+        - id: remove_time
+          type: remove
+          field: attributes.time
+  
+    processors:
+      batch:
+      resourcedetection:
+        detectors: ["env", "system"]
+        override: false  
+    
+    exporters:
+      otlphttp/metrics:
+        endpoint: http://localhost:9090/api/v1/otlp
+      otlphttp/traces:
+        endpoint: http://localhost:4418
+      otlphttp/logs:
+        endpoint: http://localhost:3100/otlp
+      debug/metrics:
+        verbosity: detailed
+      debug/traces:
+        verbosity: detailed
+      debug/logs:
+        verbosity: detailed
+      nop:
+  
+    service:
+      pipelines:
+        traces:
+          receivers: [ otlp ]
+          processors: [ batch ]
+          exporters: [ otlphttp/traces ]
+        metrics:
+          receivers: [ otlp ]
+          processors: [ batch ]
+          exporters: [ otlphttp/metrics ]
+        logs/otlp:
+          receivers: [ otlp ]
+          processors: [ batch ]
+          exporters: [ nop ]
+        logs/k8s-stdout:
+          receivers: [ filelog/fraud-detection-raw ]
+          processors: [ batch ]
+          exporters: [ otlphttp/logs, debug/logs ]
+          
+          
