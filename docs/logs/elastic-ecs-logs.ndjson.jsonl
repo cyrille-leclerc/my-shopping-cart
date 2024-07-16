@@ -1,0 +1,67 @@
+{
+  "@timestamp": "2024-07-12T14:36:45.870Z",
+  "log.level": "INFO",
+  "message": "GRPC server started, listening on 50051",
+  "ecs.version": "1.2.0",
+  "service.name": "checkout",
+  "event.dataset": "checkout",
+  "process.thread.name": "main",
+  "log.logger": "com.mycompany.checkout.CheckoutServiceServer",
+  "service.instance.id": "ee38cb36-231b-4bed-ba5d-40582b9921a8",
+  "service.namespace": "ecommerce",
+  "deployment.environment": "production"
+}
+{
+  "@timestamp": "2024-07-12T14:36:53.488Z",
+  "log.level": "INFO",
+  "message": "Order successfully placed customerId=customer-91 shipping=ok durationInMillis=62",
+  "ecs.version": "1.2.0",
+  "service.name": "checkout",
+  "event.dataset": "checkout",
+  "process.thread.name": "grpc-default-executor-0",
+  "log.logger": "com.mycompany.checkout.CheckoutServiceServer$CheckoutServiceImpl",
+  "trace_id": "64cae57fd822ba1704872db5230ed5ec",
+  "trace_flags": "01",
+  "service.instance.id": "ee38cb36-231b-4bed-ba5d-40582b9921a8",
+  "span_id": "e117f1c8b84d9f2f",
+  "service.namespace": "ecommerce",
+  "deployment.environment": "production",
+  "baggage.frontend_instrumentation.sessionId": "cf2a0fd1-b4c6-4a4b-ad65-6dffa78c8130"
+}
+{
+  "@timestamp": "2024-07-12T14:37:01.923Z",
+  "log.level": "WARN",
+  "message": "checkout internal error",
+  "ecs.version": "1.2.0",
+  "service.name": "checkout",
+  "event.dataset": "checkout",
+  "process.thread.name": "grpc-default-executor-0",
+  "log.logger": "com.mycompany.checkout.CheckoutServiceServer$CheckoutServiceImpl",
+  "trace_id": "48860525bf78aa3885c09f4fdff2d399",
+  "trace_flags": "01",
+  "service.instance.id": "ee38cb36-231b-4bed-ba5d-40582b9921a8",
+  "span_id": "733f4e929d3c472a",
+  "service.namespace": "ecommerce",
+  "deployment.environment": "production",
+  "baggage.frontend_instrumentation.sessionId": "4e3602d5-a11c-41eb-9597-7879db023488",
+  "error.type": "java.lang.RuntimeException",
+  "error.message": "random failure",
+  "error.stack_trace": "java.lang.RuntimeException: random failure\n\tat com.mycompany.checkout.CheckoutServiceServer$CheckoutServiceImpl.placeOrder(CheckoutServiceServer.java:101)\n\tat com.mycompany.checkout.CheckoutServiceGrpc$MethodHandlers.invoke(CheckoutServiceGrpc.java:210)\n\tat io.grpc.stub.ServerCalls$UnaryServerCallHandler$UnaryServerCallListener.onHalfClose(ServerCalls.java:182)\n\tat io.grpc.PartialForwardingServerCallListener.onHalfClose(PartialForwardingServerCallListener.java:35)\n\tat io.grpc.ForwardingServerCallListener.onHalfClose(ForwardingServerCallListener.java:23)\n\tat io.grpc.ForwardingServerCallListener$SimpleForwardingServerCallListener.onHalfClose(ForwardingServerCallListener.java:40)\n\tat io.grpc.Contexts$ContextualizedServerCallListener.onHalfClose(Contexts.java:86)\n\tat io.opentelemetry.javaagent.shaded.instrumentation.grpc.v1_6.TracingServerInterceptor$TracingServerCall$TracingServerCallListener.onHalfClose(TracingServerInterceptor.java:152)\n\tat io.grpc.internal.ServerCallImpl$ServerStreamListenerImpl.halfClosed(ServerCallImpl.java:356)\n\tat io.grpc.internal.ServerImpl$JumpToApplicationThreadServerStreamListener$1HalfClosed.runInContext(ServerImpl.java:861)\n\tat io.grpc.internal.ContextRunnable.run(ContextRunnable.java:37)\n\tat io.grpc.internal.SerializingExecutor.run(SerializingExecutor.java:133)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n"
+}
+{
+  "@timestamp": "2024-07-12T14:37:01.983Z",
+  "log.level": "INFO",
+  "message": "Order successfully placed customerId=customer-74 shipping=ok durationInMillis=51",
+  "ecs.version": "1.2.0",
+  "service.name": "checkout",
+  "event.dataset": "checkout",
+  "process.thread.name": "grpc-default-executor-0",
+  "log.logger": "com.mycompany.checkout.CheckoutServiceServer$CheckoutServiceImpl",
+  "trace_id": "48860525bf78aa3885c09f4fdff2d399",
+  "trace_flags": "01",
+  "service.instance.id": "ee38cb36-231b-4bed-ba5d-40582b9921a8",
+  "span_id": "733f4e929d3c472a",
+  "service.namespace": "ecommerce",
+  "deployment.environment": "production",
+  "baggage.frontend_instrumentation.sessionId": "4e3602d5-a11c-41eb-9597-7879db023488"
+}
