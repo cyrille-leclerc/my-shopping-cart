@@ -19,6 +19,11 @@ data:
         operators:
         - id: container-parser
           type: container
+        - id: router
+          type: router
+          routes:
+            - output: json_parser
+              expr: 'body matches "\\{[^{}]*\\}" == true'          
         - id: json_parser
           type: json_parser
           on_error: drop # TODO use 'drop_quiet' once available:
