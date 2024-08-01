@@ -41,8 +41,6 @@ spec:
           value: update
         - name: OTEL_EXPORTER_OTLP_ENDPOINT
           value: "http://lgtm:4318"
-        - name: LOGGING_FILE_NAME
-          value: application.log
         - name: OTEL_RESOURCE_ATTRIBUTES
           value: service.name=anti-fraud,service.namespace=shop,service.version=1.1,deployment.environment=staging
         - name: OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES

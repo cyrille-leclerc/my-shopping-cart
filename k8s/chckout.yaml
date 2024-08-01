@@ -33,8 +33,6 @@ spec:
         env:
           - name: OTEL_EXPORTER_OTLP_ENDPOINT
             value: "http://lgtm:4318"
-          - name: LOGGING_FILE_NAME
-            value: application.log
           - name: SHIPPING_SERVICE_URL
             value: "http://shipping:8080"
           - name: OTEL_RESOURCE_ATTRIBUTES
