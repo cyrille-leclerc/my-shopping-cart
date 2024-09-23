@@ -132,7 +132,7 @@ public class OrderController {
             logger.warn("FAILURE createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (!"OK".equals(fraudDetectionResult.getBody())) {
+        if (!"approved".equals(fraudDetectionResult.getBody())) {
             String exceptionShortDescription = "fraudDetection-" + fraudDetectionResult.getBody();
             span.recordException(new Exception(exceptionShortDescription));
             logger.warn("FAILURE createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
