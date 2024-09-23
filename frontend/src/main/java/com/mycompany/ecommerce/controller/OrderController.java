@@ -70,7 +70,7 @@ public class OrderController {
 
     @PostConstruct
     public void init() {
-        logger.info("Anti fraud service base url: {}", this.antiFraudServiceBaseUrl);
+        logger.info("Fraud detection service base url: {}", this.antiFraudServiceBaseUrl);
         logger.info("Un instrumented service url: {}", this.unInstrumentedServiceUrl);
     }
 
