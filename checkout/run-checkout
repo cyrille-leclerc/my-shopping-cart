@@ -74,6 +74,8 @@ export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.namespace,se
 ## ECS Logger Appender uses SERVICE_NAME
 export SERVICE_NAME="checkout"
 
+export OTEL_LOGS_EXPORTER="logging-otlp"
+
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.logback-mdc.add-baggage=true \

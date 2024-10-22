@@ -2,6 +2,8 @@
     <include resource="co/elastic/logging/logback/boot/ecs-console-appender.xml" />
 
     <root level="info">
+        <!--
         <appender-ref ref="ECS_JSON_CONSOLE"/>
+        -->
     </root>
 </configuration>
