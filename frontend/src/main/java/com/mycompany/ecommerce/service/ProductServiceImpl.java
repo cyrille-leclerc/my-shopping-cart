@@ -22,9 +22,9 @@ public class ProductServiceImpl implements ProductService {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
-    private Cache productCache;
+    private final Cache productCache;
 
     private boolean cacheMissAttack = false;
 
@@ -41,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @WithSpan
     public Product getProduct(@SpanAttribute("productId") long id) throws ResourceNotFoundException {
-        Object cacheKey = cacheMissAttack? UUID.randomUUID().toString() : id;
+        Object cacheKey = cacheMissAttack ? UUID.randomUUID().toString() : id;
 
         final Product product = productCache.get(cacheKey, () -> {
             long beforeInNanos = System.nanoTime();
@@ -50,7 +50,10 @@ public class ProductServiceImpl implements ProductService {
                 Span.current().setAttribute("cache.miss", false);
                 return product1;
             } finally {
-                logger.info("Cache miss for product " + id + ", load from database in " + TimeUnit.MILLISECONDS.convert(System.nanoTime() - beforeInNanos, TimeUnit.NANOSECONDS) + "ms");
+                logger.atInfo()
+                        .addKeyValue("product.id", id)
+                        .addKeyValue("loadTimeMs", TimeUnit.MILLISECONDS.convert(System.nanoTime() - beforeInNanos, TimeUnit.NANOSECONDS))
+                        .log("Cache miss");
             }
         });
         if (product == null) {

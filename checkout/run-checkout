@@ -74,10 +74,14 @@ export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.namespace,se
 ## ECS Logger Appender uses SERVICE_NAME
 export SERVICE_NAME="checkout"
 
-export OTEL_LOGS_EXPORTER="logging-otlp"
+export OTEL_LOGS_EXPORTER="experimental-otlp/stdout"
+
+# see https://opentelemetry.io/docs/zero-code/java/spring-boot-starter/out-of-the-box-instrumentation/
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+     -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
+     -Dotel.instrumentation.logback-appender.experimental.capture-mdc-attributes=* \
      -Dotel.instrumentation.logback-mdc.add-baggage=true \
      -Dotel.instrumentation.micrometer.base-time-unit=s \
      -Dotel.semconv-stability.opt-in=http/dup \

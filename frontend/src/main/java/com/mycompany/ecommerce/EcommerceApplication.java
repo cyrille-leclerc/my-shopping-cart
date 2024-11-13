@@ -31,7 +31,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
 
 @SpringBootApplication
 public class EcommerceApplication {
@@ -136,8 +135,6 @@ public class EcommerceApplication {
 
     @Bean("productCache")
     public RedisCache getProductCache(RedisCacheManager cacheManager, Meter meter) {
-        RedisCache productCache = (RedisCache) cacheManager.getCache("productCache");
-        OpenTelemetryUtils.observeRedisCache(Objects.requireNonNull(productCache), meter);
-        return productCache;
+        return (RedisCache) cacheManager.getCache("productCache");
     }
 }

@@ -8,7 +8,6 @@ import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,7 +21,6 @@ import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DecimalFormat;
 import java.util.Random;
 
 @ManagedResource
@@ -52,6 +50,7 @@ public class FraudDetectionController {
     final DataSource dataSource;
 
 
+
     public FraudDetectionController(Meter meter, DataSource dataSource) {
         this.fraudDetectionHistogram = meter.histogramBuilder("fraud.check_order").setUnit("{dollars}").build();
         this.dataSource = dataSource;
@@ -67,12 +66,14 @@ public class FraudDetectionController {
         Span.current().setAttribute("customer_ip_address", customerIpAddress);
         Span.current().setAttribute("shipping_country", shippingCountry);
 
+        int orderPriceDollars = Double.valueOf(orderPrice).intValue();
+
         int durationOffsetInMillis;
         int fraudPercentage;
-        if (orderPrice < priceUpperBoundaryDollarsOnSmallShoppingCart) {
+        if (orderPriceDollars < priceUpperBoundaryDollarsOnSmallShoppingCart) {
             fraudPercentage = fraudPercentageOnSmallShoppingCarts;
             durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
-        } else if (orderPrice < priceUpperBoundaryDollarsOnMediumShoppingCarts) {
+        } else if (orderPriceDollars < priceUpperBoundaryDollarsOnMediumShoppingCarts) {
             fraudPercentage = fraudPercentageOnMediumShoppingCarts;
             durationOffsetInMillis = averageDurationMillisOnMediumShoppingCarts;
         } else {
@@ -98,15 +99,26 @@ public class FraudDetectionController {
                 throw new RuntimeException("Fraud Detection Processing Exception");
             }
             outcome = denied ? "denied" : "approved";
-            logger.atLevel(denied ? Level.WARN : Level.INFO)
-                    .log("checkOrder(totalPrice={}, shippingCountry={}, customerIpAddress={}) fraudScore={}, outcome={}",
-                            new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, fraudScore, outcome);
+            logger.atInfo()
+                    .addKeyValue("outcome", outcome)
+                    .addKeyValue("orderPrice", orderPriceDollars)
+                    .addKeyValue("shippingCountry", shippingCountry)
+                    .addKeyValue("customerIpAddress", customerIpAddress)
+                    .addKeyValue("fraudScore", fraudScore)
+                    .log("checkOrder");
             this.fraudDetectionHistogram.record((int) Math.floor(orderPrice), Attributes.of(AttributeKey.stringKey("outcome"), outcome));
             return outcome;
         } catch (SQLException | InterruptedException | RuntimeException e) {
             this.fraudDetectionHistogram.record((int) Math.floor(orderPrice), Attributes.of(AttributeKey.stringKey("outcome"), "error"));
             Span.current().recordException(e);
-            logger.warn("Exception processing checkOrder(orderPrice={}, shippingCountry={}, customerIpAddress={})", new DecimalFormat("000").format(orderPrice), shippingCountry, customerIpAddress, e);
+            logger.atWarn()
+                    .addKeyValue("outcome", "error")
+                    .addKeyValue("orderPrice", orderPriceDollars)
+                    .addKeyValue("shippingCountry", shippingCountry)
+                    .addKeyValue("customerIpAddress", customerIpAddress)
+                    .addKeyValue("fraudScore", fraudScore)
+                    .setCause(e)
+                    .log("checkOrder");
             return "error";
         }
     }

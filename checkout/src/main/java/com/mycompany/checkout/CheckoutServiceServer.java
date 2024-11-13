@@ -5,6 +5,7 @@ import io.grpc.ServerBuilder;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.net.URI;
@@ -15,7 +16,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 public class CheckoutServiceServer {
 
@@ -30,7 +30,6 @@ public class CheckoutServiceServer {
     public CheckoutServiceServer(String shippingServiceUrl) {
         this.shippingServiceUrl = shippingServiceUrl;
     }
-
 
     public static void main(String[] args) throws Exception {
         String shippingServiceUrl = Optional.ofNullable(System.getProperty("shippingServiceUrl", null)).or(() -> Optional.ofNullable(System.getenv("SHIPPING_SERVICE_URL"))).orElseThrow(() -> new RuntimeException("System property 'shippingServiceUrl' or environment variable 'SHIPPING_SERVICE_URL' not found"));
@@ -89,7 +88,7 @@ public class CheckoutServiceServer {
         }
 
         @Override
-        public void placeOrder(PlaceOrderRequest request, StreamObserver<PlaceOrderReply> responseObserver) {
+        public void placeOrder(PlaceOrderRequest placeOrderRequest, StreamObserver<PlaceOrderReply> responseObserver) {
             final int millis = 25 + RANDOM.nextInt(50);
             try {
                 Thread.sleep(millis);
@@ -98,12 +97,15 @@ public class CheckoutServiceServer {
             }
 
             if (RANDOM.nextInt(10) == 0) {
-                logger.warn("checkout internal error", new RuntimeException("random failure"));
+                logger.atWarn()
+                        .addKeyValue("customerId", placeOrderRequest.getName())
+                        .setCause(new RuntimeException("random failure"))
+                        .log("internal-error");
             }
             HttpRequest shippingRequest = HttpRequest.newBuilder()
                     .uri(shippingServiceUrl)
                     .timeout(Duration.ofMinutes(2))
-                    .POST(HttpRequest.BodyPublishers.ofString(request.getName()))
+                    .POST(HttpRequest.BodyPublishers.ofString(placeOrderRequest.getName()))
                     .build();
 
             String shippingResponse;
@@ -113,9 +115,22 @@ public class CheckoutServiceServer {
             } catch (IOException | InterruptedException e) {
                 shippingResponse = "Exception invoking " + shippingRequest + " - " + e;
                 logger.error(shippingResponse);
+                logger.atError()
+                        .addKeyValue("customerId", placeOrderRequest.getName())
+                        .addKeyValue("shippingSvcResponse", shippingResponse)
+                        .addKeyValue("durationInMillis", millis)
+                        .log("Order shipping failed");
             }
 
-            logger.info("Order successfully placed customerId=" + request.getName() + " shipping=" + shippingResponse + " durationInMillis=" + millis);
+            MDC.put("customerId", placeOrderRequest.getName());
+            logger.atInfo()
+                    .addKeyValue("outcome", "success")
+                    .addKeyValue("customerId", placeOrderRequest.getName())
+                    .addKeyValue("shippingSvcResponse", shippingResponse)
+                    .addKeyValue("durationInMillis", millis)
+                    .log("placeOrder");
+            logger.info("Order {} successfully placed", "order-"+ RANDOM.nextInt(1_00000));
+
             // StressTestUtils.incrementProgressBarSuccess();
             PlaceOrderReply placeOrderReply = PlaceOrderReply.newBuilder().setMessage("Order successfully placed!").build();
             responseObserver.onNext(placeOrderReply);

@@ -27,7 +27,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -70,8 +75,10 @@ public class OrderController {
 
     @PostConstruct
     public void init() {
-        logger.info("Fraud detection service base url: {}", this.antiFraudServiceBaseUrl);
-        logger.info("Un instrumented service url: {}", this.unInstrumentedServiceUrl);
+        logger.atInfo()
+                .addKeyValue("fraud.url", this.antiFraudServiceBaseUrl)
+                .addKeyValue("unInstrumentedService.url", this.unInstrumentedServiceUrl)
+                .log("initialized");
     }
 
     @GetMapping
@@ -92,19 +99,13 @@ public class OrderController {
         span.setAttribute(OpenTelemetryAttributes.CUSTOMER_ID, customerId);
 
         double orderPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
+        String orderPriceRange = getPriceRange(orderPrice);
         String shippingCountry = form.getShippingCountry();
         String shippingMethod = form.getShippingMethod();
         String paymentMethod = form.getPaymentMethod();
 
-        span.addEvent("order-creation", Attributes.of(
-                OpenTelemetryAttributes.CUSTOMER_ID, customerId,
-                OpenTelemetryAttributes.ORDER_PRICE, orderPrice,
-                OpenTelemetryAttributes.PAYMENT_METHOD, paymentMethod,
-                OpenTelemetryAttributes.SHIPPING_METHOD, shippingMethod,
-                OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry));
-
-        span.setAttribute(OpenTelemetryAttributes.ORDER_PRICE_RANGE, getPriceRange(orderPrice));
-
+        span.setAttribute(OpenTelemetryAttributes.CUSTOMER_ID, customerId);
+        span.setAttribute(OpenTelemetryAttributes.ORDER_PRICE_RANGE, orderPriceRange);
         span.setAttribute(OpenTelemetryAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry);
         span.setAttribute(OpenTelemetryAttributes.SHIPPING_METHOD.getKey(), shippingMethod);
         span.setAttribute(OpenTelemetryAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
@@ -123,19 +124,34 @@ public class OrderController {
             if (e.getCause() != null) {
                 exceptionShortDescription += " / " + e.getCause().getClass().getSimpleName();
             }
-            logger.warn("FAILURE createOrder({}): price: {}, fraud.exception: {} with URL {}", form, orderPrice, exceptionShortDescription, url);
+            logger.atWarn()
+                    .addKeyValue("order", form)
+                    .addKeyValue("orderPrice", orderPrice)
+                    .addKeyValue("fraud.url", url)
+                    .addKeyValue("fraud.exception", exceptionShortDescription)
+                    .log("Fraud detection failure");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (fraudDetectionResult.getStatusCode().isError()) {
             String exceptionShortDescription = "fraudDetection-status-" + fraudDetectionResult.getStatusCode();
             span.recordException(new Exception(exceptionShortDescription));
-            logger.warn("FAILURE createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
+            logger.atWarn()
+                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
+                    .addKeyValue("fraud.status_code", fraudDetectionResult.getStatusCode())
+                    .addKeyValue("order", form)
+                    .addKeyValue("orderPrice", orderPrice)
+                    .addKeyValue("fraud.exception", exceptionShortDescription)
+                    .log("Fraud detected");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (!"approved".equals(fraudDetectionResult.getBody())) {
             String exceptionShortDescription = "fraudDetection-" + fraudDetectionResult.getBody();
             span.recordException(new Exception(exceptionShortDescription));
-            logger.warn("FAILURE createOrder({}): totalPrice: {}, fraud.exception:{}", form, orderPrice, exceptionShortDescription);
+            logger.atWarn()
+                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
+                    .addKeyValue("order", form)
+                    .addKeyValue("orderPrice", orderPrice)
+                    .log("Fraud detected");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -177,8 +193,24 @@ public class OrderController {
 
         long durationInNanos = System.nanoTime() - beforeInNanos;
 
-        logger.info("Success placeOrder orderId={} customerId={} price={} paymentMethod={} shippingMethod={} shippingCountry={} durationInNanos={}",
-                order.getId(), customerId, orderPrice, paymentMethod, shippingMethod, shippingCountry, durationInNanos);
+        logger.atInfo().addKeyValue("orderId", order.getId())
+                .addKeyValue("customerId", customerId)
+                .addKeyValue("price", orderPrice)
+                .addKeyValue("paymentMethod", paymentMethod)
+                .addKeyValue("shippingMethod", shippingMethod)
+                .addKeyValue("shippingCountry", shippingCountry)
+                .addKeyValue("durationInNanos", durationInNanos)
+                .log("Success placeOrder");
+
+        span.addEvent("order-creation", Attributes.builder()
+                .put(OpenTelemetryAttributes.OUTCOME, "success")
+                .put(OpenTelemetryAttributes.CUSTOMER_ID, customerId)
+                .put(OpenTelemetryAttributes.ORDER_PRICE, orderPrice)
+                .put(OpenTelemetryAttributes.ORDER_PRICE_RANGE, orderPriceRange)
+                .put(OpenTelemetryAttributes.PAYMENT_METHOD, paymentMethod)
+                .put(OpenTelemetryAttributes.SHIPPING_METHOD, shippingMethod)
+                .put(OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry)
+                .build());
 
         String uri = ServletUriComponentsBuilder
                 .fromCurrentServletMapping()

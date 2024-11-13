@@ -1,3 +1,5 @@
+package com.mycompany.opentelemetry;
+
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.context.Context;
@@ -19,7 +21,7 @@ public class BaggageLogRecordProcessor implements LogRecordProcessor {
                 LogRecordData logRecordData = logRecord.toLogRecordData();
                 return "logRecord['" +
                         logRecordData.getInstrumentationScopeInfo().getName() + ": " +
-                        logRecordData.getBody().toString() +
+                        logRecordData.getBodyValue() +
                         ".attribute[" + baggageEntryName + "]=" + baggageEntry.getValue();
             });
             logRecord.setAttribute(AttributeKey.stringKey(baggageEntryName), baggageEntry.getValue());

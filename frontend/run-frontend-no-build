@@ -100,7 +100,7 @@ else
     fi
 fi
 
-$PRGDIR/../mvnw -DskipTests package
+# $PRGDIR/../mvnw -DskipTests package
 
 echo "####################"
 echo "# START FRONTEND $INSTANCE_NUMBER #"
@@ -143,20 +143,18 @@ export OTEL_PROPAGATORS="tracecontext,baggage"
 export PYROSCOPE_APPLICATION_NAME="frontend"
 export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT,namespace=$SERVICE_NAMESPACE,instance=instance-$INSTANCE_NUMBER"
 
-# https://opentelemetry.io/docs/zero-code/java/spring-boot-starter/out-of-the-box-instrumentation/
 # https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/logback/logback-appender-1.0/javaagent
 # https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/log4j/log4j-appender-2.17/javaagent
 # -Dotel.instrumentation.log4j-appender.experimental-log-attributes=true
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
+     -javaagent:$PYROSCOPE_AGENT_JAR \
      -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
-     -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
      -Dotel.instrumentation.micrometer.base-time-unit=s \
      -Dotel.semconv-stability.opt-in=http/dup \
      -Dserver.port=8080 \
      -jar target/frontend-1.1-SNAPSHOT.jar
 
-#     -javaagent:$PYROSCOPE_AGENT_JAR \
 # otel-prrofiling-java doesn't work for me :-(
 #     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \

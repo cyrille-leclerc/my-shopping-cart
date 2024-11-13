@@ -1,0 +1,47 @@
+receivers:
+  filelog/otlp-json-logs-ndjson:
+    start_at: beginning # TODO remove in production, used for debugging purposes only
+    include: [/Users/cyrilleleclerc/git/cyrille-leclerc/my-shopping-cart/docs/logs/otlp-json-logs.ndjson]
+
+processors:
+  batch:
+  resourcedetection:
+    detectors: ["env", "system"]
+    override: false
+
+extensions:
+  basicauth/grafana_cloud:
+    client_auth:
+      username: "${env:GRAFANA_CLOUD_INSTANCE_ID}"
+      password: "${env:GRAFANA_CLOUD_API_KEY}"
+connectors:
+  otlpjson:
+
+exporters:
+  debug:
+    verbosity: detailed
+  otlphttp/grafana_cloud:
+    endpoint: "${env:OTEL_EXPORTER_OTLP_ENDPOINT}"
+    auth:
+      authenticator: basicauth/grafana_cloud
+  prometheus:
+    endpoint: "127.0.0.1:8889"
+    resource_to_telemetry_conversion:
+      enabled: false
+
+service:
+  extensions: [basicauth/grafana_cloud]
+  pipelines:
+    logs/raw:
+      receivers: [ filelog/otlp-json-logs-ndjson ]
+      processors: []
+      exporters: [otlpjson]
+    logs:
+      receivers: [otlpjson]
+      # TODO in production add processors like resourcedetection & batch
+      processors: []
+      # TODO in production replace by the otlphttp/grafana_cloud exporter
+      exporters: [debug, otlphttp/grafana_cloud]
+  telemetry:
+    metrics:
+      level: none

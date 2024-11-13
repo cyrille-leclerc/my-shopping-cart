@@ -29,8 +29,6 @@ OpenTelemetry metrics are demoed here providing in the `frontend` app:
    * Transaction: count of completed purchase orders per hour (per hour or per any desired unit of time)
    * Average Purchase Order Value: average value of the completed purchase orders
    * Note that this is a "per-request" metric
-* Framework instrumentation with the instrumentation of a Guava cache on `com.mycompany.ecommerce.service.ProductServiceImpl`, implemented in `com.mycompany.ecommerce.OpenTelemetryUtils.observeGoogleGuavaCache`.
-   * Note that these are "per-interval" metrics.
 
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/ecommerce-system-dashboard.png)
 

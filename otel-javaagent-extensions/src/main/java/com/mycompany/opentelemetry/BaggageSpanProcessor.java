@@ -1,3 +1,5 @@
+package com.mycompany.opentelemetry;
+
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.context.Context;

@@ -13,7 +13,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 @RestController()
 public class ShippingController {
@@ -37,7 +36,7 @@ public class ShippingController {
                 msg += " " + headerName + "=" + headerValue;
             }
         }
-        logger.info("Ship order for " + msg);
+        logger.info("Ship order for {}", msg);
 
         try (Connection cnn = dataSource.getConnection()) {
             try (Statement stmt = cnn.createStatement()) {
