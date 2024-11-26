@@ -13,19 +13,23 @@ import java.util.logging.Logger;
 public class BaggageSpanProcessor implements SpanProcessor {
     private final Logger logger = Logger.getLogger(getClass().getName());
 
+    /**
+     * Set {@link Baggage} entries as attributes on the Span just after {@link io.opentelemetry.api.trace.Span} creation
+     * to allow instrumentation libs and custom code to set attribute values that would override baggage values.
+     *
+     * @param context the parent {@code Context} of the span that just started.
+     * @param span    the {@code Span} that just started.
+     */
     @Override
     public void onStart(Context context, ReadWriteSpan span) {
-
-        if (span.getKind() == SpanKind.SERVER || span.getKind() == SpanKind.CONSUMER) {
-            Baggage.fromContext(context).forEach((baggageEntryName, baggageEntry) -> {
-                logger.log(Level.FINEST, () -> "Span['" +
-                        span.getName() + "' / " + span.getKind() + ", " +
-                        "spanId=" + span.getSpanContext().getSpanId() + ", " +
-                        "traceId=" + span.getSpanContext().getTraceId() + "]" +
-                        ".attribute[" + baggageEntryName + "]=" + baggageEntry.getValue());
-                span.setAttribute(baggageEntryName, baggageEntry.getValue());
-            });
-        }
+        Baggage.fromContext(context).forEach((baggageEntryName, baggageEntry) -> {
+            logger.log(Level.FINEST, () -> "Span['" +
+                    span.getName() + "' / " + span.getKind() + ", " +
+                    "spanId=" + span.getSpanContext().getSpanId() + ", " +
+                    "traceId=" + span.getSpanContext().getTraceId() + "]" +
+                    ".attribute[" + baggageEntryName + "]=" + baggageEntry.getValue());
+            span.setAttribute(baggageEntryName, baggageEntry.getValue());
+        });
     }
 
     @Override
