@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -17,12 +18,13 @@ import java.util.Random;
 @Component
 @Order(1)
 public class TenantIdFilter implements Filter {
-    private final Logger logger = org.slf4j.LoggerFactory.getLogger(getClass());
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
     static final Random random = new Random();
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        // todo implement real business logic to extract the tenant-id from the request
         String tenantId = "tenant-" + random.nextInt(3);
 
         logger.atDebug().addKeyValue("tenant_id", tenantId).log("Setting tenant id");
