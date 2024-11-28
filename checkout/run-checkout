@@ -79,11 +79,14 @@ export OTEL_LOGS_EXPORTER="experimental-otlp/stdout"
 # see https://opentelemetry.io/docs/zero-code/java/spring-boot-starter/out-of-the-box-instrumentation/
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
+     -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
      -Dotel.instrumentation.logback-appender.experimental.capture-mdc-attributes=* \
      -Dotel.instrumentation.logback-mdc.add-baggage=true \
      -Dotel.instrumentation.micrometer.base-time-unit=s \
+     -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
+     -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
      -Dotel.semconv-stability.opt-in=http/dup \
      -DshippingServiceUrl="http://shipping.local:8088/" \
      -jar target/checkout-1.1-SNAPSHOT.jar
