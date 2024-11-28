@@ -94,9 +94,8 @@ echo ""
 
 OTEL_RESOURCE_ATTRIBUTES="service.name=fraud-detection,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment=$DEPLOYMENT_ENVIRONMENT"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=production"
-
 export OTEL_RESOURCE_ATTRIBUTES
-export OTEL_PROPAGATORS="tracecontext,baggage"
+
 export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment"
 
 # /!\ PYROSCOPE_LABELS doesn't support `.` but supports `_`

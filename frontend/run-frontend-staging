@@ -71,9 +71,7 @@ OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,host.arch=amd64,host.id=5929
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,k8s.cluster.name=staging-us-central-0,k8s.namespace.name=ecommerce,k8s.node.name=gke-staging-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER,k8s.pod.name=ecommerce-frontend-5b7b9db9ff-sh828"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,cloud.account.id=mycompany-staging,cloud.availability_zone=us-central1-a,cloud.provider=gcp"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=staging"
-
 export OTEL_RESOURCE_ATTRIBUTES
-export OTEL_PROPAGATORS="tracecontext,baggage"
 
 java \
      -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \

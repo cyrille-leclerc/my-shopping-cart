@@ -133,10 +133,7 @@ OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,host.arch=amd64,host.id=5929
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,k8s.cluster.name=prod-us-central-0,k8s.namespace.name=ecommerce,k8s.node.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER,k8s.pod.name=ecommerce-frontend-5b7b9db9ff-sh828,k8s.pod.uid=5b7b9db9ff-sh828"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,cloud.account.id=mycompany-prod,cloud.availability_zone=us-central1-a,cloud.provider=gcp"
 # OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=$DEPLOYMENT_ENVIRONMENT"
-
-
 export OTEL_RESOURCE_ATTRIBUTES
-export OTEL_PROPAGATORS="tracecontext,baggage"
 
 # /!\ PYROSCOPE_LABELS doesn't support `.` but supports `_`
 # /!\ `_` in labels doesn't work with Pyroscope Tags explorer

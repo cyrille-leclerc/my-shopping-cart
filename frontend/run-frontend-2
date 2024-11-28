@@ -71,7 +71,6 @@ OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=$DEPLOYMENT_ENVIRO
 
 
 export OTEL_RESOURCE_ATTRIBUTES
-export OTEL_PROPAGATORS="tracecontext,baggage"
 
 java \
      -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
