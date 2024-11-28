@@ -7,31 +7,35 @@ import io.opentelemetry.sdk.logs.LogRecordProcessor;
 import io.opentelemetry.sdk.logs.ReadWriteLogRecord;
 
 import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- * Set {@link Baggage} entries as attributes on the LogRecord
- * <p>
- * Similar to <a href="https://github.com/open-telemetry/opentelemetry-java-contrib/blob/v1.41.0/baggage-processor/src/main/java/io/opentelemetry/contrib/baggage/processor/BaggageSpanProcessor.java">BaggageSpanProcessor</a>.
+ * This log record processor copies attributes stored in {@link Baggage} into each newly created log record.
  */
 public class BaggageLogRecordProcessor implements LogRecordProcessor {
 
-    private final Logger logger = Logger.getLogger(getClass().getName());
+    /**
+     * Creates a new {@link BaggageLogRecordProcessor} that copies all baggage entries into the newly
+     * created log record.
+     */
+    public static BaggageLogRecordProcessor allowAllBaggageKeys() {
+        return new BaggageLogRecordProcessor(baggageKey -> true);
+    }
 
-    final Predicate<String> baggageEntryNameFilter;
+    private final Predicate<String> baggageKeyPredicate;
 
-    public BaggageLogRecordProcessor() {
-        // TODO in production, implement mechanism to filter baggage entries
-        baggageEntryNameFilter = Predicates.alwaysTrue();
-        logger.log(Level.FINE, () -> "BaggageLogRecordProcessor initialized with baggageEntryNameFilter: " + baggageEntryNameFilter);
+    /**
+     * Creates a new {@link BaggageLogRecordProcessor} that copies only baggage entries with keys that pass
+     * the provided filter into the newly created log record.
+     */
+    public BaggageLogRecordProcessor(Predicate<String> baggageKeyPredicate) {
+        this.baggageKeyPredicate = baggageKeyPredicate;
     }
 
     @Override
     public void onEmit(Context context, ReadWriteLogRecord logRecord) {
-        Baggage.fromContext(context).forEach((baggageEntryName, baggageEntry) -> {
-            if (baggageEntryNameFilter.test(baggageEntryName)) {
-                logRecord.setAttribute(AttributeKey.stringKey(baggageEntryName), baggageEntry.getValue());
+        Baggage.fromContext(context).forEach((s, baggageEntry) -> {
+            if (baggageKeyPredicate.test(s)) {
+                logRecord.setAttribute(AttributeKey.stringKey(s), baggageEntry.getValue());
             }
         });
     }

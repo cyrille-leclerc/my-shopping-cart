@@ -109,6 +109,8 @@ java -javaagent:"$OPEN_TELEMETRY_AGENT_JAR" \
      -Dserver.port=8081 \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.logback-mdc.add-baggage=true \
+     -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
+     -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
      -Dotel.instrumentation.micrometer.base-time-unit=s \
      -Dotel.semconv-stability.opt-in=http/dup \
      -jar target/fraud-detection-1.1-SNAPSHOT.jar

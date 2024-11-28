@@ -68,8 +68,12 @@ echo ""
 export OTEL_RESOURCE_ATTRIBUTES="service.name=warehouse,service.namespace=$SERVICE_NAMESPACE,service.version=1.1-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT"
 
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
+     -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
      -Dserver.port=8089 \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+     -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
      -Dotel.instrumentation.micrometer.base-time-unit=s \
      -Dotel.semconv-stability.opt-in=http/dup \
+     -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
+     -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
      -jar target/warehouse-1.1-SNAPSHOT.jar

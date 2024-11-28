@@ -153,6 +153,8 @@ java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_V
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
      -Dotel.instrumentation.micrometer.base-time-unit=s \
+     -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
+     -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
      -Dotel.semconv-stability.opt-in=http/dup \
      -Dserver.port=8080 \
      -jar target/frontend-1.1-SNAPSHOT.jar
