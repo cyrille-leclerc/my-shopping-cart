@@ -2,7 +2,7 @@ receivers:
   filelog/fraud-detection-ndjson:
     # logback config
     # 1. add resource attributes to logback MDC
-    # export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment"
+    # export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment.name"
     # 2. configure logback appender
     #<encoder class="ch.qos.logback.classic.encoder.JsonEncoder">
     #   <withFormattedMessage>true</withFormattedMessage>
@@ -48,11 +48,11 @@ receivers:
         if: 'attributes.mdc["service.instance.id"] != nil'
         from: attributes.mdc["service.instance.id"]
         to: resource["service.instance.id"]
-      - id: move_deployment_environment
+      - id: move_deployment_environment_name
         type: move
-        if: 'attributes.mdc["deployment.environment"] != nil'
-        from: attributes.mdc["deployment.environment"]
-        to: resource["deployment.environment"]
+        if: 'attributes.mdc["deployment.environment.name"] != nil'
+        from: attributes.mdc["deployment.environment.name"]
+        to: resource["deployment.environment.name"]
       - id: move_thread_name
         type: move
         from: attributes.threadName
@@ -111,10 +111,10 @@ receivers:
   filelog/fraud-detection-raw:
     # logback config - same as Spring Boot default config + append trace_id and span_id
     # 1. add resource attributes to logback MDC
-    # export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment"
+    # export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment.name"
     # 2. configure logback appender
     # <encoder>
-    #   <pattern>%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- %applicationName[%t] ${LOG_CORRELATION_PATTERN:-}%-40.40logger{39} : %m - trace_id=%mdc{trace_id}, span_id=%mdc{span_id}, service.name=%mdc{service.name}, service.namespace=%mdc{service.namespace}, service.instance.id=%mdc{service.instance.id}, deployment.environment=%mdc{deployment.environment}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+    #   <pattern>%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- %applicationName[%t] ${LOG_CORRELATION_PATTERN:-}%-40.40logger{39} : %m - trace_id=%mdc{trace_id}, span_id=%mdc{span_id}, service.name=%mdc{service.name}, service.namespace=%mdc{service.namespace}, service.instance.id=%mdc{service.instance.id}, deployment.environment.name=%mdc{deployment.environment.name}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
     #   <charset>${FILE_LOG_CHARSET}</charset>
     # </encoder>
     #start_at: beginning #debug mode
@@ -124,7 +124,7 @@ receivers:
       line_start_pattern: '^\d{4}-\d{2}-\d{2}'
     operators:
       - type: regex_parser
-        regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}\+\d{2}:\d{2})\s*(?P<level>\S*)\s*(?P<pid>\d*)\s*--- \[(?P<thread>\S*)\] (?P<logger>\S*)\s*: (?P<message>.*) - trace_id=(?P<trace_id>[A-Za-z0-9]*), span_id=(?P<span_id>[A-Za-z0-9]*), service.name=(?P<service_name>.*), service.namespace=(?P<service_namespace>\S*), service.instance.id=(?P<service_instance_id>\S*), deployment.environment=(?P<deployment_environment>\S*)(?P<throwable>(.|\s)*)'
+        regex: '(?P<timestamp>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}\+\d{2}:\d{2})\s*(?P<level>\S*)\s*(?P<pid>\d*)\s*--- \[(?P<thread>\S*)\] (?P<logger>\S*)\s*: (?P<message>.*) - trace_id=(?P<trace_id>[A-Za-z0-9]*), span_id=(?P<span_id>[A-Za-z0-9]*), service.name=(?P<service_name>.*), service.namespace=(?P<service_namespace>\S*), service.instance.id=(?P<service_instance_id>\S*), deployment.environment.name=(?P<deployment_environment_name>\S*)(?P<throwable>(.|\s)*)'
         on_error: drop # TODO use 'drop_quiet' once available: https://github.com/open-telemetry/opentelemetry-collector-contrib/pull/32220
         body: attributes.message
         timestamp:
@@ -155,11 +155,11 @@ receivers:
         if: 'attributes["service_instance_id"] != nil'
         from: attributes["service_instance_id"]
         to: resource["service.instance.id"]
-      - id: move_deployment_environment
+      - id: move_deployment_environment_name
         type: move
-        if: 'attributes["deployment_environment"] != nil'
-        from: attributes["deployment_environment"]
-        to: resource["deployment.environment"]
+        if: 'attributes["deployment_environment_name"] != nil'
+        from: attributes["deployment_environment_name"]
+        to: resource["deployment.environment.name"]
       - id: move_thread_name
         type: move
         from: attributes.thread

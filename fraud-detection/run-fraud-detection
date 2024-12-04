@@ -92,16 +92,16 @@ echo "OTEL_EXPORTER_OTLP_PROTOCOL: $OTEL_EXPORTER_OTLP_PROTOCOL"
 echo ""
 
 
-OTEL_RESOURCE_ATTRIBUTES="service.name=fraud-detection,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment=$DEPLOYMENT_ENVIRONMENT"
+OTEL_RESOURCE_ATTRIBUTES="service.name=fraud-detection,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=production"
 export OTEL_RESOURCE_ATTRIBUTES
 
-export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment"
+export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment.name"
 
 # /!\ PYROSCOPE_LABELS doesn't support `.` but supports `_`
 # /!\ `_` in labels doesn't work with Pyroscope Tags explorer
 export PYROSCOPE_APPLICATION_NAME="fraud-detection"
-export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT,namespace=$SERVICE_NAMESPACE,instance=instance-1,version=1.1"
+export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SERVICE_NAMESPACE,instance=instance-1,version=1.1"
 
 java -javaagent:"$OPEN_TELEMETRY_AGENT_JAR" \
      -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \

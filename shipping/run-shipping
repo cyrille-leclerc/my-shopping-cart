@@ -41,7 +41,7 @@ echo ""
 echo ""
 
 export JAEGER_SERVICE_NAME="shipping"
-export JAEGER_TAGS="deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,service.instance.id=instance-1"
+export JAEGER_TAGS="deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,service.instance.id=instance-1"
 java \
      -Dserver.port=8088 \
      -jar target/shipping-1.1-SNAPSHOT.jar

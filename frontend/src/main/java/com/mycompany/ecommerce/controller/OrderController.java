@@ -183,7 +183,7 @@ public class OrderController {
         final PlaceOrderReply placeOrderReply = this.checkoutService.placeOrder(PlaceOrderRequest.newBuilder().setName(customerId).build());
 
         // UPDATE METRICS
-        this.orderValueHistogram.record(orderPrice);
+        this.orderValueHistogram.record(orderPrice); // would like the tenant_id to be added
 
         Attributes attributes = Attributes.of(
                 OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry,

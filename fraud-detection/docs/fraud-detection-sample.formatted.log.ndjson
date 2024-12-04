@@ -15,7 +15,7 @@
     "service.instance.id": "instance-1",
     "span_id": "a8b8a8a2d9b1534e",
     "service.namespace": "ecommerce",
-    "deployment.environment": "production"
+    "deployment.environment.name": "production"
   },
   "formattedMessage": "checkOrder(totalPrice=090, shippingCountry=GB, customerIpAddress=127.0.0.1) fraudScore=-68, status=ACCEPTED",
   "throwable": null
@@ -37,7 +37,7 @@
     "service.instance.id": "instance-1",
     "span_id": "803caa9d621f561b",
     "service.namespace": "ecommerce",
-    "deployment.environment": "production"
+    "deployment.environment.name": "production"
   },
   "formattedMessage": "Exception processing checkOrder(orderPrice=006, shippingCountry=GB, customerIpAddress=127.0.0.1)",
   "throwable": {

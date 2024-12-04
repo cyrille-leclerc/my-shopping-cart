@@ -65,7 +65,7 @@ echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 echo ""
 
-export OTEL_RESOURCE_ATTRIBUTES="service.name=warehouse,service.namespace=$SERVICE_NAMESPACE,service.version=1.1-SNAPSHOT,deployment.environment=$DEPLOYMENT_ENVIRONMENT"
+export OTEL_RESOURCE_ATTRIBUTES="service.name=warehouse,service.namespace=$SERVICE_NAMESPACE,service.version=1.1-SNAPSHOT,deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME"
 
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
      -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \

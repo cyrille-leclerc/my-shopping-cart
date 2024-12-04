@@ -9,7 +9,7 @@
   "log.logger": "com.mycompany.checkout.CheckoutServiceServer",
   "service.instance.id": "ee38cb36-231b-4bed-ba5d-40582b9921a8",
   "service.namespace": "ecommerce",
-  "deployment.environment": "production"
+  "deployment.environment.name": "production"
 }
 {
   "@timestamp": "2024-07-12T14:36:53.488Z",
@@ -25,7 +25,7 @@
   "service.instance.id": "ee38cb36-231b-4bed-ba5d-40582b9921a8",
   "span_id": "e117f1c8b84d9f2f",
   "service.namespace": "ecommerce",
-  "deployment.environment": "production",
+  "deployment.environment.name": "production",
   "baggage.frontend_instrumentation.sessionId": "cf2a0fd1-b4c6-4a4b-ad65-6dffa78c8130"
 }
 {
@@ -42,7 +42,7 @@
   "service.instance.id": "ee38cb36-231b-4bed-ba5d-40582b9921a8",
   "span_id": "733f4e929d3c472a",
   "service.namespace": "ecommerce",
-  "deployment.environment": "production",
+  "deployment.environment.name": "production",
   "baggage.frontend_instrumentation.sessionId": "4e3602d5-a11c-41eb-9597-7879db023488",
   "error.type": "java.lang.RuntimeException",
   "error.message": "random failure",
@@ -62,6 +62,6 @@
   "service.instance.id": "ee38cb36-231b-4bed-ba5d-40582b9921a8",
   "span_id": "733f4e929d3c472a",
   "service.namespace": "ecommerce",
-  "deployment.environment": "production",
+  "deployment.environment.name": "production",
   "baggage.frontend_instrumentation.sessionId": "4e3602d5-a11c-41eb-9597-7879db023488"
 }

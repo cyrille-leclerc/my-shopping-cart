@@ -36,9 +36,9 @@ spec:
           - name: SHIPPING_SERVICE_URL
             value: "http://shipping:8080"
           - name: OTEL_RESOURCE_ATTRIBUTES
-            value: service.name=checkout,service.namespace=shop,service.version=1.1,deployment.environment=staging
+            value: service.name=checkout,service.namespace=shop,service.version=1.1,deployment.environment.name=staging
           - name: OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES
-            value: "service.namespace,service.instance.id,deployment.environment"
+            value: "service.namespace,service.instance.id,deployment.environment.name"
           - name: SERVICE_NAME
             value: checkout
 
