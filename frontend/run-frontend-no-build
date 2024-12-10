@@ -128,17 +128,17 @@ INSTANCE_NUMBER=1
 # k8s.pod.name=opentelemetry-frontend-5b7b9db9ff-sh828"
 
 
-OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment=$DEPLOYMENT_ENVIRONMENT,service.instance.id=instance-$INSTANCE_NUMBER"
+OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME,service.instance.id=instance-$INSTANCE_NUMBER"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,host.arch=amd64,host.id=5929043986934855635,host.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER.mycompany-prod.internal"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,k8s.cluster.name=prod-us-central-0,k8s.namespace.name=ecommerce,k8s.node.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER,k8s.pod.name=ecommerce-frontend-5b7b9db9ff-sh828,k8s.pod.uid=5b7b9db9ff-sh828"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,cloud.account.id=mycompany-prod,cloud.availability_zone=us-central1-a,cloud.provider=gcp"
-# OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=$DEPLOYMENT_ENVIRONMENT"
+# OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=$DEPLOYMENT_ENVIRONMENT_NAME"
 export OTEL_RESOURCE_ATTRIBUTES
 
 # /!\ PYROSCOPE_LABELS doesn't support `.` but supports `_`
 # /!\ `_` in labels doesn't work with Pyroscope Tags explorer
 export PYROSCOPE_APPLICATION_NAME="frontend"
-export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT,namespace=$SERVICE_NAMESPACE,instance=instance-$INSTANCE_NUMBER"
+export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SERVICE_NAMESPACE,instance=instance-$INSTANCE_NUMBER"
 
 # https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/logback/logback-appender-1.0/javaagent
 # https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/log4j/log4j-appender-2.17/javaagent
