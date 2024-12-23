@@ -31,7 +31,7 @@ target/
 .otel/
 .prometheus*
 .pyroscope/
-
+.datadog
 
 # ENVIRONMENT VARIABLES
 setenv.sh

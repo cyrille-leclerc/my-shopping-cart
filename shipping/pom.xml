@@ -2,13 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-	<groupId>com.shoppingcart</groupId>
+	<parent>
+		<groupId>com.shoppingcart</groupId>
+		<artifactId>parent</artifactId>
+		<version>1.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 	<artifactId>shipping</artifactId>
 	<version>1.1-SNAPSHOT</version>
 
 	<properties>
-		<spring-boot.version>2.7.14</spring-boot.version>
 		<!--suppress UnresolvedMavenProperty -->
 		<container-registry.username>${env.CONTAINER_REGISTRY_USERNAME}</container-registry.username>
 		<!--suppress UnresolvedMavenProperty -->
@@ -24,40 +27,47 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jdbc</artifactId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-json</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+			<version>3.1.0</version>
 		</dependency>
 
 		<dependency>
-			<groupId>io.opentracing.contrib</groupId>
-			<artifactId>opentracing-jdbc</artifactId>
-			<!--
-            Caused by: java.lang.NoSuchMethodError: io.opentracing.contrib.jdbc.TracingConnection.<init>(Ljava/sql/Connection;Lio/opentracing/contrib/jdbc/ConnectionInfo;ZLjava/util/Set;)V
-            at io.opentracing.contrib.spring.cloud.jdbc.JdbcAspect.getConnection(JdbcAspect.java:61) ~[opentracing-spring-cloud-jdbc-starter-0.3.12.jar:na
-            https://github.com/opentracing-contrib/java-jdbc/commit/b45d56de6ae61ee83bf079504458c20545fa45d6
-            use 0.1.1
-            -->
-			<version>0.2.15</version>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.opentracing.contrib</groupId>
-			<artifactId>opentracing-spring-jaeger-cloud-starter</artifactId>
-			<version>3.3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>io.opentracing</groupId>
-			<artifactId>opentracing-api</artifactId>
-			<version>0.33.0</version>
-		</dependency>
-		<dependency>
-			<groupId>io.opentracing</groupId>
-			<artifactId>opentracing-util</artifactId>
-			<version>0.33.0</version>
-		</dependency>
-
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -66,17 +76,15 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -102,6 +110,20 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
 				<version>${spring-boot.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-bom</artifactId>
+				<version>${opentelemetry.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-bom-alpha</artifactId>
+				<version>${opentelemetry.version}-alpha</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>

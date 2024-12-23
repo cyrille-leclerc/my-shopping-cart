@@ -31,6 +31,31 @@ if [ -r "$PRGDIR/setenv.sh" ]; then
   . "$PRGDIR/setenv.sh"
 fi
 
+export DATADOG_AGENT_HOME=$PRGDIR/../.datadog
+mkdir -p "$DATADOG_AGENT_HOME"
+
+##########################################################################################
+# DOWNLOAD DATADOG AGENT IF NOT FOUND
+# code copied from Maven Wrappers's mvnw`
+##########################################################################################
+
+export DATADOG_AGENT_JAR=$DATADOG_AGENT_HOME/dd-java-agent-$DATADOG_AGENT_VERSION.jar
+if [ -r "$DATADOG_AGENT_JAR" ]; then
+    echo "Found $DATADOG_AGENT_JAR"
+else
+    echo "Couldn't find $DATADOG_AGENT_JAR, downloading it ..."
+    jarUrl="https://github.com/DataDog/dd-trace-java/releases/download/v$DATADOG_AGENT_VERSION/dd-java-agent-$DATADOG_AGENT_VERSION.jar"
+
+    if command -v wget > /dev/null; then
+        wget "$jarUrl" -O "$DATADOG_AGENT_JAR"
+    elif command -v curl > /dev/null; then
+        curl -L --max-redirs 5 -o "$DATADOG_AGENT_JAR" "$jarUrl"
+    else
+        echo "FAILURE: Datadog agent not found and none of curl and wget found"
+        exit 1;
+    fi
+fi
+
 $PRGDIR/../mvnw -DskipTests package
 
 
@@ -40,8 +65,20 @@ echo "##################"
 echo ""
 echo ""
 
-export JAEGER_SERVICE_NAME="shipping"
-export JAEGER_TAGS="deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,service.instance.id=instance-1"
+# see https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/java/?tab=wget
+export DD_ENV="production"
+export DD_SERVICE="shipping"
+export DD_VERSION="1.1"
+
+# see https://docs.datadoghq.com/opentelemetry/interoperability/environment_variable_support/
+#export OTEL_SERVICE_NAME="shipping" # DD_SERVICE=OTEL_SERVICE_NAME
+#export OTEL_RESOURCE_ATTRIBUTES="service.namespace=ecommerce,service.version=1.1,deployment.environment.name=staging"
+
+export DD_TRACE_DEBUG=false
+export DD_TRACE_AGENT_URL="http://localhost:8126"
+export DD_REMOTE_CONFIGURATION_ENABLED=false
+
 java \
+     -javaagent:"$DATADOG_AGENT_JAR" \
      -Dserver.port=8088 \
      -jar target/shipping-1.1-SNAPSHOT.jar
