@@ -77,6 +77,7 @@ export DD_VERSION="1.1"
 export DD_TRACE_DEBUG=false
 export DD_TRACE_AGENT_URL="http://localhost:8126"
 export DD_REMOTE_CONFIGURATION_ENABLED=false
+export DD_TRACE_PROPAGATION_STYLE=tracecontext
 
 java \
      -javaagent:"$DATADOG_AGENT_JAR" \

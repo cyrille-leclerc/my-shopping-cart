@@ -70,13 +70,12 @@ export OTEL_RESOURCE_ATTRIBUTES
 # don't pull service.name from the resource attributes as ECS already sets it
 export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.namespace,service.instance.id,deployment.environment.name"
 
-## ECS Logger Appender uses SERVICE_NAME
-export SERVICE_NAME="checkout"
+export OTEL_SEMCONV_STABILITY_OPT_IN=database
 
 # see https://opentelemetry.io/docs/zero-code/java/spring-boot-starter/out-of-the-box-instrumentation/
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
-     -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
+     -Dotel.semconv-stability.opt-in=database \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
      -Dotel.instrumentation.logback-appender.experimental.capture-mdc-attributes=* \

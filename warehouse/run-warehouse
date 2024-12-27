@@ -67,8 +67,9 @@ echo ""
 
 export OTEL_RESOURCE_ATTRIBUTES="service.name=warehouse,service.namespace=$SERVICE_NAMESPACE,service.version=1.1-SNAPSHOT,deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME"
 
+export OTEL_SEMCONV_STABILITY_OPT_IN="http,database"
+
 java -javaagent:$OPEN_TELEMETRY_AGENT_JAR \
-     -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
      -Dserver.port=8089 \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \

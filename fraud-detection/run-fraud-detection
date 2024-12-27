@@ -103,8 +103,10 @@ export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service
 export PYROSCOPE_APPLICATION_NAME="fraud-detection"
 export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SERVICE_NAMESPACE,instance=instance-1,version=1.1"
 
+export OTEL_SEMCONV_STABILITY_OPT_IN=http,database
+
 java -javaagent:"$OPEN_TELEMETRY_AGENT_JAR" \
-     -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
+     -Dotel.semconv-stability.opt-in=http/dup,database/dup \
      -Dserver.port=8081 \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.logback-mdc.add-baggage=true \
