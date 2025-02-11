@@ -38,7 +38,20 @@ OpenTelemetry metrics are demoed here providing in the `frontend` app:
 
 Auto instrumentation of logs that are seamlessly collected by the Otel agents
 
-# Run the sample
+# Run the demo with Docker Compose
+
+* Checkout this repo
+* Open a shell prompt on the root folder of the project
+* Run `docker compose build` 
+* Create a `.env` file with
+```
+GRAFANA_CLOUD_INSTANCE_ID=<<your cloud instance id>>
+GRAFANA_CLOUD_API_KEY=<<your api key>>
+```
+* Run `docker compose run`
+* 
+
+# Run the demo locally
 
 * Install a recent java version: on Mac, see https://github.com/AdoptOpenJDK/homebrew-openjdk
 
