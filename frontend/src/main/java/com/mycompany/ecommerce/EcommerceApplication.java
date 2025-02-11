@@ -44,24 +44,6 @@ public class EcommerceApplication {
     }
 
     @Bean
-    CommandLineRunner runner(ProductService productService) {
-        return args -> {
-            productService.save(new Product(1L, "TV Set", 300.00, "http://placehold.it/200x100"));
-            productService.save(new Product(2L, "Game Console", 200.00, "http://placehold.it/200x100"));
-            productService.save(new Product(3L, "Sofa", 100.00, "http://placehold.it/200x100"));
-            productService.save(new Product(4L, "Ice cream", 5.00, "http://placehold.it/200x100"));
-            productService.save(new Product(5L, "Beer", 3.00, "http://placehold.it/200x100"));
-            productService.save(new Product(6L, "Phone", 500.00, "http://placehold.it/200x100"));
-            productService.save(new Product(7L, "Watch", 30.00, "http://placehold.it/200x100"));
-            productService.save(new Product(8L, "USB Cable", 4.00, "http://placehold.it/200x100"));
-            productService.save(new Product(9L, "USB-C Cable", 5.00, "http://placehold.it/200x100"));
-            productService.save(new Product(10L, "Micro USB Cable", 3.00, "http://placehold.it/200x100"));
-            productService.save(new Product(11L, "Lightning Cable", 9.00, "http://placehold.it/200x100"));
-            productService.save(new Product(12L, "USB C adapter", 5.00, "http://placehold.it/200x100"));
-        };
-    }
-
-    @Bean
     public Queue queue() {
         return new Queue(AMQP_QUEUE, false);
     }
