@@ -1,5 +1,6 @@
 package com.mycompany.ecommerce.servlet;
 
+import com.mycompany.ecommerce.model.Tenant;
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.Span;
 import jakarta.servlet.Filter;
@@ -17,7 +18,7 @@ import java.util.Random;
 
 @Component
 @Order(1)
-public class TenantIdFilter implements Filter {
+public class TenantFilter implements Filter {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
     static final Random random = new Random();
@@ -25,16 +26,28 @@ public class TenantIdFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         // todo implement real business logic to extract the tenant-id from the request
-        String tenantId = "tenant-" + random.nextInt(3);
+        Tenant tenant = Tenant.nextRandomTenant();
 
-        logger.atDebug().addKeyValue("tenant_id", tenantId).log("Setting tenant id");
-        // The com.mycompany.opentelemetry.BaggageSpanProcessor promotes baggage to span attributes on span creation
+        logger.atDebug()
+                .addKeyValue("tenant.id", tenant.getId())
+                .addKeyValue("tenant.shortcode", tenant.getShortCode())
+                .log("Setting tenant");
+
+        Tenant.setCurrent(tenant);
+        // The BaggageSpanProcessor promotes baggage to span attributes on span creation
         // and the HTTP Server span is already created by the time this filter is called
-        // set the tenant_id attribute on the current span
-        Span.current().setAttribute("tenant_id", tenantId); // th
-        var baggage = Baggage.builder().put("tenant_id", tenantId).build();
+        // set the tenant.id & tenant.shortcode attributes on the current span
+        Span.current()
+                .setAttribute("tenant.id", tenant.getId())
+                .setAttribute("tenant.shortcode", tenant.getShortCode());
+        Baggage baggage = Baggage.builder()
+                .put("tenant.id", tenant.getId())
+                .put("tenant.shortcode", tenant.getShortCode())
+                .build();
         try (var ignored = baggage.makeCurrent()) {
             filterChain.doFilter(servletRequest, servletResponse);
+        } finally {
+            Tenant.clearCurrent();
         }
     }
 }
