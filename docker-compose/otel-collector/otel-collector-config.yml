@@ -20,6 +20,23 @@ receivers:
     scrapers:
       load:
       memory:
+  postgresql:
+    endpoint: postgres:5432
+    transport: tcp
+    username: "ecommerce"
+    password: "ecommerce"
+    databases:
+      - ecommerce
+    tls:
+      insecure: true
+  redis:
+    endpoint: "redis:6379"
+    collection_interval: 10s
+  rabbitmq:
+    endpoint: http://rabbitmq:15672
+    username: guest
+    password: guest
+    collection_interval: 10s
 
 processors:
   batch:
@@ -36,7 +53,8 @@ exporters:
     endpoint: "https://otlp-gateway-prod-eu-west-0.grafana.net/otlp"
     auth:
       authenticator: basicauth/grafana_cloud
-
+  prometheus:
+    endpoint: "0.0.0.0:8889"
 service:
   extensions: [basicauth/grafana_cloud]
   pipelines:
@@ -45,10 +63,18 @@ service:
       processors: [resourcedetection, batch]
       exporters: [otlphttp/grafana_cloud]
     metrics:
-      receivers: [otlp, hostmetrics]
+      receivers: [otlp, hostmetrics, postgresql, redis, rabbitmq]
       processors: [resourcedetection, batch]
-      exporters: [otlphttp/grafana_cloud]
+      exporters: [otlphttp/grafana_cloud, prometheus]
     logs:
       receivers: [otlp]
       processors: [resourcedetection, batch]
       exporters: [otlphttp/grafana_cloud]
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: '0.0.0.0'
+                port: 8888

@@ -110,7 +110,7 @@ services:
     ports:
       - "6379:6379"
   rabbitmq:
-    image: 'rabbitmq:4-alpine'
+    image: 'rabbitmq:4-management-alpine'
     container_name: rabbitmq
     ports:
       - "5672:5672"
@@ -119,6 +119,10 @@ services:
     # https://opentelemetry.io/docs/collector/installation/#docker-compose
     image: 'otel/opentelemetry-collector-contrib:0.119.0'
     container_name: otel-collector
+    depends_on:
+      - postgres
+      - redis
+      - rabbitmq
     environment:
       - GRAFANA_CLOUD_API_KEY=${GRAFANA_CLOUD_API_KEY:?error}
       - GRAFANA_CLOUD_INSTANCE_ID=${GRAFANA_CLOUD_INSTANCE_ID:?error}
