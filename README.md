@@ -1,42 +1,7 @@
-
-# Pre requisites
-
-* Java 17+
-* Postgresql with a database `jdbc:postgresql://localhost:5432/my_shopping_cart` and a user `my_shopping_cart/my_shopping_cart`
-    * Hibernate will create a bunch of tables in this `my_shopping_cart` database. 
-    * Configuration can be changed in the `application.properties` config files
-* Redis with default unsecured settings
-* RabbitMQ with default unsecured settings
-* A DNS service that maps www.example.com like Google DNS `8.8.8.8`
-* [K6](https://k6.io/open-source/) load testing executable installed
-* `npm`
-   * `npm install copyfiles -g`
-* An OTLP gRPC intake listening on `localhost:4317` and forwarding observability traces, metrics, and logs to your preferred observability backend
-
 # Architecture
 
 ![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/shopping-cart.drawio.svg)
 
-## Demoed OpenTelemetry capabilities
-
-### Traces 
-
-### Metrics
-
-OpenTelemetry metrics are demoed here providing in the `frontend` app:
-* Business KPIs with the `OrderValueRecorder` (and `OrderValueWithTagsRecorder`) on `com.mycompany.ecommerce.controller.OrderController to provide the following commonly adopted ecommerce KPIs:
-   * Sales: sum of the completed purchase orders per hour (per hour or per any desired unit of time)
-   * Transaction: count of completed purchase orders per hour (per hour or per any desired unit of time)
-   * Average Purchase Order Value: average value of the completed purchase orders
-   * Note that this is a "per-request" metric
-
-![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/ecommerce-system-dashboard.png)
-
-
-
-### Logs
-
-Auto instrumentation of logs that are seamlessly collected by the Otel agents
 
 # Run the demo with Docker Compose
 
@@ -122,6 +87,45 @@ cd load-generator
 ```
 
 * shell 6: Grafana Agent or OpenTelemetry Collector to send all the data to your Observability backend
+
+
+# Pre requisites
+
+* Java 17+
+* Postgresql with a database `jdbc:postgresql://localhost:5432/my_shopping_cart` and a user `my_shopping_cart/my_shopping_cart`
+    * Hibernate will create a bunch of tables in this `my_shopping_cart` database. 
+    * Configuration can be changed in the `application.properties` config files
+* Redis with default unsecured settings
+* RabbitMQ with default unsecured settings
+* A DNS service that maps www.example.com like Google DNS `8.8.8.8`
+* [K6](https://k6.io/open-source/) load testing executable installed
+* `npm`
+   * `npm install copyfiles -g`
+* An OTLP gRPC intake listening on `localhost:4317` and forwarding observability traces, metrics, and logs to your preferred observability backend
+
+
+## Demoed OpenTelemetry capabilities
+
+### Traces 
+
+### Metrics
+
+OpenTelemetry metrics are demoed here providing in the `frontend` app:
+* Business KPIs with the `OrderValueRecorder` (and `OrderValueWithTagsRecorder`) on `com.mycompany.ecommerce.controller.OrderController to provide the following commonly adopted ecommerce KPIs:
+   * Sales: sum of the completed purchase orders per hour (per hour or per any desired unit of time)
+   * Transaction: count of completed purchase orders per hour (per hour or per any desired unit of time)
+   * Average Purchase Order Value: average value of the completed purchase orders
+   * Note that this is a "per-request" metric
+
+![](https://github.com/cyrille-leclerc/my-shopping-cart/raw/open-telemetry/docs/images/ecommerce-system-dashboard.png)
+
+
+
+### Logs
+
+Auto instrumentation of logs that are seamlessly collected by the Otel agents
+
+
 
 # Sample execution
 
