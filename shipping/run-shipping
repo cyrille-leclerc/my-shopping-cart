@@ -56,6 +56,31 @@ else
     fi
 fi
 
+export OPEN_TELEMETRY_AGENT_HOME=$PRGDIR/../.otel
+mkdir -p "$OPEN_TELEMETRY_AGENT_HOME"
+
+##########################################################################################
+# DOWNLOAD OPEN TELEMETRY AGENT IF NOT FOUND
+# code copied from Maven Wrappers's mvnw`
+##########################################################################################
+export OPEN_TELEMETRY_AGENT_JAR=$OPEN_TELEMETRY_AGENT_HOME/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar
+if [ -r "$OPEN_TELEMETRY_AGENT_JAR" ]; then
+    echo "Found $OPEN_TELEMETRY_AGENT_JAR"
+else
+    echo "Couldn't find $OPEN_TELEMETRY_AGENT_JAR, downloading it ..."
+    jarUrl="https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v$OPEN_TELEMETRY_AGENT_VERSION/opentelemetry-javaagent.jar"
+
+    if command -v wget > /dev/null; then
+        wget "$jarUrl" -O "$OPEN_TELEMETRY_AGENT_JAR"
+    elif command -v curl > /dev/null; then
+        curl -L --max-redirs 5 -o "$OPEN_TELEMETRY_AGENT_JAR" "$jarUrl"
+    else
+        echo "FAILURE: OpenTelemetry agent not found and  none of curl and wget found"
+        exit 1;
+    fi
+fi
+
+
 $PRGDIR/../mvnw -DskipTests package
 
 
@@ -64,22 +89,37 @@ echo "# START SHIPPING #"
 echo "##################"
 echo ""
 echo ""
+echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
+echo "OTEL_EXPORTER_OTLP_PROTOCOL: $OTEL_EXPORTER_OTLP_PROTOCOL"
+echo ""
 
 # see https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/java/?tab=wget
 export DD_ENV="production"
 export DD_SERVICE="shipping"
 export DD_VERSION="1.1"
 
-# see https://docs.datadoghq.com/opentelemetry/interoperability/environment_variable_support/
-#export OTEL_SERVICE_NAME="shipping" # DD_SERVICE=OTEL_SERVICE_NAME
-#export OTEL_RESOURCE_ATTRIBUTES="service.namespace=ecommerce,service.version=1.1,deployment.environment.name=staging"
-
 export DD_TRACE_DEBUG=false
 export DD_TRACE_AGENT_URL="http://localhost:8126"
 export DD_REMOTE_CONFIGURATION_ENABLED=false
 export DD_TRACE_PROPAGATION_STYLE=tracecontext
 
-java \
-     -javaagent:"$DATADOG_AGENT_JAR" \
+
+# see https://docs.datadoghq.com/opentelemetry/interoperability/environment_variable_support/
+export OTEL_SERVICE_NAME="shipping" # DD_SERVICE=OTEL_SERVICE_NAME
+export OTEL_RESOURCE_ATTRIBUTES="service.version=1.1,deployment.environment.name=production"
+export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment.name"
+
+#java \
+#     -javaagent:"$DATADOG_AGENT_JAR" \
+#     -Dserver.port=8088 \
+#     -jar target/shipping-1.1-SNAPSHOT.jar
+
+java -javaagent:"$OPEN_TELEMETRY_AGENT_JAR" \
      -Dserver.port=8088 \
+     -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+     -Dotel.instrumentation.logback-mdc.add-baggage=true \
+     -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
+     -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
+     -Dotel.instrumentation.micrometer.base-time-unit=s \
+     -Dotel.semconv-stability.opt-in=http,database \
      -jar target/shipping-1.1-SNAPSHOT.jar
