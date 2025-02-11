@@ -30,4 +30,4 @@ else
   . "$PRGDIR/../setenv.default.sh"
 fi
 
-k6 run --out cloud -e FRONTEND_URLS="http://localhost:8079"  $PRGDIR/src/main/k6/k6.js
+k6 run --out cloud -e FRONTEND_URLS="http://localhost:8080"  $PRGDIR/src/main/k6/k6.js

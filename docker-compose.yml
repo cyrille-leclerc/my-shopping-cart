@@ -1,51 +1,150 @@
-version: '3'
-
 services:
   frontend:
-    image: 'frontend:1.1-SNAPSHOT'
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
     container_name: frontend
     depends_on:
       - postgres
-      - anti-fraud
-      - checkout
+      - redis
+      - rabbitmq
+      - otel-collector
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/compose-postgres
-      - SPRING_DATASOURCE_USERNAME=compose-postgres
-      - SPRING_DATASOURCE_PASSWORD=compose-postgres
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecommerce
+      - SPRING_DATASOURCE_USERNAME=ecommerce
+      - SPRING_DATASOURCE_PASSWORD=ecommerce
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - ANTIFRAUDSERVICE.BASEURL=http://anti-fraud:8081
+      - FRAUDDETECTIONSERVICE.BASEURL=http://fraud-detection:8081
       - CHECKOUTSERVICE.GRPCENDPOINT=checkout:50051
-      - LOGGING_FILE_NAME=application.log
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - OTEL_SERVICE_NAME=frontend
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=shop,service.version=1.1,deployment.environment.name=production
+      - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     ports:
       - "8080:8080"
-  anti-fraud:
-    image: 'anti-fraud:1.1-SNAPSHOT'
-    container_name: anti-fraud
+  fraud-detection:
+    build:
+      context: .
+      dockerfile: ./fraud-detection/Dockerfile
+    container_name: fraud-detection
     depends_on:
       - postgres
+      - otel-collector
     environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecommerce
+      - SPRING_DATASOURCE_USERNAME=ecommerce
+      - SPRING_DATASOURCE_PASSWORD=ecommerce
       - SERVER_PORT=8081
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/compose-postgres
-      - SPRING_DATASOURCE_USERNAME=compose-postgres
-      - SPRING_DATASOURCE_PASSWORD=compose-postgres
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - LOGGING_FILE_NAME=application.log
+      - OTEL_SERVICE_NAME=fraud-detection
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=shop,service.version=1.1,deployment.environment.name=production
+      - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     ports:
       - "8081:8081"
   checkout:
-    image: 'checkout-service:1.1-SNAPSHOT'
+    build:
+      context: .
+      dockerfile: ./checkout/Dockerfile
     container_name: checkout
     depends_on:
       - postgres
+      - otel-collector
     environment:
-      - LOGGING_FILE_NAME=application.log
+      - SHIPPING_SERVICE_URL=http://shipping:8088
+      - OTEL_SERVICE_NAME=checkout
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=shop,service.version=1.1,deployment.environment.name=production
+      - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     ports:
       - "50051:50051"
+  shipping:
+    build:
+      context: .
+      dockerfile: ./shipping/Dockerfile
+    container_name: shipping
+    depends_on:
+      - postgres
+      - otel-collector
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecommerce
+      - SPRING_DATASOURCE_USERNAME=ecommerce
+      - SPRING_DATASOURCE_PASSWORD=ecommerce
+      - SERVER_PORT=8088
+      - OTEL_SERVICE_NAME=shipping
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=shop,service.version=1.1,deployment.environment.name=production
+      - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+    ports:
+      - "8088:8088"
+  warehouse:
+    build:
+      context: .
+      dockerfile: ./warehouse/Dockerfile
+    container_name: warehouse
+    depends_on:
+      - postgres
+      - rabbitmq
+      - otel-collector
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SERVER_PORT=8089
+      - OTEL_SERVICE_NAME=warehouse
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=shop,service.version=1.1,deployment.environment.name=production
+      - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+    ports:
+      - "8089:8089"
   postgres:
-    image: 'postgres:13.1-alpine'
+    image: 'postgres:16-alpine'
     container_name: postgres
     environment:
-      - POSTGRES_USER=compose-postgres
-      - POSTGRES_PASSWORD=compose-postgres
+      - POSTGRES_USER=ecommerce
+      - POSTGRES_PASSWORD=ecommerce
     ports:
       - "5432:5432"
+  redis:
+    image: 'redis:6-alpine'
+    container_name: redis
+    ports:
+      - "6379:6379"
+  rabbitmq:
+    image: 'rabbitmq:4-alpine'
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  otel-collector:
+    # https://opentelemetry.io/docs/collector/installation/#docker-compose
+    image: 'otel/opentelemetry-collector-contrib:0.119.0'
+    container_name: otel-collector
+    environment:
+      - GRAFANA_CLOUD_API_KEY
+      - GRAFANA_CLOUD_INSTANCE_ID
+    volumes:
+      - ./docker-compose/otel-collector/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - "1888:1888" # pprof extension
+      - "8888:8888" # Prometheus metrics exposed by the Collector
+      - "8889:8889" # Prometheus exporter metrics
+      - "13133:13133" # health_check extension
+      - "4317:4317" # OTLP gRPC receiver
+      - "4318:4318" # OTLP http receiver
+      - "55679:55679" # zpages extension
+
+  k6-load-generator:
+    image: 'grafana/k6:latest'
+    container_name: k6-load-generator
+    volumes:
+      - ./load-generator/src/main/k6/k6.js:/k6-load-generator.js
+    command: cloud run --local-execution -e FRONTEND_URLS="http://frontend:8080"  /k6-load-generator.js
+    depends_on:
+      - frontend
+      - fraud-detection
+      - checkout
+      - shipping
+    environment:
+        - FRONTEND_URLS=http://frontend:8080
+        - K6_CLOUD_TOKEN
+        - K6_CLOUD_PROJECT_ID

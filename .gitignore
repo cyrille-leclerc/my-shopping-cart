@@ -35,6 +35,7 @@ target/
 
 # ENVIRONMENT VARIABLES
 setenv.sh
+secrets/
 
 
 .DS_Store

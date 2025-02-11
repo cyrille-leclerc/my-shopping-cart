@@ -32,7 +32,7 @@ public class FraudDetectionController {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
 
-    int exceptionPercentage = 20;
+    int exceptionPercentage = 0; // DISABLED
 
     int averageDurationMillisOnSmallShoppingCarts = 50;
     int averageDurationMillisOnMediumShoppingCarts = 50;
@@ -42,14 +42,12 @@ public class FraudDetectionController {
     int fraudPercentageOnMediumShoppingCarts = 0;
     int fraudPercentageOnLargeShoppingCarts = 20;
 
-    int priceUpperBoundaryDollarsOnSmallShoppingCart = 10;
-    int priceUpperBoundaryDollarsOnMediumShoppingCarts = 100;
+    int valueUpperBoundaryDollarsOnSmallShoppingCart = 10;
+    int valueUpperBoundaryDollarsOnMediumShoppingCarts = 100;
 
     final DoubleHistogram fraudDetectionHistogram;
 
     final DataSource dataSource;
-
-
 
     public FraudDetectionController(Meter meter, DataSource dataSource) {
         this.fraudDetectionHistogram = meter.histogramBuilder("fraud.check_order").setUnit("{dollars}").build();
@@ -58,22 +56,22 @@ public class FraudDetectionController {
 
     @RequestMapping(path = "fraud/checkOrder", method = {RequestMethod.GET, RequestMethod.POST})
     public String checkOrder(
-            @RequestParam double orderPrice,
+            @RequestParam double orderValue,
             @RequestParam String shippingCountry,
             @RequestParam String customerIpAddress) {
 
-        Span.current().setAttribute("order_price", orderPrice);
+        Span.current().setAttribute("order_value", orderValue);
         Span.current().setAttribute("customer_ip_address", customerIpAddress);
         Span.current().setAttribute("shipping_country", shippingCountry);
 
-        int orderPriceDollars = Double.valueOf(orderPrice).intValue();
+        int orderValueDollars = Double.valueOf(orderValue).intValue();
 
         int durationOffsetInMillis;
         int fraudPercentage;
-        if (orderPriceDollars < priceUpperBoundaryDollarsOnSmallShoppingCart) {
+        if (orderValueDollars < valueUpperBoundaryDollarsOnSmallShoppingCart) {
             fraudPercentage = fraudPercentageOnSmallShoppingCarts;
             durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
-        } else if (orderPriceDollars < priceUpperBoundaryDollarsOnMediumShoppingCarts) {
+        } else if (orderValueDollars < valueUpperBoundaryDollarsOnMediumShoppingCarts) {
             fraudPercentage = fraudPercentageOnMediumShoppingCarts;
             durationOffsetInMillis = averageDurationMillisOnMediumShoppingCarts;
         } else {
@@ -95,25 +93,25 @@ public class FraudDetectionController {
                 stmt.execute("select pg_sleep(0.05)");
                 Thread.sleep(checkOrderDurationMillis);
             }
-            if (RANDOM.nextInt(IntMath.divide(100, exceptionPercentage, RoundingMode.CEILING)) == 1) {
+            if (exceptionPercentage != 0 && RANDOM.nextInt(IntMath.divide(100, exceptionPercentage, RoundingMode.CEILING)) == 1) {
                 throw new RuntimeException("Fraud Detection Processing Exception");
             }
             outcome = denied ? "denied" : "approved";
             logger.atInfo()
                     .addKeyValue("outcome", outcome)
-                    .addKeyValue("orderPrice", orderPriceDollars)
+                    .addKeyValue("orderValue", orderValueDollars)
                     .addKeyValue("shippingCountry", shippingCountry)
                     .addKeyValue("customerIpAddress", customerIpAddress)
                     .addKeyValue("fraudScore", fraudScore)
                     .log("checkOrder");
-            this.fraudDetectionHistogram.record((int) Math.floor(orderPrice), Attributes.of(AttributeKey.stringKey("outcome"), outcome));
+            this.fraudDetectionHistogram.record((int) Math.floor(orderValue), Attributes.of(AttributeKey.stringKey("outcome"), outcome));
             return outcome;
         } catch (SQLException | InterruptedException | RuntimeException e) {
-            this.fraudDetectionHistogram.record((int) Math.floor(orderPrice), Attributes.of(AttributeKey.stringKey("outcome"), "error"));
+            this.fraudDetectionHistogram.record((int) Math.floor(orderValue), Attributes.of(AttributeKey.stringKey("outcome"), "error"));
             Span.current().recordException(e);
             logger.atWarn()
                     .addKeyValue("outcome", "error")
-                    .addKeyValue("orderPrice", orderPriceDollars)
+                    .addKeyValue("orderValue", orderValueDollars)
                     .addKeyValue("shippingCountry", shippingCountry)
                     .addKeyValue("customerIpAddress", customerIpAddress)
                     .addKeyValue("fraudScore", fraudScore)
@@ -165,13 +163,13 @@ public class FraudDetectionController {
     }
 
     @ManagedAttribute
-    public int getPriceUpperBoundaryDollarsOnSmallShoppingCart() {
-        return priceUpperBoundaryDollarsOnSmallShoppingCart;
+    public int getValueUpperBoundaryDollarsOnSmallShoppingCart() {
+        return valueUpperBoundaryDollarsOnSmallShoppingCart;
     }
 
     @ManagedAttribute
-    public void setPriceUpperBoundaryDollarsOnSmallShoppingCart(int priceUpperBoundaryDollarsOnSmallShoppingCart) {
-        this.priceUpperBoundaryDollarsOnSmallShoppingCart = priceUpperBoundaryDollarsOnSmallShoppingCart;
+    public void setValueUpperBoundaryDollarsOnSmallShoppingCart(int valueUpperBoundaryDollarsOnSmallShoppingCart) {
+        this.valueUpperBoundaryDollarsOnSmallShoppingCart = valueUpperBoundaryDollarsOnSmallShoppingCart;
     }
 
     @ManagedAttribute
@@ -195,12 +193,12 @@ public class FraudDetectionController {
     }
 
     @ManagedAttribute
-    public int getPriceUpperBoundaryDollarsOnMediumShoppingCarts() {
-        return priceUpperBoundaryDollarsOnMediumShoppingCarts;
+    public int getValueUpperBoundaryDollarsOnMediumShoppingCarts() {
+        return valueUpperBoundaryDollarsOnMediumShoppingCarts;
     }
 
     @ManagedAttribute
-    public void setPriceUpperBoundaryDollarsOnMediumShoppingCarts(int priceUpperBoundaryDollarsOnMediumShoppingCarts) {
-        this.priceUpperBoundaryDollarsOnMediumShoppingCarts = priceUpperBoundaryDollarsOnMediumShoppingCarts;
+    public void setValueUpperBoundaryDollarsOnMediumShoppingCarts(int valueUpperBoundaryDollarsOnMediumShoppingCarts) {
+        this.valueUpperBoundaryDollarsOnMediumShoppingCarts = valueUpperBoundaryDollarsOnMediumShoppingCarts;
     }
 }

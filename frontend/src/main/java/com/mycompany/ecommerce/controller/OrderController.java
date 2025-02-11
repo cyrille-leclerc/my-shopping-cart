@@ -3,17 +3,19 @@ package com.mycompany.ecommerce.controller;
 import com.mycompany.checkout.PlaceOrderReply;
 import com.mycompany.checkout.PlaceOrderRequest;
 import com.mycompany.ecommerce.EcommerceApplication;
-import com.mycompany.ecommerce.OpenTelemetryAttributes;
+import com.mycompany.ecommerce.EcommerceAttributes;
 import com.mycompany.ecommerce.dto.OrderProductDto;
 import com.mycompany.ecommerce.model.Order;
 import com.mycompany.ecommerce.model.OrderProduct;
 import com.mycompany.ecommerce.model.OrderStatus;
 import com.mycompany.ecommerce.model.Product;
+import com.mycompany.ecommerce.model.Tenant;
 import com.mycompany.ecommerce.service.CheckoutService;
 import com.mycompany.ecommerce.service.OrderProductService;
 import com.mycompany.ecommerce.service.OrderService;
 import com.mycompany.ecommerce.service.ProductService;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.metrics.ExtendedDoubleHistogramBuilder;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
@@ -38,6 +40,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.annotation.Nonnull;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -57,10 +61,9 @@ public class OrderController {
     final CheckoutService checkoutService;
     RabbitTemplate rabbitTemplate;
     RestTemplate restTemplate;
-    String antiFraudServiceBaseUrl;
+    String fraudDetectionServiceBaseUrl;
     String unInstrumentedServiceUrl;
     final DoubleHistogram orderValueHistogram;
-    final DoubleHistogram orderWithTagsHistogram;
 
     public OrderController(ProductService productService, OrderService orderService, OrderProductService orderProductService, CheckoutService checkoutService, Meter meter) {
         this.productService = productService;
@@ -68,15 +71,16 @@ public class OrderController {
         this.orderProductService = orderProductService;
         this.checkoutService = checkoutService;
 
-        // Meters below are used for testing and compare with orderValueRecorder
-        orderValueHistogram = meter.histogramBuilder("order").setUnit("usd").build();
-        orderWithTagsHistogram = meter.histogramBuilder("orderWithTags").setUnit("usd").build();
+        orderValueHistogram = ((ExtendedDoubleHistogramBuilder) meter.histogramBuilder("order"))
+                .setAttributesAdvice(List.of(EcommerceAttributes.TENANT_ID, EcommerceAttributes.TENANT_SHORTCODE))
+                .setUnit("usd")
+                .build();
     }
 
     @PostConstruct
     public void init() {
         logger.atInfo()
-                .addKeyValue("fraud.url", this.antiFraudServiceBaseUrl)
+                .addKeyValue("fraudDetectionServiceBaseUrl", this.fraudDetectionServiceBaseUrl)
                 .addKeyValue("unInstrumentedService.url", this.unInstrumentedServiceUrl)
                 .log("initialized");
     }
@@ -90,33 +94,33 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<Order> create(@RequestBody OrderForm form, HttpServletRequest request) {
-        long beforeInNanos = System.nanoTime();
+        Tenant tenant = Tenant.current();
         Span span = Span.current();
 
         List<OrderProductDto> formDtos = form.getProductOrders();
 
         String customerId = "customer-" + RANDOM.nextInt(100);
-        span.setAttribute(OpenTelemetryAttributes.CUSTOMER_ID, customerId);
+        span.setAttribute(EcommerceAttributes.CUSTOMER_ID, customerId);
 
-        double orderPrice = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
-        String orderPriceRange = getPriceRange(orderPrice);
+        double orderValue = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
+        String orderPriceRange = getPriceRange(orderValue);
         String shippingCountry = form.getShippingCountry();
         String shippingMethod = form.getShippingMethod();
         String paymentMethod = form.getPaymentMethod();
 
-        span.setAttribute(OpenTelemetryAttributes.CUSTOMER_ID, customerId);
-        span.setAttribute(OpenTelemetryAttributes.ORDER_PRICE_RANGE, orderPriceRange);
-        span.setAttribute(OpenTelemetryAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry);
-        span.setAttribute(OpenTelemetryAttributes.SHIPPING_METHOD.getKey(), shippingMethod);
-        span.setAttribute(OpenTelemetryAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
+        span.setAttribute(EcommerceAttributes.CUSTOMER_ID, customerId);
+        span.setAttribute(EcommerceAttributes.ORDER_PRICE_RANGE, orderPriceRange);
+        span.setAttribute(EcommerceAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry);
+        span.setAttribute(EcommerceAttributes.SHIPPING_METHOD.getKey(), shippingMethod);
+        span.setAttribute(EcommerceAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
 
         ResponseEntity<String> fraudDetectionResult;
-        String url = this.antiFraudServiceBaseUrl + (antiFraudServiceBaseUrl.endsWith("/") ? "" : "/") + "fraud/checkOrder?orderPrice={q}&customerIpAddress={q}&shippingCountry={q}";
+        String url = this.fraudDetectionServiceBaseUrl + (fraudDetectionServiceBaseUrl.endsWith("/") ? "" : "/") + "fraud/checkOrder?orderValue={q}&customerIpAddress={q}&shippingCountry={q}";
         try {
             fraudDetectionResult = restTemplate.getForEntity(
                     url,
                     String.class,
-                    orderPrice, request.getRemoteAddr(), shippingCountry);
+                    orderValue, request.getRemoteAddr(), shippingCountry);
         } catch (RestClientException e) {
             String exceptionShortDescription = e.getClass().getSimpleName();
             span.recordException(e);
@@ -124,34 +128,37 @@ public class OrderController {
             if (e.getCause() != null) {
                 exceptionShortDescription += " / " + e.getCause().getClass().getSimpleName();
             }
-            logger.atWarn()
-                    .addKeyValue("order", form)
-                    .addKeyValue("orderPrice", orderPrice)
-                    .addKeyValue("fraud.url", url)
-                    .addKeyValue("fraud.exception", exceptionShortDescription)
-                    .log("Fraud detection failure");
+//            logger.atWarn()
+//                    .addKeyValue("order", form)
+//                    .addKeyValue("orderValue", orderValue)
+//                    .addKeyValue("fraud.url", url)
+//                    .addKeyValue("fraud.exception", exceptionShortDescription)
+//                    .log("Fraud detection failure");
+            logger.warn("Fraud detection failure for order: {}, orderValue: {}, fraud.url: {}, fraud.exception: {}", form, orderValue, url, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (fraudDetectionResult.getStatusCode().isError()) {
             String exceptionShortDescription = "fraudDetection-status-" + fraudDetectionResult.getStatusCode();
             span.recordException(new Exception(exceptionShortDescription));
-            logger.atWarn()
-                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
-                    .addKeyValue("fraud.status_code", fraudDetectionResult.getStatusCode())
-                    .addKeyValue("order", form)
-                    .addKeyValue("orderPrice", orderPrice)
-                    .addKeyValue("fraud.exception", exceptionShortDescription)
-                    .log("Fraud detected");
+//            logger.atWarn()
+//                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
+//                    .addKeyValue("fraud.status_code", fraudDetectionResult.getStatusCode())
+//                    .addKeyValue("order", form)
+//                    .addKeyValue("orderValue", orderValue)
+//                    .addKeyValue("fraud.exception", exceptionShortDescription)
+//                    .log("Fraud detected");
+            logger.warn("Fraud detected for fraud.score: {}, fraud.status_code: {}, order: {}, orderValue: {}, fraud.exception: {}", fraudDetectionResult.getBody(), fraudDetectionResult.getStatusCode(), form, orderValue, exceptionShortDescription);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (!"approved".equals(fraudDetectionResult.getBody())) {
             String exceptionShortDescription = "fraudDetection-" + fraudDetectionResult.getBody();
             span.recordException(new Exception(exceptionShortDescription));
-            logger.atWarn()
-                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
-                    .addKeyValue("order", form)
-                    .addKeyValue("orderPrice", orderPrice)
-                    .log("Fraud detected");
+//            logger.atWarn()
+//                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
+//                    .addKeyValue("order", form)
+//                    .addKeyValue("orderValue", orderValue)
+//                    .log("Fraud detected");
+            logger.warn("Fraud detected for fraud.score: {}, order: {}, orderValue: {}", fraudDetectionResult.getBody(), form, orderValue);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -180,36 +187,51 @@ public class OrderController {
 
         rabbitTemplate.convertAndSend(EcommerceApplication.AMQP_EXCHANGE, EcommerceApplication.AMQP_ROUTING_KEY, order.toString());
 
-        final PlaceOrderReply placeOrderReply = this.checkoutService.placeOrder(PlaceOrderRequest.newBuilder().setName(customerId).build());
+        try {
+            final PlaceOrderReply placeOrderReply = this.checkoutService.placeOrder(PlaceOrderRequest.newBuilder().setName(customerId).build());
+        } catch (RuntimeException e) {
+            String exceptionName = e.getClass().getCanonicalName();
+            String exceptionMessage = e.getMessage();
+            StringWriter stringWriter = new StringWriter();
+            try (PrintWriter printWriter = new PrintWriter(stringWriter)) {
+                e.printStackTrace(printWriter);
+            }
+            String stackTrace = stringWriter.toString();
 
-        // UPDATE METRICS
-        this.orderValueHistogram.record(orderPrice); // would like the tenant_id to be added
+            span.addEvent("checkout/place-order-exception",
+                    Attributes.builder()
+                            .put("exception.type", exceptionName)
+                            .put("exception.message", exceptionMessage)
+                            .put("exception.stacktrace", stackTrace)
+                            .build());
 
-        Attributes attributes = Attributes.of(
-                OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry,
-                OpenTelemetryAttributes.SHIPPING_METHOD, shippingMethod,
-                OpenTelemetryAttributes.PAYMENT_METHOD, paymentMethod);
-        this.orderWithTagsHistogram.record(orderPrice, attributes);
+            logger.warn("Non blocking checkout failure", e);
+        }
+        this.orderValueHistogram.record(
+                orderValue,
+                Attributes.of(
+                        EcommerceAttributes.TENANT_ID, tenant.getId(),
+                        EcommerceAttributes.TENANT_SHORTCODE, tenant.getShortCode()
+                ));
 
-        long durationInNanos = System.nanoTime() - beforeInNanos;
-
-        logger.atInfo().addKeyValue("orderId", order.getId())
-                .addKeyValue("customerId", customerId)
-                .addKeyValue("price", orderPrice)
-                .addKeyValue("paymentMethod", paymentMethod)
-                .addKeyValue("shippingMethod", shippingMethod)
-                .addKeyValue("shippingCountry", shippingCountry)
-                .addKeyValue("durationInNanos", durationInNanos)
-                .log("Success placeOrder");
+//        logger.atInfo().addKeyValue("orderId", order.getId())
+//                .addKeyValue("customerId", customerId)
+//                .addKeyValue("price", orderValue)
+//                .addKeyValue("paymentMethod", paymentMethod)
+//                .addKeyValue("shippingMethod", shippingMethod)
+//                .addKeyValue("shippingCountry", shippingCountry)
+//                .log("Success placeOrder");
+        logger.info("Order {} successfully placed, customerId: {}, price: {}, paymentMethod: {}, shippingMethod: {}, shippingCountry: {}",
+                order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry);
 
         span.addEvent("order-creation", Attributes.builder()
-                .put(OpenTelemetryAttributes.OUTCOME, "success")
-                .put(OpenTelemetryAttributes.CUSTOMER_ID, customerId)
-                .put(OpenTelemetryAttributes.ORDER_PRICE, orderPrice)
-                .put(OpenTelemetryAttributes.ORDER_PRICE_RANGE, orderPriceRange)
-                .put(OpenTelemetryAttributes.PAYMENT_METHOD, paymentMethod)
-                .put(OpenTelemetryAttributes.SHIPPING_METHOD, shippingMethod)
-                .put(OpenTelemetryAttributes.SHIPPING_COUNTRY, shippingCountry)
+                .put(EcommerceAttributes.OUTCOME, "success")
+                .put(EcommerceAttributes.CUSTOMER_ID, customerId)
+                .put(EcommerceAttributes.ORDER_PRICE, orderValue)
+                .put(EcommerceAttributes.ORDER_PRICE_RANGE, orderPriceRange)
+                .put(EcommerceAttributes.PAYMENT_METHOD, paymentMethod)
+                .put(EcommerceAttributes.SHIPPING_METHOD, shippingMethod)
+                .put(EcommerceAttributes.SHIPPING_COUNTRY, shippingCountry)
                 .build());
 
         String uri = ServletUriComponentsBuilder
@@ -238,9 +260,9 @@ public class OrderController {
         this.unInstrumentedServiceUrl = unInstrumentedServiceUrl;
     }
 
-    @Value("${antiFraudService.baseUrl}")
-    public void setAntiFraudServiceBaseUrl(String antiFraudServiceBaseUrl) {
-        this.antiFraudServiceBaseUrl = antiFraudServiceBaseUrl;
+    @Value("${fraudDetectionService.baseUrl}")
+    public void setFraudDetectionServiceBaseUrl(String fraudDetectionServiceBaseUrl) {
+        this.fraudDetectionServiceBaseUrl = fraudDetectionServiceBaseUrl;
     }
 
     public String getPriceRange(double price) {

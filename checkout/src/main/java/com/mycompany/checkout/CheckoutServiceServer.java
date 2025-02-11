@@ -131,6 +131,10 @@ public class CheckoutServiceServer {
                     .log("placeOrder");
             logger.info("Order {} successfully placed", "order-"+ RANDOM.nextInt(1_00000));
 
+            if (RANDOM.nextInt(10) == 0) {
+                RuntimeException exception = new RuntimeException("Checkout failure");
+                responseObserver.onError(exception);
+            }
             // StressTestUtils.incrementProgressBarSuccess();
             PlaceOrderReply placeOrderReply = PlaceOrderReply.newBuilder().setMessage("Order successfully placed!").build();
             responseObserver.onNext(placeOrderReply);

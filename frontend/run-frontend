@@ -127,12 +127,12 @@ INSTANCE_NUMBER=1
 # k8s.node.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq"
 # k8s.pod.name=opentelemetry-frontend-5b7b9db9ff-sh828"
 
-
 OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME,service.instance.id=instance-$INSTANCE_NUMBER"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,host.arch=amd64,host.id=5929043986934855635,host.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER.mycompany-prod.internal"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,k8s.cluster.name=prod-us-central-0,k8s.namespace.name=ecommerce,k8s.node.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER,k8s.pod.name=ecommerce-frontend-5b7b9db9ff-sh828,k8s.pod.uid=5b7b9db9ff-sh828"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,cloud.account.id=mycompany-prod,cloud.availability_zone=us-central1-a,cloud.provider=gcp"
-# OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=$DEPLOYMENT_ENVIRONMENT_NAME"
+OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,container.id=5cc7dd9ecf384635129e7ff7b4a2dd239c803a4f04f62e85386425d31b40de08"
+
 export OTEL_RESOURCE_ATTRIBUTES
 
 # /!\ PYROSCOPE_LABELS doesn't support `.` but supports `_`
@@ -145,18 +145,21 @@ export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SER
 # https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/log4j/log4j-appender-2.17/javaagent
 # -Dotel.instrumentation.log4j-appender.experimental-log-attributes=true
 
+# https://docs.spring.io/spring-boot/reference/features/logging.html
+export LOG_FILE=$PRGDIR/../logs/frontend.log
+export FILE_LOG_PATTERN="%d{yyyy-MM-dd HH:mm:ss.SSSXXX} [%15.15thread] %-5level %-30.30logger{29} : %msg%n%ex"
+
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
-     -javaagent:$PYROSCOPE_AGENT_JAR \
-     -Dotel.semconv-stability.opt-in=http/dup,database \
+     -Dotel.semconv-stability.opt-in=http,database \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
      -Dotel.instrumentation.micrometer.base-time-unit=s \
      -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
      -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
-     -Dotel.semconv-stability.opt-in=http/dup \
      -Dserver.port=8080 \
      -jar target/frontend-1.1-SNAPSHOT.jar
 
+#      -javaagent:$PYROSCOPE_AGENT_JAR \
 #     -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
 # otel-profiling-java doesn't work for me :-(
 #     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \

@@ -1,0 +1,54 @@
+
+extensions:
+  basicauth/grafana_cloud:
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/basicauthextension
+    client_auth:
+      username: "${env:GRAFANA_CLOUD_INSTANCE_ID}"
+      password: "${env:GRAFANA_CLOUD_API_KEY}"
+
+receivers:
+  otlp:
+    # https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver/otlpreceiver
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  hostmetrics:
+    # Optional. Host Metrics Receiver added as an example of Infra Monitoring capabilities of the OpenTelemetry Collector
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver
+    scrapers:
+      load:
+      memory:
+
+processors:
+  batch:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
+  resourcedetection:
+    # Enriches telemetry data with resource information from the host
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor
+    detectors: ["env", "system"]
+    override: false
+
+exporters:
+  otlphttp/grafana_cloud:
+    # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
+    endpoint: "https://otlp-gateway-prod-eu-west-0.grafana.net/otlp"
+    auth:
+      authenticator: basicauth/grafana_cloud
+
+service:
+  extensions: [basicauth/grafana_cloud]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resourcedetection, batch]
+      exporters: [otlphttp/grafana_cloud]
+    metrics:
+      receivers: [otlp, hostmetrics]
+      processors: [resourcedetection, batch]
+      exporters: [otlphttp/grafana_cloud]
+    logs:
+      receivers: [otlp]
+      processors: [resourcedetection, batch]
+      exporters: [otlphttp/grafana_cloud]

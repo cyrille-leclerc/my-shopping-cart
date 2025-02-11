@@ -145,13 +145,13 @@ export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SER
 # -Dotel.instrumentation.log4j-appender.experimental-log-attributes=true
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
-     -javaagent:$PYROSCOPE_AGENT_JAR \
      -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.micrometer.base-time-unit=s \
-     -Dotel.semconv-stability.opt-in=http/dup \
+     -Dotel.semconv-stability.opt-in=http,database \
      -Dserver.port=8080 \
      -jar target/frontend-1.1-SNAPSHOT.jar
 
+#      -javaagent:$PYROSCOPE_AGENT_JAR \
 # otel-prrofiling-java doesn't work for me :-(
 #     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \
