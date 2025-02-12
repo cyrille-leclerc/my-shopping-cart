@@ -33,9 +33,10 @@ target/
 .pyroscope/
 .datadog
 
-# ENVIRONMENT VARIABLES
+# SECRETS
 setenv.sh
 secrets/
+/.env
 
 
 .DS_Store
