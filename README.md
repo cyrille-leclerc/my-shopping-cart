@@ -10,12 +10,21 @@
 * Run `docker compose build` 
 * Create a `.env` file with
 ```
+# REQUIRED VARIABLES
+# ==================
+
 # Example 123456
 GRAFANA_CLOUD_INSTANCE_ID=<<your cloud instance id>>
 # Example: glc_...
 GRAFANA_CLOUD_API_KEY=<<your api key>>
 # Example: https://otlp-gateway-prod-eu-west-0.grafana.net/otlp
 GRAFANA_CLOUD_OTLP_ENDPOINT=<<your Grafana Cloud OTLP Endpoint>>
+
+# OPTIONAL VARIABLES
+
+# OTEL_DEPLOYMENT_ENVIRONMENT_NAME , default: production
+# OTEL_SERVICE_NAMESPACE , defult: shop
+
 ```
 * Run `docker compose run`
 * 

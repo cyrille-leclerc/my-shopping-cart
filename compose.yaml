@@ -19,7 +19,7 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_RABBITMQ_HOST=rabbitmq
       - OTEL_SERVICE_NAME=frontend
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=shop,service.version=1.1,deployment.environment.name=production
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
       - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     ports:
@@ -38,7 +38,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=ecommerce
       - SERVER_PORT=8081
       - OTEL_SERVICE_NAME=fraud-detection
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=shop,service.version=1.1,deployment.environment.name=production
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
       - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     ports:
@@ -54,7 +54,7 @@ services:
     environment:
       - SHIPPING_SERVICE_URL=http://shipping:8088
       - OTEL_SERVICE_NAME=checkout
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=shop,service.version=1.1,deployment.environment.name=production
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
       - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     ports:
@@ -73,7 +73,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=ecommerce
       - SERVER_PORT=8088
       - OTEL_SERVICE_NAME=shipping
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=shop,service.version=1.1,deployment.environment.name=production
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
       - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     ports:
@@ -91,7 +91,7 @@ services:
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SERVER_PORT=8089
       - OTEL_SERVICE_NAME=warehouse
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=shop,service.version=1.1,deployment.environment.name=production
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
       - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     ports:
