@@ -124,8 +124,9 @@ services:
       - redis
       - rabbitmq
     environment:
-      - GRAFANA_CLOUD_API_KEY=${GRAFANA_CLOUD_API_KEY:?error}
       - GRAFANA_CLOUD_INSTANCE_ID=${GRAFANA_CLOUD_INSTANCE_ID:?error}
+      - GRAFANA_CLOUD_API_KEY=${GRAFANA_CLOUD_API_KEY:?error}
+      - GRAFANA_CLOUD_OTLP_ENDPOINT=${GRAFANA_CLOUD_OTLP_ENDPOINT:?error}
     volumes:
       - ./docker-compose/otel-collector/otel-collector-config.yml:/etc/otelcol-contrib/config.yaml
     ports:

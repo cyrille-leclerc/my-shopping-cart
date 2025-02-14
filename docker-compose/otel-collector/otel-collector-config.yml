@@ -50,7 +50,7 @@ processors:
 exporters:
   otlphttp/grafana_cloud:
     # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
-    endpoint: "https://otlp-gateway-prod-eu-west-0.grafana.net/otlp"
+    endpoint: "${env:GRAFANA_CLOUD_OTLP_ENDPOINT}"
     auth:
       authenticator: basicauth/grafana_cloud
   prometheus:
