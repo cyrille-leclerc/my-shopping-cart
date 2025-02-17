@@ -5,6 +5,9 @@ extensions:
     client_auth:
       username: "${env:GRAFANA_CLOUD_INSTANCE_ID}"
       password: "${env:GRAFANA_CLOUD_API_KEY}"
+  health_check:
+    # https://github:com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/healthcheckextension/README.md
+    endpoint: "0.0.0.0:13133"
 
 receivers:
   otlp:
@@ -56,7 +59,7 @@ exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
 service:
-  extensions: [basicauth/grafana_cloud]
+  extensions: [basicauth/grafana_cloud, health_check]
   pipelines:
     traces:
       receivers: [otlp]

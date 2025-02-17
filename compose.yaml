@@ -5,10 +5,15 @@ services:
       dockerfile: ./frontend/Dockerfile
     container_name: frontend
     depends_on:
-      - postgres
-      - redis
-      - rabbitmq
-      - otel-collector
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      otel-collector:
+        # todo rely on service_healthy instead of service_started. It doesn't work for the moment
+        condition: service_started
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecommerce
       - SPRING_DATASOURCE_USERNAME=ecommerce
@@ -24,14 +29,18 @@ services:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
     ports:
       - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
   fraud-detection:
     build:
       context: .
       dockerfile: ./fraud-detection/Dockerfile
     container_name: fraud-detection
     depends_on:
-      - postgres
-      - otel-collector
+      postgres:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecommerce
       - SPRING_DATASOURCE_USERNAME=ecommerce
@@ -49,8 +58,10 @@ services:
       dockerfile: ./checkout/Dockerfile
     container_name: checkout
     depends_on:
-      - postgres
-      - otel-collector
+      postgres:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
     environment:
       - SHIPPING_SERVICE_URL=http://shipping:8088
       - OTEL_SERVICE_NAME=checkout
@@ -65,8 +76,10 @@ services:
       dockerfile: ./shipping/Dockerfile
     container_name: shipping
     depends_on:
-      - postgres
-      - otel-collector
+      postgres:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ecommerce
       - SPRING_DATASOURCE_USERNAME=ecommerce
@@ -84,9 +97,12 @@ services:
       dockerfile: ./warehouse/Dockerfile
     container_name: warehouse
     depends_on:
-      - postgres
-      - rabbitmq
-      - otel-collector
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SERVER_PORT=8089
@@ -104,25 +120,45 @@ services:
       - POSTGRES_PASSWORD=ecommerce
     ports:
       - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 2s
+      retries: 3
   redis:
     image: 'redis:6-alpine'
     container_name: redis
     ports:
       - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 2s
+      retries: 3
   rabbitmq:
     image: 'rabbitmq:4-management-alpine'
     container_name: rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: "rabbitmq-diagnostics -q status"
+      #test: ["CMD", "curl", "-f", "http://guest:guest@localhost:15672/api/queues"]
+      # health check : http://guest:guest@localhost:15672/api/healthchecks/node /
+      interval: 5s
+      timeout: 2s
+      retries: 3
   otel-collector:
     # https://opentelemetry.io/docs/collector/installation/#docker-compose
     image: 'otel/opentelemetry-collector-contrib:0.119.0'
     container_name: otel-collector
     depends_on:
-      - postgres
-      - redis
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       - GRAFANA_CLOUD_INSTANCE_ID=${GRAFANA_CLOUD_INSTANCE_ID:?error}
       - GRAFANA_CLOUD_API_KEY=${GRAFANA_CLOUD_API_KEY:?error}
@@ -137,7 +173,11 @@ services:
       - "4317:4317" # OTLP gRPC receiver
       - "4318:4318" # OTLP http receiver
       - "55679:55679" # zpages extension
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/metrics"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
   k6-load-generator:
     image: 'grafana/k6:latest'
     container_name: k6-load-generator
