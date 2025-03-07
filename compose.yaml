@@ -150,7 +150,7 @@ services:
       retries: 3
   otel-collector:
     # https://opentelemetry.io/docs/collector/installation/#docker-compose
-    image: 'otel/opentelemetry-collector-contrib:0.119.0'
+    image: 'otel/opentelemetry-collector-contrib:0.121.0'
     container_name: otel-collector
     depends_on:
       postgres:
