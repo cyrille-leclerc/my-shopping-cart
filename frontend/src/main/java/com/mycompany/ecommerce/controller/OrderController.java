@@ -214,13 +214,16 @@ public class OrderController {
                         EcommerceAttributes.TENANT_SHORTCODE, tenant.getShortCode()
                 ));
 
-//        logger.atInfo().addKeyValue("orderId", order.getId())
-//                .addKeyValue("customerId", customerId)
-//                .addKeyValue("price", orderValue)
-//                .addKeyValue("paymentMethod", paymentMethod)
-//                .addKeyValue("shippingMethod", shippingMethod)
-//                .addKeyValue("shippingCountry", shippingCountry)
-//                .log("Success placeOrder");
+        logger.atInfo()
+                .addKeyValue("orderId", order.getId())
+                .addKeyValue("customerId", customerId)
+                .addKeyValue("price", orderValue)
+                .addKeyValue("paymentMethod", paymentMethod)
+                .addKeyValue("shippingMethod", shippingMethod)
+                .addKeyValue("shippingCountry", shippingCountry)
+                .log("Success placeOrder (structured logging example)");
+
+
         logger.info("Order {} successfully placed, customerId: {}, price: {}, paymentMethod: {}, shippingMethod: {}, shippingCountry: {}",
                 order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry);
 
