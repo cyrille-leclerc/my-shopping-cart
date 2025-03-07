@@ -50,6 +50,10 @@ processors:
     detectors: ["env", "system"]
     override: false
 
+connectors:
+  grafanacloud:
+    host_identifiers: ["k8s.node.uid", "k8s.node.name", "host.id", "host.name", "container.id"]
+
 exporters:
   otlphttp/grafana_cloud:
     # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
@@ -64,9 +68,9 @@ service:
     traces:
       receivers: [otlp]
       processors: [resourcedetection, batch]
-      exporters: [otlphttp/grafana_cloud]
+      exporters: [grafanacloud, otlphttp/grafana_cloud]
     metrics:
-      receivers: [otlp, hostmetrics, postgresql, redis, rabbitmq]
+      receivers: [otlp, hostmetrics, postgresql, redis, rabbitmq, grafanacloud]
       processors: [resourcedetection, batch]
       exporters: [otlphttp/grafana_cloud, prometheus]
     logs:
