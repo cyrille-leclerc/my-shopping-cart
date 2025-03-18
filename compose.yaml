@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
-    container_name: frontend
+    container_name: ecomm-frontend
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,7 +35,7 @@ services:
     build:
       context: .
       dockerfile: ./fraud-detection/Dockerfile
-    container_name: fraud-detection
+    container_name: ecomm-fraud-detection
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,7 +56,7 @@ services:
     build:
       context: .
       dockerfile: ./checkout/Dockerfile
-    container_name: checkout
+    container_name: ecomm-checkout
     depends_on:
       postgres:
         condition: service_healthy
@@ -74,7 +74,7 @@ services:
     build:
       context: .
       dockerfile: ./shipping/Dockerfile
-    container_name: shipping
+    container_name: ecomm-shipping
     depends_on:
       postgres:
         condition: service_healthy
@@ -95,7 +95,7 @@ services:
     build:
       context: .
       dockerfile: ./warehouse/Dockerfile
-    container_name: warehouse
+    container_name: ecomm-warehouse
     depends_on:
       postgres:
         condition: service_healthy
@@ -114,7 +114,7 @@ services:
       - "8089:8089"
   postgres:
     image: 'postgres:16-alpine'
-    container_name: postgres
+    container_name: ecomm-postgres
     environment:
       - POSTGRES_USER=ecommerce
       - POSTGRES_PASSWORD=ecommerce
@@ -127,7 +127,7 @@ services:
       retries: 3
   redis:
     image: 'redis:6-alpine'
-    container_name: redis
+    container_name: ecomm-redis
     ports:
       - "6379:6379"
     healthcheck:
@@ -137,7 +137,7 @@ services:
       retries: 3
   rabbitmq:
     image: 'rabbitmq:4-management-alpine'
-    container_name: rabbitmq
+    container_name: ecomm-rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -149,9 +149,10 @@ services:
       timeout: 2s
       retries: 3
   otel-collector:
+    # don't call it "otel-collector" because it would conflict with the otel-demo
     # https://opentelemetry.io/docs/collector/installation/#docker-compose
     image: 'otel/opentelemetry-collector-contrib:0.121.0'
-    container_name: otel-collector
+    container_name: ecomm-otel-collector
     depends_on:
       postgres:
         condition: service_healthy
@@ -180,7 +181,7 @@ services:
       retries: 3
   k6-load-generator:
     image: 'grafana/k6:latest'
-    container_name: k6-load-generator
+    container_name: ecomm-k6-load-generator
     volumes:
       - ./load-generator/src/main/k6/k6.js:/k6-load-generator.js
     command: run -e FRONTEND_URLS="http://frontend:8080"  /k6-load-generator.js

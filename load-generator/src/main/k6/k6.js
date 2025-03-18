@@ -132,7 +132,7 @@ const unEvenlyDistributedPaymentMethods = [
     "VISA",
 ]
 
-const shippingCountries = ["FR", "FR", "GB", "DE"]
+const shippingCountries = ["US", "FR", "GB", "DE"]
 const shippingMethods = ["standard", "express"]
 
 const priceUpperBoundaryDollarsOnMediumShoppingCarts = 100

@@ -72,27 +72,34 @@ public class FraudDetectionController {
         int durationOffsetInMillis;
         int fraudPercentage;
         int exceptionPercentage;
+        LoggingEventBuilder loggingEventBuilder;
+        String msg;
         if (orderValueDollars < valueUpperBoundaryDollarsOnSmallShoppingCart) {
             fraudPercentage = fraudPercentageOnSmallShoppingCarts;
             durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
             exceptionPercentage = exceptionPercentageOnSmallShoppingCarts;
+            loggingEventBuilder = logger.atInfo();
+            msg = "ok";
         } else if (orderValueDollars < valueUpperBoundaryDollarsOnMediumShoppingCarts) {
             fraudPercentage = fraudPercentageOnMediumShoppingCarts;
             durationOffsetInMillis = averageDurationMillisOnMediumShoppingCarts;
             exceptionPercentage = exceptionPercentageOnMediumShoppingCarts;
+            loggingEventBuilder = logger.atInfo();
+            msg = "ok";
         } else {
             fraudPercentage = fraudPercentageOnLargeShoppingCarts;
             durationOffsetInMillis = averageDurationMillisOnLargeShoppingCart;
             exceptionPercentage = exceptionPercentageOnLargeShoppingCarts;
+            loggingEventBuilder = logger.atWarn();
+            msg = "problem FD-123456 executing fraud detection";
         }
 
         int checkOrderDurationMillis = durationOffsetInMillis + RANDOM.nextInt(Math.max(5, new BigDecimal(durationOffsetInMillis).multiply(FIVE_PERCENT).intValue()));
-        // positive means fraud
+        // positive score means fraud
         int fraudScore = fraudPercentage - RANDOM.nextInt(100);
         Span.current().setAttribute("fraud_score", fraudScore);
 
         String outcome;
-        LoggingEventBuilder eventBuilder = logger.atInfo();
         try (Connection cnn = dataSource.getConnection()) {
             try (Statement stmt = cnn.createStatement()) {
 
@@ -106,12 +113,12 @@ public class FraudDetectionController {
 
         } catch (SQLException | InterruptedException | RuntimeException e) {
             Span.current().recordException(e);
-            eventBuilder = logger.atWarn().setCause(e);
+            loggingEventBuilder = logger.atWarn().setCause(e);
             outcome = "error";
         }
         this.fraudDetectionHistogram.record(orderValueDollars, Attributes.of(AttributeKey.stringKey("outcome"), outcome));
-        eventBuilder.log("checkOrder: outcome={}, orderValue={}, shippingCountry={}, customerIpAddress={}, fraudScore={}",
-                outcome, orderValueDollars, shippingCountry, customerIpAddress, fraudScore);
+        loggingEventBuilder.log("checkOrder: outcome={}, orderValue={}, shippingCountry={}, customerIpAddress={}, fraudScore={}, msg={}",
+                outcome, orderValueDollars, shippingCountry, customerIpAddress, fraudScore, msg);
         return outcome;
     }
 
