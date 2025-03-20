@@ -151,7 +151,7 @@ services:
   otel-collector:
     # don't call it "otel-collector" because it would conflict with the otel-demo
     # https://opentelemetry.io/docs/collector/installation/#docker-compose
-    image: 'otel/opentelemetry-collector-contrib:0.121.0'
+    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.120.0
     container_name: ecomm-otel-collector
     depends_on:
       postgres:

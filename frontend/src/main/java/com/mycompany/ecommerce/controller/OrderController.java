@@ -9,11 +9,11 @@ import com.mycompany.ecommerce.model.Order;
 import com.mycompany.ecommerce.model.OrderProduct;
 import com.mycompany.ecommerce.model.OrderStatus;
 import com.mycompany.ecommerce.model.Product;
-import com.mycompany.ecommerce.model.Tenant;
 import com.mycompany.ecommerce.service.CheckoutService;
 import com.mycompany.ecommerce.service.OrderProductService;
 import com.mycompany.ecommerce.service.OrderService;
 import com.mycompany.ecommerce.service.ProductService;
+import com.mycompany.ecommerce.servlet.TenantFilter;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.incubator.metrics.ExtendedDoubleHistogramBuilder;
 import io.opentelemetry.api.metrics.DoubleHistogram;
@@ -94,7 +94,6 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<Order> create(@RequestBody OrderForm form, HttpServletRequest request) {
-        Tenant tenant = Tenant.current();
         Span span = Span.current();
 
         List<OrderProductDto> formDtos = form.getProductOrders();
@@ -110,7 +109,7 @@ public class OrderController {
 
         span.setAttribute(EcommerceAttributes.CUSTOMER_ID, customerId);
         span.setAttribute(EcommerceAttributes.ORDER_PRICE_RANGE, orderPriceRange);
-        span.setAttribute(EcommerceAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry);
+        //span.setAttribute(EcommerceAttributes.SHIPPING_COUNTRY.getKey(), shippingCountry);
         span.setAttribute(EcommerceAttributes.SHIPPING_METHOD.getKey(), shippingMethod);
         span.setAttribute(EcommerceAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
 
@@ -207,14 +206,16 @@ public class OrderController {
 
             logger.warn("Non blocking checkout failure", e);
         }
+        TenantFilter.Tenant tenant = TenantFilter.Tenant.current();
         this.orderValueHistogram.record(
                 orderValue,
                 Attributes.of(
-                        EcommerceAttributes.TENANT_ID, tenant.getId(),
+                        //EcommerceAttributes.TENANT_ID, tenant.getId(),
                         EcommerceAttributes.TENANT_SHORTCODE, tenant.getShortCode()
                 ));
 
         logger.atInfo()
+                .addKeyValue("tenant.short_code", tenant.getShortCode())
                 .addKeyValue("orderId", order.getId())
                 .addKeyValue("customerId", customerId)
                 .addKeyValue("price", orderValue)
@@ -224,8 +225,8 @@ public class OrderController {
                 .log("Success placeOrder (structured logging example)");
 
 
-        logger.info("Order {} successfully placed, customerId: {}, price: {}, paymentMethod: {}, shippingMethod: {}, shippingCountry: {}",
-                order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry);
+        logger.info("Order {} successfully placed, customerId: {}, price: {}, paymentMethod: {}, shippingMethod: {}, shippingCountry: {}, tenant.short_code={}",
+                order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry, tenant.getShortCode());
 
         span.addEvent("order-creation", Attributes.builder()
                 .put(EcommerceAttributes.OUTCOME, "success")
@@ -234,7 +235,7 @@ public class OrderController {
                 .put(EcommerceAttributes.ORDER_PRICE_RANGE, orderPriceRange)
                 .put(EcommerceAttributes.PAYMENT_METHOD, paymentMethod)
                 .put(EcommerceAttributes.SHIPPING_METHOD, shippingMethod)
-                .put(EcommerceAttributes.SHIPPING_COUNTRY, shippingCountry)
+                //.put(EcommerceAttributes.SHIPPING_COUNTRY, shippingCountry)
                 .build());
 
         String uri = ServletUriComponentsBuilder

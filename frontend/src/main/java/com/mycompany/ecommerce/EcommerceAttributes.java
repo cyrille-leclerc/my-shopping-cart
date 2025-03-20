@@ -11,6 +11,6 @@ public class EcommerceAttributes {
     public static final AttributeKey<String> SHIPPING_METHOD = AttributeKey.stringKey("shipping_method");
     public static final AttributeKey<String> PAYMENT_METHOD = AttributeKey.stringKey("payment_method");
     public static final AttributeKey<String> TENANT_ID = AttributeKey.stringKey("tenant.id");
-    public static final AttributeKey<String> TENANT_SHORTCODE = AttributeKey.stringKey("tenant.shortcode");
+    public static final AttributeKey<String> TENANT_SHORTCODE = AttributeKey.stringKey("tenant.short_code");
 
 }

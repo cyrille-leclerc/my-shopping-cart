@@ -1,4 +1,4 @@
-package com.mycompany.ecommerce.servlet;
+package com.mycompany.antifraud;
 
 import io.opentelemetry.api.baggage.Baggage;
 import io.opentelemetry.api.trace.Span;
@@ -9,44 +9,38 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
 
 @Component
 @Order(1)
 public class TenantFilter implements Filter {
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    static final Random random = new Random();
-
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        if (servletRequest instanceof HttpServletRequest httpServletRequest) {
-            doFilter(filterChain, httpServletRequest, (HttpServletResponse) servletResponse);
+        if (servletRequest instanceof HttpServletRequest request) {
+            doFilter(filterChain, request, (HttpServletResponse) servletResponse);
         } else {
             filterChain.doFilter(servletRequest, servletResponse);
         }
     }
 
     private void doFilter(FilterChain filterChain, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Tenant tenant = getTenant(request);
 
-        logger.atDebug()
-                //.addKeyValue("tenant.id", tenant.getId())
-                .addKeyValue("tenant.short_code", tenant.getShortCode())
-                .addKeyValue("http.request.method", request.getMethod())
-                .addKeyValue("url.path", request.getRequestURI())
-                .addKeyValue("request['tenant']", request.getParameter("tenant"))
-                .log("Setting tenant");
+        //String tenantId = Baggage.current().getEntryValue("tenant.id");
+        String tenantShortCode = Baggage.current().getEntryValue("tenant.short_code");
+        Tenant tenant = Optional.ofNullable(tenantShortCode)
+                .map(id -> Tenant.newFromShortCode(tenantShortCode))
+                .orElseGet(Tenant::unknown);
+
+        logger.debug("Tenant: {}", tenant);
 
         // The BaggageSpanProcessor promotes baggage to span attributes on span creation
         // and the HTTP Server span is already created by the time this filter is called
@@ -54,48 +48,18 @@ public class TenantFilter implements Filter {
         Span.current()
                 //.setAttribute("tenant.id", tenant.getId())
                 .setAttribute("tenant.short_code", tenant.getShortCode());
-        Baggage baggage = Baggage.builder()
-                //.put("tenant.id", tenant.getId())
-                .put("tenant.short_code", tenant.getShortCode())
-                .build();
         Tenant.setCurrent(tenant);
-        try (var ignored = baggage.makeCurrent()) {
+        try{
             filterChain.doFilter(request, response);
         } finally {
             Tenant.clearCurrent();
         }
     }
 
-    // todo implement real business logic to extract the tenant-id from the request
-    private static Tenant getTenant(HttpServletRequest request) {
-        // retrieve tenant from HTTP session or from request parameter or generate a random one
-        HttpSession session = request.getSession();
-
-        return Optional.ofNullable(session.getAttribute("tenant"))
-                .map(value -> (Tenant) value)
-                .orElseGet(() -> {
-                    Tenant t = Optional.ofNullable(request.getParameter("tenant"))
-                            .map(String::trim)
-                            .filter(s -> !s.isEmpty())
-                            .map(Tenant::newFromShortCode)
-                            .orElseGet(Tenant::nextRandomTenant);
-                    session.setAttribute("tenant", t);
-                    return t;
-                });
-    }
-
     public static class Tenant {
-        private final static Random random = new Random();
 
-        private static final List<Tenant> tenants = List.of(
-                newFromShortCode("T_ALPHA"),
-                newFromShortCode("T_BETA"),
-                newFromShortCode("T_GAMMA"),
-                newFromShortCode("T_DELTA")
-        );
-
-        public static Tenant nextRandomTenant() {
-            return tenants.get(random.nextInt(tenants.size()));
+        public static Tenant unknown() {
+            return new Tenant("#unknown#", "#unknown#");
         }
 
         public static Tenant newFromShortCode(String shortCode) {

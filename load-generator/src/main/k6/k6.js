@@ -1,6 +1,6 @@
 import {sleep, group} from 'k6'
 import http from 'k6/http'
-import {uuidv4, randomIntBetween, randomItem} from 'https://jslib.k6.io/k6-utils/1.2.0/index.js';
+import {uuidv4, randomIntBetween, randomItem} from 'https://jslib.k6.io/k6-utils/1.6.0/index.js';
 
 export const options = {
     ext: {
@@ -42,17 +42,6 @@ export function scenario_1() {
     group('Purchase', function () {
         let frontendRootUrl = randomItem(frontendServerRootUrls)
 
-        // Home
-        response = http.get(frontendRootUrl, { headers: {baggage: "frontend_instrumentation.sessionId=" + sessionUid}})
-
-        // Get Products
-        response = http.get(frontendRootUrl + "/api/products", {
-            headers: {
-                accept: 'application/json, text/plain, */*',
-                baggage: "frontend_instrumentation.sessionId=" + sessionUid
-            },
-        })
-
         let product = randomItem(products)
         let quantity = randomIntBetween(1, 3)
         let price = product.price * quantity
@@ -73,10 +62,21 @@ export function scenario_1() {
             "shippingCountry": shippingCountry
         }
 
+        // Home
+        response = http.get(frontendRootUrl + "?tenant=" + shippingCountry, { headers: {baggage: "frontend_instrumentation.sessionId=" + sessionUid}})
+
+        // Get Products
+        response = http.get(frontendRootUrl + "/api/products?tenant=" + shippingCountry, {
+            headers: {
+                accept: 'application/json, text/plain, */*',
+                baggage: "frontend_instrumentation.sessionId=" + sessionUid
+            },
+        })
+
         sleep(randomIntBetween(1, 5))
         // Place Order
         response = http.post(
-            frontendRootUrl + "/api/orders",
+            frontendRootUrl + "/api/orders?tenant=" + shippingCountry,
             JSON.stringify(purchaseOrders),
             {
                 headers: {
@@ -88,7 +88,7 @@ export function scenario_1() {
         )
         sleep(randomIntBetween(1, 5))
         // Get Products
-        response = http.get(frontendRootUrl + "/api/products", {
+        response = http.get(frontendRootUrl + "/api/products?tenant=" + shippingCountry, {
             headers: {
                 accept: 'application/json, text/plain, */*',
                 baggage: "frontend_instrumentation.sessionId=" + sessionUid

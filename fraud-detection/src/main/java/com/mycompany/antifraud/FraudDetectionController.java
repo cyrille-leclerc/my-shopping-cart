@@ -31,7 +31,11 @@ public class FraudDetectionController {
     final static BigDecimal FIVE_PERCENT = new BigDecimal(5).divide(new BigDecimal(100), RoundingMode.HALF_UP);
 
     final Logger logger = LoggerFactory.getLogger(getClass());
-
+    enum AnomalyType {
+        ORDER_VALUE,
+        TENANT
+    }
+    AnomalyType anomalyType = AnomalyType.TENANT;
 
     int averageDurationMillisOnSmallShoppingCarts = 50;
     int averageDurationMillisOnMediumShoppingCarts = 50;
@@ -57,46 +61,87 @@ public class FraudDetectionController {
         this.dataSource = dataSource;
     }
 
-    @RequestMapping(path = "fraud/checkOrder", method = {RequestMethod.GET, RequestMethod.POST})
-    public String checkOrder(
-            @RequestParam double orderValue,
-            @RequestParam String shippingCountry,
-            @RequestParam String customerIpAddress) {
-
-        Span.current().setAttribute("order_value", orderValue);
-        Span.current().setAttribute("customer_ip_address", customerIpAddress);
-        Span.current().setAttribute("shipping_country", shippingCountry);
-
-        int orderValueDollars = Double.valueOf(orderValue).intValue();
-
+    static class FraudDetectionConfiguration {
         int durationOffsetInMillis;
         int fraudPercentage;
         int exceptionPercentage;
         LoggingEventBuilder loggingEventBuilder;
         String msg;
-        if (orderValueDollars < valueUpperBoundaryDollarsOnSmallShoppingCart) {
-            fraudPercentage = fraudPercentageOnSmallShoppingCarts;
-            durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
-            exceptionPercentage = exceptionPercentageOnSmallShoppingCarts;
-            loggingEventBuilder = logger.atInfo();
-            msg = "ok";
-        } else if (orderValueDollars < valueUpperBoundaryDollarsOnMediumShoppingCarts) {
-            fraudPercentage = fraudPercentageOnMediumShoppingCarts;
-            durationOffsetInMillis = averageDurationMillisOnMediumShoppingCarts;
-            exceptionPercentage = exceptionPercentageOnMediumShoppingCarts;
-            loggingEventBuilder = logger.atInfo();
-            msg = "ok";
-        } else {
-            fraudPercentage = fraudPercentageOnLargeShoppingCarts;
-            durationOffsetInMillis = averageDurationMillisOnLargeShoppingCart;
-            exceptionPercentage = exceptionPercentageOnLargeShoppingCarts;
-            loggingEventBuilder = logger.atWarn();
-            msg = "problem FD-123456 executing fraud detection";
-        }
 
-        int checkOrderDurationMillis = durationOffsetInMillis + RANDOM.nextInt(Math.max(5, new BigDecimal(durationOffsetInMillis).multiply(FIVE_PERCENT).intValue()));
+        @Override
+        public String toString() {
+            return "FraudDetectionConfiguration{" +
+                    "durationOffsetInMillis=" + durationOffsetInMillis +
+                    ", fraudPercentage=" + fraudPercentage +
+                    ", exceptionPercentage=" + exceptionPercentage +
+                    ", loggingEventBuilder=" + loggingEventBuilder +
+                    ", msg='" + msg + '\'' +
+                    '}';
+        }
+    }
+
+    FraudDetectionConfiguration buildFraudDetectionConfiguration(int orderValueDollars, TenantFilter.Tenant tenant) {
+        FraudDetectionConfiguration cfg = new FraudDetectionConfiguration();
+        switch (anomalyType) {
+            case TENANT -> {
+                if ("FR".equalsIgnoreCase(tenant.getShortCode())) {
+                    cfg.fraudPercentage = 35;
+                    cfg.durationOffsetInMillis = averageDurationMillisOnLargeShoppingCart;
+                    cfg.exceptionPercentage = exceptionPercentageOnLargeShoppingCarts;
+                    cfg.loggingEventBuilder = logger.atWarn();
+                    cfg.msg = "problem FD-654321 executing fraud detection";
+                } else {
+                    cfg.fraudPercentage = fraudPercentageOnSmallShoppingCarts;
+                    cfg.durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
+                    cfg.exceptionPercentage = exceptionPercentageOnSmallShoppingCarts;
+                    cfg.loggingEventBuilder = logger.atInfo();
+                    cfg.msg = "ok";
+                }
+            }
+            case ORDER_VALUE -> {
+                if (orderValueDollars < valueUpperBoundaryDollarsOnSmallShoppingCart) {
+                    cfg.fraudPercentage = fraudPercentageOnSmallShoppingCarts;
+                    cfg.durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
+                    cfg.exceptionPercentage = exceptionPercentageOnSmallShoppingCarts;
+                    cfg.loggingEventBuilder = logger.atInfo();
+                    cfg.msg = "ok";
+                } else if (orderValueDollars < valueUpperBoundaryDollarsOnMediumShoppingCarts) {
+                    cfg.fraudPercentage = fraudPercentageOnMediumShoppingCarts;
+                    cfg.durationOffsetInMillis = averageDurationMillisOnMediumShoppingCarts;
+                    cfg.exceptionPercentage = exceptionPercentageOnMediumShoppingCarts;
+                    cfg.loggingEventBuilder = logger.atInfo();
+                    cfg.msg = "ok";
+                } else {
+                    cfg.fraudPercentage = fraudPercentageOnLargeShoppingCarts;
+                    cfg.durationOffsetInMillis = averageDurationMillisOnLargeShoppingCart;
+                    cfg.exceptionPercentage = exceptionPercentageOnLargeShoppingCarts;
+                    cfg.loggingEventBuilder = logger.atWarn();
+                    cfg.msg = "problem FD-123456 executing fraud detection";
+                }
+            }
+        }
+        return cfg;
+    }
+
+    @RequestMapping(path = "fraud/checkOrder", method = {RequestMethod.GET, RequestMethod.POST})
+    public String checkOrder(
+            @RequestParam double orderValue,
+            @RequestParam String shippingCountry,
+            @RequestParam String customerIpAddress) {
+        TenantFilter.Tenant tenant = TenantFilter.Tenant.current();
+
+        Span.current().setAttribute("order_value", orderValue);
+        Span.current().setAttribute("customer_ip_address", customerIpAddress);
+        //Span.current().setAttribute("shipping_country", shippingCountry);
+        Span.current().setAttribute("database_pool", tenant.shortCode);
+
+        int orderValueDollars = Double.valueOf(orderValue).intValue();
+
+        FraudDetectionConfiguration cfg = buildFraudDetectionConfiguration(orderValueDollars, tenant);
+
+        int checkOrderDurationMillis = cfg.durationOffsetInMillis + RANDOM.nextInt(Math.max(5, new BigDecimal(cfg.durationOffsetInMillis).multiply(FIVE_PERCENT).intValue()));
         // positive score means fraud
-        int fraudScore = fraudPercentage - RANDOM.nextInt(100);
+        int fraudScore = cfg.fraudPercentage - RANDOM.nextInt(100);
         Span.current().setAttribute("fraud_score", fraudScore);
 
         String outcome;
@@ -106,19 +151,19 @@ public class FraudDetectionController {
                 stmt.execute("select pg_sleep(0.05)");
                 Thread.sleep(checkOrderDurationMillis);
             }
-            if (exceptionPercentage - RANDOM.nextInt(100) > 0) {
+            if (cfg.exceptionPercentage - RANDOM.nextInt(100) > 0) {
                 throw new RuntimeException("Fraud Detection Processing Exception");
             }
             outcome = fraudScore > 0 ? "denied" : "approved";
 
         } catch (SQLException | InterruptedException | RuntimeException e) {
             Span.current().recordException(e);
-            loggingEventBuilder = logger.atWarn().setCause(e);
+            cfg.loggingEventBuilder = logger.atWarn().setCause(e);
             outcome = "error";
         }
         this.fraudDetectionHistogram.record(orderValueDollars, Attributes.of(AttributeKey.stringKey("outcome"), outcome));
-        loggingEventBuilder.log("checkOrder: outcome={}, orderValue={}, shippingCountry={}, customerIpAddress={}, fraudScore={}, msg={}",
-                outcome, orderValueDollars, shippingCountry, customerIpAddress, fraudScore, msg);
+        cfg.loggingEventBuilder.log("checkOrder: outcome={}, orderValue={}, shippingCountry={}, customerIpAddress={}, fraudScore={}, msg={}, tenant={}",
+                outcome, orderValueDollars, shippingCountry, customerIpAddress, fraudScore, cfg.msg, tenant.getShortCode());
         return outcome;
     }
 

@@ -35,7 +35,7 @@ class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplBase {
             logger.warn("Thread interrupted", e);
         }
 
-        if (CheckoutServiceServer.RANDOM.nextInt(10) == 0) {
+        if (CheckoutServiceServer.RANDOM.nextInt(100) == 0) {
             logger.atWarn()
                     .addKeyValue("customerId", placeOrderRequest.getName())
                     .setCause(new RuntimeException("random failure"))
