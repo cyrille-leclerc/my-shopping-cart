@@ -5,6 +5,7 @@ import com.mycompany.checkout.PlaceOrderRequest;
 import com.mycompany.ecommerce.EcommerceApplication;
 import com.mycompany.ecommerce.EcommerceAttributes;
 import com.mycompany.ecommerce.dto.OrderProductDto;
+import com.mycompany.ecommerce.exception.FraudDetectionException;
 import com.mycompany.ecommerce.model.Order;
 import com.mycompany.ecommerce.model.OrderProduct;
 import com.mycompany.ecommerce.model.OrderStatus;
@@ -71,7 +72,7 @@ public class OrderController {
         this.orderProductService = orderProductService;
         this.checkoutService = checkoutService;
 
-        orderValueHistogram = ((ExtendedDoubleHistogramBuilder) meter.histogramBuilder("order"))
+        orderValueHistogram = ((ExtendedDoubleHistogramBuilder) meter.histogramBuilder("order.value"))
                 .setAttributesAdvice(List.of(EcommerceAttributes.TENANT_ID, EcommerceAttributes.TENANT_SHORTCODE))
                 .setUnit("usd")
                 .build();
@@ -93,19 +94,19 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Order> create(@RequestBody OrderForm form, HttpServletRequest request) {
+    public ResponseEntity<Order> create(@RequestBody OrderForm orderForm, HttpServletRequest request) {
         Span span = Span.current();
 
-        List<OrderProductDto> formDtos = form.getProductOrders();
+        List<OrderProductDto> formDtos = orderForm.getProductOrders();
 
         String customerId = "customer-" + RANDOM.nextInt(100);
         span.setAttribute(EcommerceAttributes.CUSTOMER_ID, customerId);
 
         double orderValue = formDtos.stream().mapToDouble(po -> po.getQuantity() * po.getProduct().getPrice()).sum();
         String orderPriceRange = getPriceRange(orderValue);
-        String shippingCountry = form.getShippingCountry();
-        String shippingMethod = form.getShippingMethod();
-        String paymentMethod = form.getPaymentMethod();
+        String shippingCountry = orderForm.getShippingCountry();
+        String shippingMethod = orderForm.getShippingMethod();
+        String paymentMethod = orderForm.getPaymentMethod();
 
         span.setAttribute(EcommerceAttributes.CUSTOMER_ID, customerId);
         span.setAttribute(EcommerceAttributes.ORDER_PRICE_RANGE, orderPriceRange);
@@ -114,50 +115,54 @@ public class OrderController {
         span.setAttribute(EcommerceAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
 
         ResponseEntity<String> fraudDetectionResult;
-        String url = this.fraudDetectionServiceBaseUrl + (fraudDetectionServiceBaseUrl.endsWith("/") ? "" : "/") + "fraud/checkOrder?orderValue={q}&customerIpAddress={q}&shippingCountry={q}";
+        String url = this.fraudDetectionServiceBaseUrl + (fraudDetectionServiceBaseUrl.endsWith("/") ? "" : "/") + "fraud/checkOrder?orderValue={q}&customerIpAddress={q}&shippingCountry={q}&paymentMethod={q}";
         try {
             fraudDetectionResult = restTemplate.getForEntity(
                     url,
                     String.class,
-                    orderValue, request.getRemoteAddr(), shippingCountry);
+                    orderValue, request.getRemoteAddr(),
+                    shippingCountry,
+                    paymentMethod);
         } catch (RestClientException e) {
             String exceptionShortDescription = e.getClass().getSimpleName();
-            span.recordException(e);
+            FraudDetectionException fde = new FraudDetectionException(exceptionShortDescription, e);
+            span.recordException(fde);
 
-            if (e.getCause() != null) {
-                exceptionShortDescription += " / " + e.getCause().getClass().getSimpleName();
-            }
 //            logger.atWarn()
 //                    .addKeyValue("order", form)
 //                    .addKeyValue("orderValue", orderValue)
 //                    .addKeyValue("fraud.url", url)
 //                    .addKeyValue("fraud.exception", exceptionShortDescription)
 //                    .log("Fraud detection failure");
-            logger.warn("Fraud detection failure for order: {}, orderValue: {}, fraud.url: {}, fraud.exception: {}", form, orderValue, url, exceptionShortDescription);
+            logger.warn("Fraud detection failure for order: {}, orderValue: {}, fraud.url: {}, type: RestClientException", orderForm, orderValue, url, e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (fraudDetectionResult.getStatusCode().isError()) {
             String exceptionShortDescription = "fraudDetection-status-" + fraudDetectionResult.getStatusCode();
-            span.recordException(new Exception(exceptionShortDescription));
+            FraudDetectionException fde = new FraudDetectionException(exceptionShortDescription);
+            span.recordException(fde);
 //            logger.atWarn()
+//                    .addKeyValue("order.paymentMethod", orderForm.paymentMethod)
+//                    .addKeyValue("order.shippingMethod", orderForm.shippingMethod)
+//                    .addKeyValue("order.shippingCountry", orderForm.shippingCountry)
+//                    .addKeyValue("order.value", orderValue)
 //                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
 //                    .addKeyValue("fraud.status_code", fraudDetectionResult.getStatusCode())
-//                    .addKeyValue("order", form)
-//                    .addKeyValue("orderValue", orderValue)
 //                    .addKeyValue("fraud.exception", exceptionShortDescription)
-//                    .log("Fraud detected");
-            logger.warn("Fraud detected for fraud.score: {}, fraud.status_code: {}, order: {}, orderValue: {}, fraud.exception: {}", fraudDetectionResult.getBody(), fraudDetectionResult.getStatusCode(), form, orderValue, exceptionShortDescription);
+//                    .log("Fraud detected on order");
+            logger.warn("Fraud detected for fraud.score: {}, fraud.status_code: {}, order: {}, orderValue: {}, type: response.status_code", fraudDetectionResult.getBody(), fraudDetectionResult.getStatusCode(), orderForm, orderValue, fde);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (!"approved".equals(fraudDetectionResult.getBody())) {
             String exceptionShortDescription = "fraudDetection-" + fraudDetectionResult.getBody();
-            span.recordException(new Exception(exceptionShortDescription));
+            FraudDetectionException fde = new FraudDetectionException(exceptionShortDescription);
+            span.recordException(fde);
 //            logger.atWarn()
 //                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
 //                    .addKeyValue("order", form)
 //                    .addKeyValue("orderValue", orderValue)
 //                    .log("Fraud detected");
-            logger.warn("Fraud detected for fraud.score: {}, order: {}, orderValue: {}", fraudDetectionResult.getBody(), form, orderValue);
+            logger.warn("Fraud detected for fraud.score: {}, order: {}, orderValue: {}, type: response.body", fraudDetectionResult.getBody(), orderForm, orderValue, fde);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -214,8 +219,9 @@ public class OrderController {
                         EcommerceAttributes.TENANT_SHORTCODE, tenant.getShortCode()
                 ));
 
+        // TODO add tenant to log statements
+
         logger.atInfo()
-                .addKeyValue("tenant.short_code", tenant.getShortCode())
                 .addKeyValue("orderId", order.getId())
                 .addKeyValue("customerId", customerId)
                 .addKeyValue("price", orderValue)
@@ -225,8 +231,11 @@ public class OrderController {
                 .log("Success placeOrder (structured logging example)");
 
 
-        logger.info("Order {} successfully placed, customerId: {}, price: {}, paymentMethod: {}, shippingMethod: {}, shippingCountry: {}, tenant.short_code={}",
-                order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry, tenant.getShortCode());
+        logger.info("Order {} successfully placed, customerId: {}, price: {}, paymentMethod: {}, shippingMethod: {}, shippingCountry: {}",
+                order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry);
+
+        logger.info("msg=order-successfully-placed orderId={} customerId={} price={}, paymentMethod={} shippingMethod={} shippingCountry={}",
+                order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry);
 
         span.addEvent("order-creation", Attributes.builder()
                 .put(EcommerceAttributes.OUTCOME, "success")

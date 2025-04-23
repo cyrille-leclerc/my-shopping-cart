@@ -16,7 +16,7 @@ export const options = {
             gracefulStop: '30s',
             stages: [
                 {target: 5, duration: '1m'},
-                {target: 5, duration: '180m'},
+                {target: 5, duration: '1800m'},
                 {target: 0, duration: '1m'},
             ],
             gracefulRampDown: '30s',
@@ -66,7 +66,7 @@ export function scenario_1() {
         response = http.get(frontendRootUrl + "?tenant=" + shippingCountry, { headers: {baggage: "frontend_instrumentation.sessionId=" + sessionUid}})
 
         // Get Products
-        response = http.get(frontendRootUrl + "/api/products?tenant=" + shippingCountry, {
+        response = http.get(frontendRootUrl + "/api/products", {
             headers: {
                 accept: 'application/json, text/plain, */*',
                 baggage: "frontend_instrumentation.sessionId=" + sessionUid
@@ -76,7 +76,7 @@ export function scenario_1() {
         sleep(randomIntBetween(1, 5))
         // Place Order
         response = http.post(
-            frontendRootUrl + "/api/orders?tenant=" + shippingCountry,
+            frontendRootUrl + "/api/orders",
             JSON.stringify(purchaseOrders),
             {
                 headers: {
@@ -88,7 +88,7 @@ export function scenario_1() {
         )
         sleep(randomIntBetween(1, 5))
         // Get Products
-        response = http.get(frontendRootUrl + "/api/products?tenant=" + shippingCountry, {
+        response = http.get(frontendRootUrl + "/api/products", {
             headers: {
                 accept: 'application/json, text/plain, */*',
                 baggage: "frontend_instrumentation.sessionId=" + sessionUid
@@ -121,6 +121,9 @@ const evenlyDistributedPaymentMethods = [
     "VISA",
     "VISA",
     "VISA",
+    "AMEX",
+    "AMEX",
+    "AMEX",
     "AMEX"]
 const unEvenlyDistributedPaymentMethods = [
     "AMEX",

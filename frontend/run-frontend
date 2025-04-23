@@ -137,7 +137,7 @@ export OTEL_RESOURCE_ATTRIBUTES
 # /!\ PYROSCOPE_LABELS doesn't support `.` but supports `_`
 # /!\ `_` in labels doesn't work with Pyroscope Tags explorer
 export PYROSCOPE_APPLICATION_NAME="frontend"
-export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SERVICE_NAMESPACE,instance=instance-$INSTANCE_NUMBER"
+export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SERVICE_NAMESPACE"
 
 # https://opentelemetry.io/docs/zero-code/java/spring-boot-starter/out-of-the-box-instrumentation/
 # https://github.com/open-telemetry/opentelemetry-java-instrumentation/tree/main/instrumentation/logback/logback-appender-1.0/javaagent
@@ -149,6 +149,8 @@ export LOG_FILE=$PRGDIR/../logs/frontend.log
 export FILE_LOG_PATTERN="%d{yyyy-MM-dd HH:mm:ss.SSSXXX} [%15.15thread] %-5level %-30.30logger{29} : %msg%n%ex"
 
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
+     -javaagent:$PYROSCOPE_AGENT_JAR \
+     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \
      -Dotel.semconv-stability.opt-in=http,database \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
      -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
@@ -158,7 +160,5 @@ java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_V
      -Dserver.port=8080 \
      -jar target/frontend-1.1-SNAPSHOT.jar
 
-#      -javaagent:$PYROSCOPE_AGENT_JAR \
 #     -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
 # otel-profiling-java doesn't work for me :-(
-#     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \

@@ -1,7 +1,7 @@
 package com.mycompany.antifraud;
 
-import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.incubator.metrics.ExtendedDoubleHistogramBuilder;
 import io.opentelemetry.api.metrics.DoubleHistogram;
 import io.opentelemetry.api.metrics.Meter;
 import io.opentelemetry.api.trace.Span;
@@ -21,6 +21,7 @@ import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.Random;
 
 @ManagedResource
@@ -31,23 +32,26 @@ public class FraudDetectionController {
     final static BigDecimal FIVE_PERCENT = new BigDecimal(5).divide(new BigDecimal(100), RoundingMode.HALF_UP);
 
     final Logger logger = LoggerFactory.getLogger(getClass());
+
     enum AnomalyType {
         ORDER_VALUE,
-        TENANT
+        TENANT,
+        PAYMENT_METHOD
     }
-    AnomalyType anomalyType = AnomalyType.TENANT;
 
-    int averageDurationMillisOnSmallShoppingCarts = 50;
-    int averageDurationMillisOnMediumShoppingCarts = 50;
-    int averageDurationMillisOnLargeShoppingCart = 1000;
+    AnomalyType anomalyType = AnomalyType.ORDER_VALUE;
 
-    int fraudPercentageOnSmallShoppingCarts = 0;
-    int fraudPercentageOnMediumShoppingCarts = 0;
-    int fraudPercentageOnLargeShoppingCarts = 15;
+    int averageDurationMillisSmall = 50;
+    int averageDurationMillisMedium = 50;
+    int averageDurationMillisLarge = 1000;
 
-    int exceptionPercentageOnSmallShoppingCarts = 0;
-    int exceptionPercentageOnMediumShoppingCarts = 0;
-    int exceptionPercentageOnLargeShoppingCarts = 10;
+    int fraudPercentageSmall = 0;
+    int fraudPercentageMedium = 0;
+    int fraudPercentageLarge = 15;
+
+    int exceptionPercentageSmall = 0;
+    int exceptionPercentageMedium = 0;
+    int exceptionPercentageLarge = 10;
 
     int valueUpperBoundaryDollarsOnSmallShoppingCart = 10;
     int valueUpperBoundaryDollarsOnMediumShoppingCarts = 100;
@@ -57,7 +61,9 @@ public class FraudDetectionController {
     final DataSource dataSource;
 
     public FraudDetectionController(Meter meter, DataSource dataSource) {
-        this.fraudDetectionHistogram = meter.histogramBuilder("fraud.check_order").setUnit("{dollars}").build();
+        this.fraudDetectionHistogram = ((ExtendedDoubleHistogramBuilder) meter.histogramBuilder("fraud.check_order"))
+                .setAttributesAdvice(List.of(FraudDetectionAttributes.OUTCOME, FraudDetectionAttributes.TENANT_SHORTCODE, FraudDetectionAttributes.PAYMENT_METHOD))
+                .setUnit("usd").build();
         this.dataSource = dataSource;
     }
 
@@ -80,43 +86,58 @@ public class FraudDetectionController {
         }
     }
 
-    FraudDetectionConfiguration buildFraudDetectionConfiguration(int orderValueDollars, TenantFilter.Tenant tenant) {
+    FraudDetectionConfiguration buildFraudDetectionConfiguration(int orderValueDollars, TenantFilter.Tenant tenant, String paymentMethod) {
         FraudDetectionConfiguration cfg = new FraudDetectionConfiguration();
         switch (anomalyType) {
             case TENANT -> {
                 if ("FR".equalsIgnoreCase(tenant.getShortCode())) {
-                    cfg.fraudPercentage = 35;
-                    cfg.durationOffsetInMillis = averageDurationMillisOnLargeShoppingCart;
-                    cfg.exceptionPercentage = exceptionPercentageOnLargeShoppingCarts;
+                    cfg.fraudPercentage = fraudPercentageLarge;
+                    cfg.durationOffsetInMillis = averageDurationMillisLarge;
+                    cfg.exceptionPercentage = exceptionPercentageLarge;
                     cfg.loggingEventBuilder = logger.atWarn();
                     cfg.msg = "problem FD-654321 executing fraud detection";
                 } else {
-                    cfg.fraudPercentage = fraudPercentageOnSmallShoppingCarts;
-                    cfg.durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
-                    cfg.exceptionPercentage = exceptionPercentageOnSmallShoppingCarts;
+                    cfg.fraudPercentage = fraudPercentageSmall;
+                    cfg.durationOffsetInMillis = averageDurationMillisSmall;
+                    cfg.exceptionPercentage = exceptionPercentageSmall;
                     cfg.loggingEventBuilder = logger.atInfo();
                     cfg.msg = "ok";
                 }
             }
             case ORDER_VALUE -> {
                 if (orderValueDollars < valueUpperBoundaryDollarsOnSmallShoppingCart) {
-                    cfg.fraudPercentage = fraudPercentageOnSmallShoppingCarts;
-                    cfg.durationOffsetInMillis = averageDurationMillisOnSmallShoppingCarts;
-                    cfg.exceptionPercentage = exceptionPercentageOnSmallShoppingCarts;
+                    cfg.fraudPercentage = fraudPercentageSmall;
+                    cfg.durationOffsetInMillis = averageDurationMillisSmall;
+                    cfg.exceptionPercentage = exceptionPercentageSmall;
                     cfg.loggingEventBuilder = logger.atInfo();
                     cfg.msg = "ok";
                 } else if (orderValueDollars < valueUpperBoundaryDollarsOnMediumShoppingCarts) {
-                    cfg.fraudPercentage = fraudPercentageOnMediumShoppingCarts;
-                    cfg.durationOffsetInMillis = averageDurationMillisOnMediumShoppingCarts;
-                    cfg.exceptionPercentage = exceptionPercentageOnMediumShoppingCarts;
+                    cfg.fraudPercentage = fraudPercentageMedium;
+                    cfg.durationOffsetInMillis = averageDurationMillisMedium;
+                    cfg.exceptionPercentage = exceptionPercentageMedium;
                     cfg.loggingEventBuilder = logger.atInfo();
                     cfg.msg = "ok";
                 } else {
-                    cfg.fraudPercentage = fraudPercentageOnLargeShoppingCarts;
-                    cfg.durationOffsetInMillis = averageDurationMillisOnLargeShoppingCart;
-                    cfg.exceptionPercentage = exceptionPercentageOnLargeShoppingCarts;
+                    cfg.fraudPercentage = fraudPercentageLarge;
+                    cfg.durationOffsetInMillis = averageDurationMillisLarge;
+                    cfg.exceptionPercentage = exceptionPercentageLarge;
                     cfg.loggingEventBuilder = logger.atWarn();
                     cfg.msg = "problem FD-123456 executing fraud detection";
+                }
+            }
+            case PAYMENT_METHOD -> {
+                if ("AMEX".equals(paymentMethod)) {
+                    cfg.fraudPercentage = fraudPercentageLarge;
+                    cfg.durationOffsetInMillis = averageDurationMillisLarge;
+                    cfg.exceptionPercentage = exceptionPercentageLarge;
+                    cfg.loggingEventBuilder = logger.atWarn();
+                    cfg.msg = "problem FD-0987654 executing fraud detection";
+                } else {
+                    cfg.fraudPercentage = fraudPercentageSmall;
+                    cfg.durationOffsetInMillis = averageDurationMillisSmall;
+                    cfg.exceptionPercentage = exceptionPercentageSmall;
+                    cfg.loggingEventBuilder = logger.atInfo();
+                    cfg.msg = "ok";
                 }
             }
         }
@@ -127,17 +148,19 @@ public class FraudDetectionController {
     public String checkOrder(
             @RequestParam double orderValue,
             @RequestParam String shippingCountry,
-            @RequestParam String customerIpAddress) {
+            @RequestParam String customerIpAddress,
+            @RequestParam String paymentMethod) {
         TenantFilter.Tenant tenant = TenantFilter.Tenant.current();
 
         Span.current().setAttribute("order_value", orderValue);
         Span.current().setAttribute("customer_ip_address", customerIpAddress);
         //Span.current().setAttribute("shipping_country", shippingCountry);
+        Span.current().setAttribute(FraudDetectionAttributes.PAYMENT_METHOD, paymentMethod);
         Span.current().setAttribute("database_pool", tenant.shortCode);
 
         int orderValueDollars = Double.valueOf(orderValue).intValue();
 
-        FraudDetectionConfiguration cfg = buildFraudDetectionConfiguration(orderValueDollars, tenant);
+        FraudDetectionConfiguration cfg = buildFraudDetectionConfiguration(orderValueDollars, tenant, paymentMethod);
 
         int checkOrderDurationMillis = cfg.durationOffsetInMillis + RANDOM.nextInt(Math.max(5, new BigDecimal(cfg.durationOffsetInMillis).multiply(FIVE_PERCENT).intValue()));
         // positive score means fraud
@@ -161,51 +184,59 @@ public class FraudDetectionController {
             cfg.loggingEventBuilder = logger.atWarn().setCause(e);
             outcome = "error";
         }
-        this.fraudDetectionHistogram.record(orderValueDollars, Attributes.of(AttributeKey.stringKey("outcome"), outcome));
-        cfg.loggingEventBuilder.log("checkOrder: outcome={}, orderValue={}, shippingCountry={}, customerIpAddress={}, fraudScore={}, msg={}, tenant={}",
-                outcome, orderValueDollars, shippingCountry, customerIpAddress, fraudScore, cfg.msg, tenant.getShortCode());
+        this.fraudDetectionHistogram.record(
+                orderValueDollars,
+                Attributes.of(
+                        FraudDetectionAttributes.OUTCOME, outcome,
+                        FraudDetectionAttributes.TENANT_SHORTCODE, tenant.getShortCode(),
+                        FraudDetectionAttributes.PAYMENT_METHOD, paymentMethod));
+        cfg.loggingEventBuilder.log("checkOrder: outcome={}, orderValue={}, shippingCountry={}, customerIpAddress={}, fraudScore={}, msg={}, tenant={}, paymentMethod={}",
+                outcome, orderValueDollars, shippingCountry, customerIpAddress, fraudScore, cfg.msg, tenant.getShortCode(), paymentMethod);
+
+        Span.current().setAttribute("outcome", outcome);
+
         return outcome;
     }
 
 
     @ManagedAttribute
-    public int getFraudPercentageOnLargeShoppingCarts() {
-        return fraudPercentageOnLargeShoppingCarts;
+    public int getFraudPercentageLarge() {
+        return fraudPercentageLarge;
     }
 
     @ManagedAttribute
-    public void setFraudPercentageOnLargeShoppingCarts(int fraudPercentageOnLargeShoppingCarts) {
-        this.fraudPercentageOnLargeShoppingCarts = fraudPercentageOnLargeShoppingCarts;
+    public void setFraudPercentageLarge(int fraudPercentageLarge) {
+        this.fraudPercentageLarge = fraudPercentageLarge;
     }
 
     @ManagedAttribute
-    public int getAverageDurationMillisOnLargeShoppingCart() {
-        return averageDurationMillisOnLargeShoppingCart;
+    public int getAverageDurationMillisLarge() {
+        return averageDurationMillisLarge;
     }
 
     @ManagedAttribute
-    public void setAverageDurationMillisOnLargeShoppingCart(int averageDurationMillisOnLargeShoppingCart) {
-        this.averageDurationMillisOnLargeShoppingCart = averageDurationMillisOnLargeShoppingCart;
+    public void setAverageDurationMillisLarge(int averageDurationMillisLarge) {
+        this.averageDurationMillisLarge = averageDurationMillisLarge;
     }
 
     @ManagedAttribute
-    public int getFraudPercentageOnSmallShoppingCarts() {
-        return fraudPercentageOnSmallShoppingCarts;
+    public int getFraudPercentageSmall() {
+        return fraudPercentageSmall;
     }
 
     @ManagedAttribute
-    public void setFraudPercentageOnSmallShoppingCarts(int fraudPercentageOnSmallShoppingCarts) {
-        this.fraudPercentageOnSmallShoppingCarts = fraudPercentageOnSmallShoppingCarts;
+    public void setFraudPercentageSmall(int fraudPercentageSmall) {
+        this.fraudPercentageSmall = fraudPercentageSmall;
     }
 
     @ManagedAttribute
-    public int getAverageDurationMillisOnSmallShoppingCarts() {
-        return averageDurationMillisOnSmallShoppingCarts;
+    public int getAverageDurationMillisSmall() {
+        return averageDurationMillisSmall;
     }
 
     @ManagedAttribute
-    public void setAverageDurationMillisOnSmallShoppingCarts(int averageDurationMillisOnSmallShoppingCarts) {
-        this.averageDurationMillisOnSmallShoppingCarts = averageDurationMillisOnSmallShoppingCarts;
+    public void setAverageDurationMillisSmall(int averageDurationMillisSmall) {
+        this.averageDurationMillisSmall = averageDurationMillisSmall;
     }
 
     @ManagedAttribute
@@ -219,23 +250,23 @@ public class FraudDetectionController {
     }
 
     @ManagedAttribute
-    public int getFraudPercentageOnMediumShoppingCarts() {
-        return fraudPercentageOnMediumShoppingCarts;
+    public int getFraudPercentageMedium() {
+        return fraudPercentageMedium;
     }
 
     @ManagedAttribute
-    public void setFraudPercentageOnMediumShoppingCarts(int fraudPercentageOnMediumShoppingCarts) {
-        this.fraudPercentageOnMediumShoppingCarts = fraudPercentageOnMediumShoppingCarts;
+    public void setFraudPercentageMedium(int fraudPercentageMedium) {
+        this.fraudPercentageMedium = fraudPercentageMedium;
     }
 
     @ManagedAttribute
-    public int getAverageDurationMillisOnMediumShoppingCarts() {
-        return averageDurationMillisOnMediumShoppingCarts;
+    public int getAverageDurationMillisMedium() {
+        return averageDurationMillisMedium;
     }
 
     @ManagedAttribute
-    public void setAverageDurationMillisOnMediumShoppingCarts(int averageDurationMillisOnMediumShoppingCarts) {
-        this.averageDurationMillisOnMediumShoppingCarts = averageDurationMillisOnMediumShoppingCarts;
+    public void setAverageDurationMillisMedium(int averageDurationMillisMedium) {
+        this.averageDurationMillisMedium = averageDurationMillisMedium;
     }
 
     @ManagedAttribute

@@ -20,6 +20,8 @@ class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplBase {
 
     final URI shippingServiceUrl;
 
+    final int exceptionPercentage = 1;
+
     CheckoutServiceImpl(String shippingServiceUrl) {
         this.httpClient = HttpClient.newBuilder().build();
         String separator = shippingServiceUrl.endsWith("/") ? "" : "/";
@@ -70,7 +72,7 @@ class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplBase {
                 .log("placeOrder");
         logger.info("Order {} successfully placed", "order-" + CheckoutServiceServer.RANDOM.nextInt(1_00000));
 
-        if (CheckoutServiceServer.RANDOM.nextInt(10) == 0) {
+        if (CheckoutServiceServer.RANDOM.nextInt(100) <= exceptionPercentage) {
             RuntimeException exception = new RuntimeException("Checkout failure");
             responseObserver.onError(exception);
         }

@@ -1,9 +1,13 @@
+name: webshop
 services:
   frontend:
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
-    container_name: ecomm-frontend
+    #container_name: webshop-frontend
+    deploy:
+      mode: replicated
+      replicas: 2
     depends_on:
       postgres:
         condition: service_healthy
@@ -24,18 +28,23 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_RABBITMQ_HOST=rabbitmq
       - OTEL_SERVICE_NAME=frontend
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production},deployment.environment=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
       - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES=true
+      - OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES=true
+      - OTEL_INSTRUMENTATION_MICROMETER_BASE_TIME_UNIT=s
+      - OTEL_JAVA_EXPERIMENTAL_SPAN_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
+      - OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
     ports:
-      - "8080:8080"
+      - "8079-8080:8080"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
   fraud-detection:
     build:
       context: .
       dockerfile: ./fraud-detection/Dockerfile
-    container_name: ecomm-fraud-detection
+    #container_name: webshop-fraud-detection
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,16 +56,21 @@ services:
       - SPRING_DATASOURCE_PASSWORD=ecommerce
       - SERVER_PORT=8081
       - OTEL_SERVICE_NAME=fraud-detection
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production},deployment.environment=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
       - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES=true
+      - OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES=true
+      - OTEL_INSTRUMENTATION_MICROMETER_BASE_TIME_UNIT=s
+      - OTEL_JAVA_EXPERIMENTAL_SPAN_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
+      - OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
     ports:
       - "8081:8081"
   checkout:
     build:
       context: .
       dockerfile: ./checkout/Dockerfile
-    container_name: ecomm-checkout
+    #container_name: webshop-checkout
     depends_on:
       postgres:
         condition: service_healthy
@@ -65,16 +79,21 @@ services:
     environment:
       - SHIPPING_SERVICE_URL=http://shipping:8088
       - OTEL_SERVICE_NAME=checkout
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production},deployment.environment=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
       - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES=true
+      - OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES=true
+      - OTEL_INSTRUMENTATION_MICROMETER_BASE_TIME_UNIT=s
+      - OTEL_JAVA_EXPERIMENTAL_SPAN_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
+      - OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
     ports:
       - "50051:50051"
   shipping:
     build:
       context: .
       dockerfile: ./shipping/Dockerfile
-    container_name: ecomm-shipping
+    #container_name: webshop-shipping
     depends_on:
       postgres:
         condition: service_healthy
@@ -86,16 +105,21 @@ services:
       - SPRING_DATASOURCE_PASSWORD=ecommerce
       - SERVER_PORT=8088
       - OTEL_SERVICE_NAME=shipping
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production},deployment.environment=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
       - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES=true
+      - OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES=true
+      - OTEL_INSTRUMENTATION_MICROMETER_BASE_TIME_UNIT=s
+      - OTEL_JAVA_EXPERIMENTAL_SPAN_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
+      - OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
     ports:
       - "8088:8088"
   warehouse:
     build:
       context: .
       dockerfile: ./warehouse/Dockerfile
-    container_name: ecomm-warehouse
+    #container_name: webshop-warehouse
     depends_on:
       postgres:
         condition: service_healthy
@@ -107,14 +131,19 @@ services:
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SERVER_PORT=8089
       - OTEL_SERVICE_NAME=warehouse
-      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
+      - OTEL_RESOURCE_ATTRIBUTES=service.namespace=${OTEL_SERVICE_NAMESPACE-shop},service.version=1.1,deployment.environment.name=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production},deployment.environment=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}
       - OTEL_SEMCONV_STABILITY_OPT_IN=http,database
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES=true
+      - OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES=true
+      - OTEL_INSTRUMENTATION_MICROMETER_BASE_TIME_UNIT=s
+      - OTEL_JAVA_EXPERIMENTAL_SPAN_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
+      - OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
     ports:
       - "8089:8089"
   postgres:
     image: 'postgres:16-alpine'
-    container_name: ecomm-postgres
+    #container_name: webshop-postgres
     environment:
       - POSTGRES_USER=ecommerce
       - POSTGRES_PASSWORD=ecommerce
@@ -127,7 +156,7 @@ services:
       retries: 3
   redis:
     image: 'redis:6-alpine'
-    container_name: ecomm-redis
+    #container_name: webshop-redis
     ports:
       - "6379:6379"
     healthcheck:
@@ -137,7 +166,7 @@ services:
       retries: 3
   rabbitmq:
     image: 'rabbitmq:4-management-alpine'
-    container_name: ecomm-rabbitmq
+    #container_name: webshop-rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -152,7 +181,7 @@ services:
     # don't call it "otel-collector" because it would conflict with the otel-demo
     # https://opentelemetry.io/docs/collector/installation/#docker-compose
     image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.120.0
-    container_name: ecomm-otel-collector
+    #container_name: webshop-otel-collector
     depends_on:
       postgres:
         condition: service_healthy
@@ -181,7 +210,7 @@ services:
       retries: 3
   k6-load-generator:
     image: 'grafana/k6:latest'
-    container_name: ecomm-k6-load-generator
+    #container_name: webshop-k6-load-generator
     volumes:
       - ./load-generator/src/main/k6/k6.js:/k6-load-generator.js
     command: run -e FRONTEND_URLS="http://frontend:8080"  /k6-load-generator.js
