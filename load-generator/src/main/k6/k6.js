@@ -16,7 +16,7 @@ export const options = {
             gracefulStop: '30s',
             stages: [
                 {target: 5, duration: '1m'},
-                {target: 5, duration: '1800m'},
+                {target: 5, duration: '10h'},
                 {target: 0, duration: '1m'},
             ],
             gracefulRampDown: '30s',
