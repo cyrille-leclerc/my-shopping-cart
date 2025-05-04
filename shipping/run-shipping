@@ -31,13 +31,13 @@ if [ -r "$PRGDIR/setenv.sh" ]; then
   . "$PRGDIR/setenv.sh"
 fi
 
-export DATADOG_AGENT_HOME=$PRGDIR/../.datadog
-mkdir -p "$DATADOG_AGENT_HOME"
-
 ##########################################################################################
 # DOWNLOAD DATADOG AGENT IF NOT FOUND
 # code copied from Maven Wrappers's mvnw`
 ##########################################################################################
+
+export DATADOG_AGENT_HOME=$PRGDIR/../.datadog
+mkdir -p "$DATADOG_AGENT_HOME"
 
 export DATADOG_AGENT_JAR=$DATADOG_AGENT_HOME/dd-java-agent-$DATADOG_AGENT_VERSION.jar
 if [ -r "$DATADOG_AGENT_JAR" ]; then
@@ -97,8 +97,7 @@ echo ""
 export DD_ENV="production"
 export DD_SERVICE="shipping"
 export DD_VERSION="1.1"
-
-export DD_TRACE_DEBUG=false
+export DD_TRACE_DEBUG=true
 export DD_TRACE_AGENT_URL="http://localhost:8126"
 export DD_REMOTE_CONFIGURATION_ENABLED=false
 export DD_TRACE_PROPAGATION_STYLE=tracecontext
@@ -109,17 +108,17 @@ export OTEL_SERVICE_NAME="shipping" # DD_SERVICE=OTEL_SERVICE_NAME
 export OTEL_RESOURCE_ATTRIBUTES="service.version=1.1,deployment.environment.name=production"
 export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment.name"
 
-#java \
-#     -javaagent:"$DATADOG_AGENT_JAR" \
-#     -Dserver.port=8088 \
-#     -jar target/shipping-1.1-SNAPSHOT.jar
-
-java -javaagent:"$OPEN_TELEMETRY_AGENT_JAR" \
+java \
+     -javaagent:"$DATADOG_AGENT_JAR" \
      -Dserver.port=8088 \
-     -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
-     -Dotel.instrumentation.logback-mdc.add-baggage=true \
-     -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
-     -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
-     -Dotel.instrumentation.micrometer.base-time-unit=s \
-     -Dotel.semconv-stability.opt-in=http,database \
      -jar target/shipping-1.1-SNAPSHOT.jar
+
+#java -javaagent:"$OPEN_TELEMETRY_AGENT_JAR" \
+#     -Dserver.port=8088 \
+#     -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+#     -Dotel.instrumentation.logback-mdc.add-baggage=true \
+#     -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
+#     -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
+#     -Dotel.instrumentation.micrometer.base-time-unit=s \
+#     -Dotel.semconv-stability.opt-in=http,database \
+#     -jar target/shipping-1.1-SNAPSHOT.jar

@@ -39,7 +39,7 @@ public class ShippingController {
 
         try (Connection cnn = dataSource.getConnection()) {
             try (Statement stmt = cnn.createStatement()) {
-                stmt.execute("select pg_sleep(0.05)");
+                stmt.execute("select *, pg_sleep_for('1 seconds') from product where id=1");
             }
         } catch (SQLException e) {
             logger.atError().log("Error while shipping order", e);

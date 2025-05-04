@@ -80,6 +80,32 @@ else
 fi
 
 ##########################################################################################
+# DOWNLOAD DATADOG AGENT IF NOT FOUND
+# code copied from Maven Wrappers's mvnw`
+##########################################################################################
+export DATADOG_AGENT_HOME=$PRGDIR/../.datadog
+mkdir -p "$DATADOG_AGENT_HOME"
+
+export DATADOG_AGENT_JAR=$DATADOG_AGENT_HOME/dd-java-agent-$DATADOG_AGENT_VERSION.jar
+if [ -r "$DATADOG_AGENT_JAR" ]; then
+    echo "Found $DATADOG_AGENT_JAR"
+else
+    echo "Couldn't find $DATADOG_AGENT_JAR, downloading it ..."
+    jarUrl="https://github.com/DataDog/dd-trace-java/releases/download/v$DATADOG_AGENT_VERSION/dd-java-agent-$DATADOG_AGENT_VERSION.jar"
+
+    if command -v wget > /dev/null; then
+        wget "$jarUrl" -O "$DATADOG_AGENT_JAR"
+    elif command -v curl > /dev/null; then
+        curl -L --max-redirs 5 -o "$DATADOG_AGENT_JAR" "$jarUrl"
+    else
+        echo "FAILURE: Datadog agent not found and none of curl and wget found"
+        exit 1;
+    fi
+fi
+
+export OPEN_TELEMETRY_AGENT_HOME=$PRGDIR/../.otel
+mkdir -p "$OPEN_TELEMETRY_AGENT_HOME"
+##########################################################################################
 # DOWNLOAD PYROSCOPE OTEL AGENT EXTENSION IF NOT FOUND
 # code copied from Maven Wrappers's mvnw`
 ##########################################################################################
@@ -109,6 +135,19 @@ echo ""
 echo "OTEL_EXPORTER_OTLP_ENDPOINT: $OTEL_EXPORTER_OTLP_ENDPOINT"
 echo "OTEL_EXPORTER_OTLP_PROTOCOL: $OTEL_EXPORTER_OTLP_PROTOCOL"
 
+# BEGIN DATADOG AGENT
+#
+# see https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/java/?tab=wget
+export DD_ENV="production"
+export DD_SERVICE="frontend"
+export DD_VERSION="1.1"
+export DD_TRACE_DEBUG=false
+export DD_TRACE_AGENT_URL="http://localhost:8126"
+export DD_REMOTE_CONFIGURATION_ENABLED=false
+export DD_TRACE_PROPAGATION_STYLE=tracecontext
+
+# END DATADOG AGENT
+
 INSTANCE_NUMBER=1
 
 # cloud.account.id	"grafanalabs-prod"
@@ -127,7 +166,7 @@ INSTANCE_NUMBER=1
 # k8s.node.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq"
 # k8s.pod.name=opentelemetry-frontend-5b7b9db9ff-sh828"
 
-OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME,service.instance.id=instance-$INSTANCE_NUMBER"
+OTEL_RESOURCE_ATTRIBUTES="service.name=frontend,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME,service.instance.id=instance-$INSTANCE_NUMBER,deployment.environment=$DEPLOYMENT_ENVIRONMENT_NAME"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,k8s.cluster.name=prod-us-central-0,k8s.namespace.name=ecommerce,k8s.node.name=gke-prod-us-central-0-otel-n2s4-1-f04acab8-dxqq-$INSTANCE_NUMBER,k8s.pod.name=ecommerce-frontend-5b7b9db9ff-sh828,k8s.pod.uid=5b7b9db9ff-sh828"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,cloud.account.id=mycompany-prod,cloud.availability_zone=us-central1-a,cloud.provider=gcp"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,container.id=5cc7dd9ecf384635129e7ff7b4a2dd239c803a4f04f62e85386425d31b40de08"
@@ -148,17 +187,25 @@ export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SER
 export LOG_FILE=$PRGDIR/../logs/frontend.log
 export FILE_LOG_PATTERN="%d{yyyy-MM-dd HH:mm:ss.SSSXXX} [%15.15thread] %-5level %-30.30logger{29} : %msg%n%ex"
 
-java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
-     -javaagent:$PYROSCOPE_AGENT_JAR \
-     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \
-     -Dotel.semconv-stability.opt-in=http,database \
-     -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
-     -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
-     -Dotel.instrumentation.micrometer.base-time-unit=s \
-     -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
-     -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
-     -Dserver.port=8080 \
-     -jar target/frontend-1.1-SNAPSHOT.jar
+# ava -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
+#     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \
+#     -Dotel.semconv-stability.opt-in=http,database \
+#     -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+#     -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
+#     -Dotel.instrumentation.micrometer.base-time-unit=s \
+#     -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
+#     -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
+#     -Dserver.port=8080 \
+#     -jar target/frontend-1.1-SNAPSHOT.jar
+
+#     -javaagent:$PYROSCOPE_AGENT_JAR \
 
 #     -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
 # otel-profiling-java doesn't work for me :-(
+
+java \
+     -javaagent:"$DATADOG_AGENT_JAR" \
+     -Ddd.trace.debug=true \
+     -Ddatadog.slf4j.simpleLogger.logFile=/Users/cyrilleleclerc/git/cyrille-leclerc/my-shopping-cart/frontend/dd-agent.log \
+     -Dserver.port=8080 \
+     -jar target/frontend-1.1-SNAPSHOT.jar
