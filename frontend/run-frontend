@@ -187,25 +187,28 @@ export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SER
 export LOG_FILE=$PRGDIR/../logs/frontend.log
 export FILE_LOG_PATTERN="%d{yyyy-MM-dd HH:mm:ss.SSSXXX} [%15.15thread] %-5level %-30.30logger{29} : %msg%n%ex"
 
-# ava -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
-#     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \
-#     -Dotel.semconv-stability.opt-in=http,database \
-#     -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
-#     -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
-#     -Dotel.instrumentation.micrometer.base-time-unit=s \
-#     -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
-#     -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
-#     -Dserver.port=8080 \
-#     -jar target/frontend-1.1-SNAPSHOT.jar
+java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
+    -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \
+    -Dotel.semconv-stability.opt-in=http,database \
+    -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \
+    -Dotel.instrumentation.logback-appender.experimental.capture-key-value-pair-attributes=true \
+    -Dotel.instrumentation.micrometer.base-time-unit=s \
+    -Dotel.java.experimental.span-attributes.copy-from-baggage.include=* \
+    -Dotel.java.experimental.log-attributes.copy-from-baggage.include=* \
+    -Dserver.port=8080 \
+    -jar target/frontend-1.1-SNAPSHOT.jar
 
 #     -javaagent:$PYROSCOPE_AGENT_JAR \
 
 #     -Dotel.javaagent.extensions=$PRGDIR/../otel-javaagent-extensions/target/otel-javaagent-extensions-1.1-SNAPSHOT.jar \
 # otel-profiling-java doesn't work for me :-(
 
-java \
-     -javaagent:"$DATADOG_AGENT_JAR" \
-     -Ddd.trace.debug=true \
-     -Ddatadog.slf4j.simpleLogger.logFile=/Users/cyrilleleclerc/git/cyrille-leclerc/my-shopping-cart/frontend/dd-agent.log \
-     -Dserver.port=8080 \
-     -jar target/frontend-1.1-SNAPSHOT.jar
+#java \
+#     -javaagent:"$DATADOG_AGENT_JAR" \
+#     -Ddd.trace.debug=true \
+#     -Ddd.trace.debug=true \
+#     -Ddatadog.slf4j.simpleLogger.defaultLogLevel=INFO \
+#     -Ddatadog.slf4j.simpleLogger.log.datadog.trace.agent.core.DDSpan=DEBUG \
+#     -Ddatadog.slf4j.simpleLogger.log.datadog.trace.agent.common.writer.RemoteWriter=DEBUG \
+#     -Dserver.port=8080 \
+#     -jar target/frontend-1.1-SNAPSHOT.jar
