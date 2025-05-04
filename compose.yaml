@@ -180,7 +180,7 @@ services:
   otel-collector:
     # don't call it "otel-collector" because it would conflict with the otel-demo
     # https://opentelemetry.io/docs/collector/installation/#docker-compose
-    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.120.0
+    image: ${COLLECTOR_CONTRIB_IMAGE-ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.125.0}
     #container_name: webshop-otel-collector
     depends_on:
       postgres:
