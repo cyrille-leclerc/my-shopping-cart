@@ -14,9 +14,21 @@ FROM eclipse-temurin:21-jre
 WORKDIR /usr/src/app/
 
 COPY --from=builder /usr/src/app/shipping/target/shipping-1.1-SNAPSHOT.jar ./app.jar
-# we ignore the version (which is from upstream) and use the latest version of the grafana distribution
-ADD --chmod=644 https://github.com/grafana/grafana-opentelemetry-java/releases/latest/download/grafana-opentelemetry-java.jar /usr/src/app/opentelemetry-javaagent.jar
-ENV JAVA_TOOL_OPTIONS=-javaagent:/usr/src/app/opentelemetry-javaagent.jar
+
+ADD --chmod=644 https://github.com/DataDog/dd-trace-java/releases/latest/download/dd-java-agent.jar /usr/src/app/dd-java-agent.jar
+
+# https://docs.datadoghq.com/tracing/troubleshooting/tracer_debug_logs/
 
 EXPOSE 8080
-ENTRYPOINT [ "java", "-jar", "./app.jar" ]
+ENTRYPOINT [ \
+    "java", \
+    "-javaagent:/usr/src/app/dd-java-agent.jar", \
+#    "-Ddd.service=shipping", \
+#    "-Ddd.env=dev", \
+#    "-Ddd.version=1.1", \
+#    "-Ddd.trace.agent.url=http://otel-collector:8126", \
+    "-Ddd.trace.debug=true", \
+    "-Ddatadog.slf4j.simpleLogger.defaultLogLevel=INFO", \
+    "-Ddatadog.slf4j.simpleLogger.log.datadog.trace.agent.core.DDSpan=DEBUG", \
+    "-Ddatadog.slf4j.simpleLogger.log.datadog.trace.agent.common.writer.RemoteWriter=DEBUG", \
+    "-jar", "./app.jar" ]

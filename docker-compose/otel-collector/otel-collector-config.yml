@@ -40,6 +40,9 @@ receivers:
     username: guest
     password: guest
     collection_interval: 10s
+  datadog:
+    endpoint: 0.0.0.0:8126
+    read_timeout: 60s
 
 processors:
   batch:
@@ -66,7 +69,7 @@ service:
   extensions: [basicauth/grafana_cloud, health_check]
   pipelines:
     traces:
-      receivers: [otlp]
+      receivers: [otlp, datadog]
       processors: [resourcedetection, batch]
       exporters: [grafanacloud, otlphttp/grafana_cloud]
     metrics:
