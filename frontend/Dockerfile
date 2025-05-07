@@ -21,7 +21,13 @@ WORKDIR /usr/src/app/
 COPY --from=builder /usr/src/app/frontend/target/frontend-1.1-SNAPSHOT.jar ./app.jar
 # we ignore the version (which is from upstream) and use the latest version of the grafana distribution
 ADD --chmod=644 https://github.com/grafana/grafana-opentelemetry-java/releases/latest/download/grafana-opentelemetry-java.jar /usr/src/app/opentelemetry-javaagent.jar
-ENV JAVA_TOOL_OPTIONS=-javaagent:/usr/src/app/opentelemetry-javaagent.jar
+
+ADD --chmod=644 https://github.com/grafana/pyroscope-java/releases/latest/download/pyroscope.jar /usr/src/app/pyroscope.jar
+
+ENV PYROSCOPE_APPLICATION_NAME="frontend"
+ENV PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SERVICE_NAMESPACE"
+
+ENV JAVA_TOOL_OPTIONS="-javaagent:/usr/src/app/opentelemetry-javaagent.jar -javaagent:/usr/src/app/pyroscope.jar"
 
 EXPOSE 8080
 ENTRYPOINT [ "java", "-jar", "./app.jar" ]

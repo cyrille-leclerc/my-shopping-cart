@@ -2,8 +2,8 @@ package com.mycompany.ecommerce.controller;
 
 import com.mycompany.ecommerce.model.Product;
 import com.mycompany.ecommerce.service.ProductService;
-import io.pyroscope.labels.LabelsSet;
-import io.pyroscope.labels.Pyroscope;
+import io.pyroscope.labels.v2.LabelsSet;
+import io.pyroscope.labels.v2.Pyroscope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;

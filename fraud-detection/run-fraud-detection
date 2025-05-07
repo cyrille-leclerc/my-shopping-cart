@@ -92,7 +92,7 @@ echo "OTEL_EXPORTER_OTLP_PROTOCOL: $OTEL_EXPORTER_OTLP_PROTOCOL"
 echo ""
 
 
-OTEL_RESOURCE_ATTRIBUTES="service.name=fraud-detection,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME"
+OTEL_RESOURCE_ATTRIBUTES="service.name=fraud-detection,service.namespace=$SERVICE_NAMESPACE,service.version=1.1,deployment.environment.name=$DEPLOYMENT_ENVIRONMENT_NAME,deployment.environment=$DEPLOYMENT_ENVIRONMENT_NAME"
 OTEL_RESOURCE_ATTRIBUTES="$OTEL_RESOURCE_ATTRIBUTES,mycie.env=production"
 export OTEL_RESOURCE_ATTRIBUTES
 
