@@ -1,0 +1,22 @@
+# https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: otel-instrumentation
+spec:
+  exporter:
+    endpoint: http://otel-collector:4318
+  java:
+    env:
+      - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES
+        value: "true"
+      - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES
+        value: "true"
+      - name: OTEL_INSTRUMENTATION_MICROMETER_BASE_TIME_UNIT
+        value: s
+      - name: OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE
+        value: '*'
+      - name: OTEL_JAVA_EXPERIMENTAL_SPAN_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE
+        value: '*'
+      - name: OTEL_SEMCONV_STABILITY_OPT_IN
+        value: http,database

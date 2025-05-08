@@ -1,0 +1,47 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: checkout
+spec:
+  ports:
+    - name: "50051"
+      port: 50051
+      targetPort: 50051
+  selector:
+    app.kubernetes.io/name: checkout
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checkout
+  labels:
+    app.kubernetes.io/name: checkout
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: checkout
+  template:
+    metadata:
+      annotations:
+        resource.opentelemetry.io/service.name: checkout
+        resource.opentelemetry.io/service.namespace: ecommerce
+        resource.opentelemetry.io/service.version: "1.1"
+        resource.opentelemetry.io/deployment.environment: production
+        resource.opentelemetry.io/deployment.environment.name: production
+        instrumentation.opentelemetry.io/inject-sdk: "true"
+      labels:
+        app.kubernetes.io/name: checkout
+    spec:
+      containers:
+        - name: checkout
+          env:
+            - name: SHIPPING_SERVICE_URL
+              value: http://shipping:8088
+          image: webshop-checkout:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 50051
+              protocol: TCP
+      restartPolicy: Always

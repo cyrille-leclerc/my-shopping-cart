@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k6-load-generator
+  labels:
+    app.kubernetes.io/name: k6-load-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: k6-load-generator
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: k6-load-generator
+    spec:
+      containers:
+        - args:
+            - run
+            - -e
+            - FRONTEND_URLS=http://frontend:8080
+            - /k6-load-generator.js
+          image: grafana/k6:latest
+          name: k6-load-generator
+          volumeMounts:
+            - mountPath: /k6-load-generator.js
+              name: k6-load-generator-cm0
+              subPath: k6-load-generator.js
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            items:
+              - key: k6.js
+                path: k6-load-generator.js
+            name: k6-load-generator-cm0
+          name: k6-load-generator-cm0

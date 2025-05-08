@@ -1,0 +1,67 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app.kubernetes.io/name: frontend
+spec:
+  ports:
+    - name: "8080"
+      port: 8080
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app.kubernetes.io/name: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+  template:
+    metadata:
+      annotations:
+        resource.opentelemetry.io/service.name: frontend
+        resource.opentelemetry.io/service.namespace: ecommerce
+        resource.opentelemetry.io/service.version: "1.1"
+        resource.opentelemetry.io/deployment.environment: production
+        resource.opentelemetry.io/deployment.environment.name: production
+        instrumentation.opentelemetry.io/inject-sdk: "true"
+      labels:
+        app.kubernetes.io/name: frontend
+    spec:
+      containers:
+        - name: frontend
+          env:
+            - name: CHECKOUTSERVICE_GRPCENDPOINT
+              value: checkout:50051
+            - name: ENV PYROSCOPE_LABELS
+              value: '"environment=production,namespace=ecommerce"'
+            - name: FRAUDDETECTIONSERVICE_BASEURL
+              value: http://fraud-detection:8081
+            - name: PYROSCOPE_APPLICATION_NAME
+              value: frontend
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: ecommerce
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/ecommerce
+            - name: SPRING_DATASOURCE_USERNAME
+              value: ecommerce
+            - name: SPRING_DATA_REDIS_HOST
+              value: redis
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: update
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq
+          image: webshop-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+      restartPolicy: Always

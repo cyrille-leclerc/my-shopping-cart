@@ -1,6 +1,13 @@
 name: webshop
 services:
   frontend:
+    labels:
+      instrumentation.opentelemetry.io/inject-sdk: "true"
+      resource.opentelemetry.io/service.name: "frontend"
+      resource.opentelemetry.io/service.namespace: "${OTEL_SERVICE_NAMESPACE-shop}"
+      resource.opentelemetry.io/service.version: "1.1"
+      resource.opentelemetry.io/deployment.environment: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
+      resource.opentelemetry.io/deployment.environment.name: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
     build:
       context: .
       dockerfile: ./frontend/Dockerfile
@@ -43,6 +50,13 @@ services:
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
   fraud-detection:
+    labels:
+      instrumentation.opentelemetry.io/inject-sdk: "true"
+      resource.opentelemetry.io/service.name: "fraud-detection"
+      resource.opentelemetry.io/service.namespace: "${OTEL_SERVICE_NAMESPACE-shop}"
+      resource.opentelemetry.io/service.version: "1.1"
+      resource.opentelemetry.io/deployment.environment: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
+      resource.opentelemetry.io/deployment.environment.name: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
     build:
       context: .
       dockerfile: ./fraud-detection/Dockerfile
@@ -69,6 +83,13 @@ services:
     ports:
       - "8081:8081"
   checkout:
+    labels:
+      instrumentation.opentelemetry.io/inject-sdk: "true"
+      resource.opentelemetry.io/service.name: "checkout"
+      resource.opentelemetry.io/service.namespace: "${OTEL_SERVICE_NAMESPACE-shop}"
+      resource.opentelemetry.io/service.version: "1.1"
+      resource.opentelemetry.io/deployment.environment: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
+      resource.opentelemetry.io/deployment.environment.name: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
     build:
       context: .
       dockerfile: ./checkout/Dockerfile
@@ -92,6 +113,13 @@ services:
     ports:
       - "50051:50051"
   shipping:
+    labels:
+      instrumentation.opentelemetry.io/inject-sdk: "true"
+      resource.opentelemetry.io/service.name: "shipping"
+      resource.opentelemetry.io/service.namespace: "${OTEL_SERVICE_NAMESPACE-shop}"
+      resource.opentelemetry.io/service.version: "1.1"
+      resource.opentelemetry.io/deployment.environment: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
+      resource.opentelemetry.io/deployment.environment.name: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
     build:
       context: .
       dockerfile: ./shipping/Dockerfile
@@ -118,6 +146,13 @@ services:
     ports:
       - "8088:8088"
   warehouse:
+    labels:
+      instrumentation.opentelemetry.io/inject-sdk: "true"
+      resource.opentelemetry.io/service.name: "warehouse"
+      resource.opentelemetry.io/service.namespace: "${OTEL_SERVICE_NAMESPACE-shop}"
+      resource.opentelemetry.io/service.version: "1.1"
+      resource.opentelemetry.io/deployment.environment: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
+      resource.opentelemetry.io/deployment.environment.name: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
     build:
       context: .
       dockerfile: ./warehouse/Dockerfile

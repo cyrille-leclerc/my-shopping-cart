@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: warehouse
+spec:
+  ports:
+    - name: "8089"
+      port: 8089
+      targetPort: 8089
+  selector:
+    app.kubernetes.io/name: warehouse
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: warehouse
+  labels:
+    app.kubernetes.io/name: warehouse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: warehouse
+  template:
+    metadata:
+      annotations:
+        resource.opentelemetry.io/service.name: warehouse
+        resource.opentelemetry.io/service.namespace: ecommerce
+        resource.opentelemetry.io/service.version: "1.1"
+        resource.opentelemetry.io/deployment.environment: production
+        resource.opentelemetry.io/deployment.environment.name: production
+        instrumentation.opentelemetry.io/inject-sdk: "true"
+      labels:
+        app.kubernetes.io/name: warehouse
+    spec:
+      containers:
+        - name: warehouse
+          env:
+            - name: SERVER_PORT
+              value: "8089"
+            - name: SPRING_RABBITMQ_HOST
+              value: rabbitmq
+          image: webshop-warehouse:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8089
+              protocol: TCP
+      restartPolicy: Always
