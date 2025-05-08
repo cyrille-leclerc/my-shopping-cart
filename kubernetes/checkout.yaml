@@ -5,7 +5,7 @@ metadata:
   name: checkout
 spec:
   ports:
-    - name: "50051"
+    - name: grpc
       port: 50051
       targetPort: 50051
   selector:
@@ -15,8 +15,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: checkout
-  labels:
-    app.kubernetes.io/name: checkout
 spec:
   replicas: 1
   selector:
@@ -28,8 +26,6 @@ spec:
         resource.opentelemetry.io/service.name: checkout
         resource.opentelemetry.io/service.namespace: ecommerce
         resource.opentelemetry.io/service.version: "1.1"
-        resource.opentelemetry.io/deployment.environment: production
-        resource.opentelemetry.io/deployment.environment.name: production
         instrumentation.opentelemetry.io/inject-sdk: "true"
       labels:
         app.kubernetes.io/name: checkout
@@ -38,10 +34,11 @@ spec:
         - name: checkout
           env:
             - name: SHIPPING_SERVICE_URL
-              value: http://shipping:8088
+              value: http://shipping:8080
           image: webshop-checkout:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 50051
+            - name: grpc
+              containerPort: 50051
               protocol: TCP
       restartPolicy: Always

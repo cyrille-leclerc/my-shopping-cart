@@ -1,11 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: k6-load-test-webshop-frontend
   annotations:
     use-subpath: "true"
-  labels:
-    io.kompose.service: k6-load-generator
-  name: k6-load-generator-cm0
 data:
   k6.js: |-
     import {sleep, group} from 'k6'

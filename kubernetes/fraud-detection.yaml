@@ -5,9 +5,9 @@ metadata:
   name: fraud-detection
 spec:
   ports:
-    - name: "8081"
-      port: 8081
-      targetPort: 8081
+    - name: http
+      port: 8080
+      targetPort: 8080
   selector:
     app.kubernetes.io/name: fraud-detection
 
@@ -16,8 +16,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fraud-detection
-  labels:
-    app.kubernetes.io/name: fraud-detection
 spec:
   replicas: 1
   selector:
@@ -29,8 +27,6 @@ spec:
         resource.opentelemetry.io/service.name: fraud-detection
         resource.opentelemetry.io/service.namespace: ecommerce
         resource.opentelemetry.io/service.version: "1.1"
-        resource.opentelemetry.io/deployment.environment: production
-        resource.opentelemetry.io/deployment.environment.name: production
         instrumentation.opentelemetry.io/inject-sdk: "true"
       labels:
         app.kubernetes.io/name: fraud-detection
@@ -38,8 +34,6 @@ spec:
       containers:
         - name: fraud-detection
           env:
-            - name: SERVER_PORT
-              value: "8081"
             - name: SPRING_DATASOURCE_PASSWORD
               value: ecommerce
             - name: SPRING_DATASOURCE_URL
@@ -49,6 +43,7 @@ spec:
           image: webshop-fraud-detection:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8081
+            - name: http
+              containerPort: 8080
               protocol: TCP
       restartPolicy: Always

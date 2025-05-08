@@ -5,9 +5,9 @@ metadata:
   name: shipping
 spec:
   ports:
-    - name: "8088"
-      port: 8088
-      targetPort: 8088
+    - name: http
+      port: 8080
+      targetPort: 8080
   selector:
     app.kubernetes.io/name: shipping
 ---
@@ -15,8 +15,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: shipping
-  labels:
-    app.kubernetes.io/name: shipping
 spec:
   replicas: 1
   selector:
@@ -28,8 +26,6 @@ spec:
         resource.opentelemetry.io/service.name: shipping
         resource.opentelemetry.io/service.namespace: ecommerce
         resource.opentelemetry.io/service.version: "1.1"
-        resource.opentelemetry.io/deployment.environment: production
-        resource.opentelemetry.io/deployment.environment.name: production
         instrumentation.opentelemetry.io/inject-sdk: "true"
       labels:
         app.kubernetes.io/name: shipping
@@ -37,8 +33,6 @@ spec:
       containers:
         - name: shipping
           env:
-            - name: SERVER_PORT
-              value: "8088"
             - name: SPRING_DATASOURCE_PASSWORD
               value: ecommerce
             - name: SPRING_DATASOURCE_URL
@@ -48,6 +42,7 @@ spec:
           image: webshop-shipping:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8088
+            - name: http
+              containerPort: 8080
               protocol: TCP
       restartPolicy: Always

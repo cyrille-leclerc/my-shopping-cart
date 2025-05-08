@@ -31,7 +31,7 @@ export function scenario_1() {
     if (__ENV.FRONTEND_URLS !== undefined) {
         frontendServerRootUrlsAsString = `${__ENV.FRONTEND_URLS}`
     } else {
-        frontendServerRootUrlsAsString = "http://localhost:8080"
+        frontendServerRootUrlsAsString = "http://frontend:8080"
     }
     const frontendServerRootUrls = frontendServerRootUrlsAsString.split(",")
 

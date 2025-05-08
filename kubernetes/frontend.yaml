@@ -3,11 +3,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend
-  labels:
-    app.kubernetes.io/name: frontend
 spec:
   ports:
-    - name: "8080"
+    - name: http
       port: 8080
       targetPort: 8080
   selector:
@@ -17,8 +15,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  labels:
-    app.kubernetes.io/name: frontend
 spec:
   replicas: 2
   selector:
@@ -30,8 +26,6 @@ spec:
         resource.opentelemetry.io/service.name: frontend
         resource.opentelemetry.io/service.namespace: ecommerce
         resource.opentelemetry.io/service.version: "1.1"
-        resource.opentelemetry.io/deployment.environment: production
-        resource.opentelemetry.io/deployment.environment.name: production
         instrumentation.opentelemetry.io/inject-sdk: "true"
       labels:
         app.kubernetes.io/name: frontend
@@ -40,28 +34,32 @@ spec:
         - name: frontend
           env:
             - name: CHECKOUTSERVICE_GRPCENDPOINT
-              value: checkout:50051
-            - name: ENV PYROSCOPE_LABELS
-              value: '"environment=production,namespace=ecommerce"'
+              value: "checkout:50051"
+            - name: PYROSCOPE_LABELS
+              value: "environment=production,namespace=ecommerce"
             - name: FRAUDDETECTIONSERVICE_BASEURL
-              value: http://fraud-detection:8081
+              value: "http://fraud-detection:8080"
             - name: PYROSCOPE_APPLICATION_NAME
-              value: frontend
+              value: "frontend"
             - name: SPRING_DATASOURCE_PASSWORD
-              value: ecommerce
+              value: "ecommerce"
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres:5432/ecommerce
+              value: "jdbc:postgresql://postgres:5432/ecommerce"
             - name: SPRING_DATASOURCE_USERNAME
-              value: ecommerce
+              value: "ecommerce"
             - name: SPRING_DATA_REDIS_HOST
-              value: redis
+              value: "redis"
             - name: SPRING_JPA_HIBERNATE_DDL_AUTO
-              value: update
+              value: "update"
             - name: SPRING_RABBITMQ_HOST
-              value: rabbitmq
+              value: "rabbitmq"
+            - name: CONSOLE_LOG_THRESHOLD
+              # TODO define this env var in the otel sdk injection layer
+              value: "OFF"
           image: webshop-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
               protocol: TCP
       restartPolicy: Always

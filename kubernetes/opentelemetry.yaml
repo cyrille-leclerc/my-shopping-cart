@@ -1,0 +1,257 @@
+---
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel
+  namespace: default
+spec:
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.125.0
+  mode: daemonset
+  serviceAccount: otel-collector
+  env:
+    - name: GRAFANA_CLOUD_INSTANCE_ID
+      valueFrom:
+        configMapKeyRef:
+          name: grafana-cloud-config
+          key: GRAFANA_CLOUD_INSTANCE_ID
+    - name: GRAFANA_CLOUD_API_KEY
+      valueFrom:
+        configMapKeyRef:
+          name: grafana-cloud-config
+          key: GRAFANA_CLOUD_API_KEY
+    - name: GRAFANA_CLOUD_OTLP_ENDPOINT
+      valueFrom:
+        configMapKeyRef:
+          name: grafana-cloud-config
+          key: GRAFANA_CLOUD_OTLP_ENDPOINT
+    - name: K8S_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+  config:
+    extensions:
+      basicauth/grafana_cloud:
+        # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/basicauthextension
+        client_auth:
+          username: "${env:GRAFANA_CLOUD_INSTANCE_ID}"
+          password: "${env:GRAFANA_CLOUD_API_KEY}"
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+      hostmetrics:
+        scrapers:
+          load: {}
+          memory: {}
+          cpu: {}
+      kubeletstats:
+        auth_type: "serviceAccount"
+        endpoint: "${env:K8S_NODE_NAME}:10250"
+        insecure_skip_verify: true
+        metrics:
+          container.cpu.utilization:
+            enabled: false
+          k8s.node.cpu.utilization:
+            enabled: false
+          k8s.pod.cpu.utilization:
+            enabled: false
+          container.cpu.usage:
+            enabled: true
+          k8s.node.cpu.usage:
+            enabled: true
+          k8s.pod.cpu.usage:
+            enabled: true
+          k8s.pod.cpu_limit_utilization:
+            enabled: true
+          k8s.pod.cpu_request_utilization:
+            enabled: true
+          k8s.pod.memory_limit_utilization:
+            enabled: true
+          k8s.pod.memory_request_utilization:
+            enabled: true
+      postgresql:
+        endpoint: postgres:5432
+        transport: tcp
+        username: "ecommerce"
+        password: "ecommerce"
+        databases:
+          - ecommerce
+        tls:
+          insecure: true
+      redis:
+        endpoint: "redis:6379"
+        collection_interval: 10s
+      rabbitmq:
+        endpoint: http://rabbitmq:15672
+        username: guest
+        password: guest
+        collection_interval: 10s
+      filelog:
+        exclude:
+          - /var/log/pods/kube-system_*/*/*.log
+        include:
+          - /var/log/pods/*/*/*.log
+        start_at: beginning
+        include_file_path: true
+        operators:
+          - id: container-parser
+            type: container
+            add_metadata_from_filepath: true
+          - type: trace_parser
+            trace_id:
+              parse_from: attributes.trace_id
+            span_id:
+              parse_from: attributes.span_id
+            trace_flags:
+              parse_from: attributes.trace_flags
+    processors:
+      batch: {}
+      transform:
+        # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor
+        error_mode: ignore
+        log_statements:
+          - set(resource.attributes["k8s.cluster.name"], "prod-eu-west-1-cluster")
+          - set(resource.attributes["k8s.pod.name"], "${env:K8S_NODE_NAME}")
+          - set(resource.attributes["deployment.environment"], "production")
+          - set(resource.attributes["deployment.environment.name"], "production")
+        metric_statements:
+          - set(resource.attributes["k8s.cluster.name"], "prod-eu-west-1-cluster")
+          - set(resource.attributes["k8s.pod.name"], "${env:K8S_NODE_NAME}")
+          - set(resource.attributes["deployment.environment"], "production")
+          - set(resource.attributes["deployment.environment.name"], "production")
+        trace_statements:
+          - set(resource.attributes["k8s.cluster.name"], "prod-eu-west-1-cluster")
+          - set(resource.attributes["k8s.pod.name"], "${env:K8S_NODE_NAME}")
+          - set(resource.attributes["deployment.environment"], "production")
+          - set(resource.attributes["deployment.environment.name"], "production")
+      resourcedetection:
+        detectors:
+          - system
+          - k8snode
+        system:
+          resource_attributes:
+            host.name:
+              enabled: false
+      k8sattributes:
+        extract:
+          metadata:
+            - k8s.cluster.uid
+            - k8s.cronjob.name
+            - k8s.daemonset.name
+            - k8s.daemonset.uid
+            - k8s.deployment.name
+            - k8s.deployment.uid
+            - k8s.job.name
+            - k8s.job.uid
+            - k8s.namespace.name
+            - k8s.node.name
+            - k8s.pod.hostname
+            - k8s.pod.ip
+            - k8s.pod.name
+            - k8s.pod.start_time
+            - k8s.pod.uid
+            - k8s.replicaset.name
+            - k8s.replicaset.uid
+            - k8s.statefulset.name
+            - k8s.statefulset.uid
+            - container.image.name
+            - container.image.tag
+        filter:
+          node_from_env_var: K8S_NODE_NAME
+        passthrough: false
+        pod_association:
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.ip
+          - sources:
+              - from: resource_attribute
+                name: k8s.pod.uid
+          - sources:
+              - from: connection
+    connectors:
+      grafanacloud:
+        host_identifiers: [ "k8s.node.uid", "k8s.node.name", "host.id", "host.name", "container.id" ]
+
+    exporters:
+      debug:
+        verbosity: detailed
+      otlphttp/grafana_cloud:
+        # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
+        endpoint: "${env:GRAFANA_CLOUD_OTLP_ENDPOINT}"
+        auth:
+          authenticator: basicauth/grafana_cloud
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+
+    service:
+      extensions: [basicauth/grafana_cloud]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [transform, k8sattributes, resourcedetection, batch]
+          exporters: [grafanacloud, otlphttp/grafana_cloud]
+        metrics:
+          receivers: [otlp, hostmetrics, postgresql, redis, rabbitmq, kubeletstats, grafanacloud]
+          processors: [transform, k8sattributes, resourcedetection, batch]
+          exporters: [otlphttp/grafana_cloud, prometheus]
+        logs:
+          receivers: [otlp, filelog]
+          processors: [transform, k8sattributes, resourcedetection, batch]
+          exporters: [otlphttp/grafana_cloud]
+    telemetry:
+      metrics:
+        readers:
+          - pull:
+              exporter:
+                prometheus:
+                  host: '0.0.0.0'
+                  port: 8888
+  volumeMounts:
+    - name: varlogpods
+      mountPath: /var/log/pods
+      readOnly: true
+    - name: varlibdockercontainers
+      mountPath: /var/lib/docker/containers
+      readOnly: true
+  volumes:
+    - name: varlogpods
+      hostPath:
+        path: /var/log/pods
+    - name: varlibdockercontainers
+      hostPath:
+        path: /var/lib/docker/containers
+---
+# https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md
+apiVersion: opentelemetry.io/v1alpha1
+kind: Instrumentation
+metadata:
+  name: otel-instrumentation
+spec:
+  exporter:
+    endpoint: http://otel-collector:4318
+  sampler:
+    type: "parentbased_always_on"
+  java:
+    env:
+      - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES
+        value: "true"
+      - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES
+        value: "true"
+      - name: OTEL_INSTRUMENTATION_MICROMETER_BASE_TIME_UNIT
+        value: s
+      - name: OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE
+        value: "*"
+      - name: OTEL_JAVA_EXPERIMENTAL_SPAN_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE
+        value: "*"
+      - name: OTEL_SEMCONV_STABILITY_OPT_IN
+        value: "http,database"
+      # we would like to pass the env var CONSOLE_LOG_THRESHOLD to the java apps so they disable logging in the console
+      # when otel java sdk is injected to not duplicate logs from the logging framework with console logs
+      # but this is not working to define "CONSOLE_LOG_THRESHOLD" in the otel sdk injection layer, it's not injected as
+      # an env var of the pod
+      #- name: CONSOLE_LOG_THRESHOLD
+      #  value: "OFF"
+

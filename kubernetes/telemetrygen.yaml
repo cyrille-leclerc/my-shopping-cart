@@ -1,0 +1,52 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: telemetrygen-traces-job
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: telemetrygen-traces-job
+    spec:
+      containers:
+        - name: telemetrygen-traces-job
+          image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.125.0
+          command: ["./telemetrygen"]
+          args:
+            - "--otlp-endpoint=otel-collector:4317"
+            - "--otlp-insecure=true"
+            - "--rate=1"
+            - "--duration=180m"
+            - "--service=telemetrygen-traces-job"
+            - "traces"
+      restartPolicy: Never
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telemetrygen-traces-app-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: telemetrygen-traces-app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: telemetrygen-traces-app
+    spec:
+      containers:
+        - name: telemetrygen-traces-app
+          image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.125.0
+          command: ["./telemetrygen"]
+          args:
+            - "--otlp-endpoint=otel-collector:4317"
+            - "--otlp-insecure=true"
+            - "--rate=1"
+            - "--duration=180m"
+            - "--service=telemetrygen-traces-app"
+            - "traces"
+      restartPolicy: Always
