@@ -40,3 +40,5 @@ secrets/
 
 
 .DS_Store
+
+kubernetes/grafana-cloud-endpoint-config.yaml
