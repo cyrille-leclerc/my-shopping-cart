@@ -9,8 +9,8 @@ services:
       resource.opentelemetry.io/deployment.environment: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
       resource.opentelemetry.io/deployment.environment.name: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
     build:
-      context: .
-      dockerfile: ./frontend/Dockerfile
+      context: ./frontend
+      dockerfile: ./Dockerfile
     #container_name: webshop-frontend
     deploy:
       mode: replicated
@@ -44,7 +44,7 @@ services:
       - OTEL_JAVA_EXPERIMENTAL_SPAN_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
       - OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
       - PYROSCOPE_APPLICATION_NAME=frontend
-      - ENV PYROSCOPE_LABELS="environment=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production},namespace=${OTEL_SERVICE_NAMESPACE-shop}"
+      - PYROSCOPE_LABELS="environment=${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production},namespace=${OTEL_SERVICE_NAMESPACE-shop}"
     ports:
       - "8079-8080:8080"
     healthcheck:
@@ -58,8 +58,8 @@ services:
       resource.opentelemetry.io/deployment.environment: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
       resource.opentelemetry.io/deployment.environment.name: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
     build:
-      context: .
-      dockerfile: ./fraud-detection/Dockerfile
+      context: ./fraud-detection
+      dockerfile: ./Dockerfile
     #container_name: webshop-fraud-detection
     depends_on:
       postgres:
@@ -91,8 +91,8 @@ services:
       resource.opentelemetry.io/deployment.environment: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
       resource.opentelemetry.io/deployment.environment.name: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
     build:
-      context: .
-      dockerfile: ./checkout/Dockerfile
+      context: ./checkout
+      dockerfile: ./Dockerfile
     #container_name: webshop-checkout
     depends_on:
       postgres:
@@ -121,8 +121,8 @@ services:
       resource.opentelemetry.io/deployment.environment: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
       resource.opentelemetry.io/deployment.environment.name: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
     build:
-      context: .
-      dockerfile: ./shipping/Dockerfile
+      context: ./shipping
+      dockerfile: ./Dockerfile
     #container_name: webshop-shipping
     depends_on:
       postgres:
@@ -154,8 +154,8 @@ services:
       resource.opentelemetry.io/deployment.environment: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
       resource.opentelemetry.io/deployment.environment.name: "${OTEL_DEPLOYMENT_ENVIRONMENT_NAME-production}"
     build:
-      context: .
-      dockerfile: ./warehouse/Dockerfile
+      context: ./warehouse
+      dockerfile: ./Dockerfile
     #container_name: webshop-warehouse
     depends_on:
       postgres:
