@@ -16,7 +16,7 @@ kind: Deployment
 metadata:
   name: frontend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: frontend
@@ -26,21 +26,19 @@ spec:
         resource.opentelemetry.io/service.name: frontend
         resource.opentelemetry.io/service.namespace: ecommerce
         resource.opentelemetry.io/service.version: "1.1"
-        instrumentation.opentelemetry.io/inject-sdk: "true"
+        instrumentation.opentelemetry.io/inject-java: "true"
       labels:
         app.kubernetes.io/name: frontend
     spec:
       containers:
         - name: frontend
           env:
-            - name: CHECKOUTSERVICE_GRPCENDPOINT
-              value: "checkout:50051"
-            - name: PYROSCOPE_LABELS
-              value: "environment=production,namespace=ecommerce"
-            - name: FRAUDDETECTIONSERVICE_BASEURL
-              value: "http://fraud-detection:8080"
             - name: PYROSCOPE_APPLICATION_NAME
               value: "frontend"
+            - name: CHECKOUTSERVICE_GRPCENDPOINT
+              value: "checkout:50051"
+            - name: FRAUDDETECTIONSERVICE_BASEURL
+              value: "http://fraud-detection:8080"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "ecommerce"
             - name: SPRING_DATASOURCE_URL
@@ -53,9 +51,12 @@ spec:
               value: "update"
             - name: SPRING_RABBITMQ_HOST
               value: "rabbitmq"
-            - name: CONSOLE_LOG_THRESHOLD
+            #- name: CONSOLE_LOG_THRESHOLD
               # TODO define this env var in the otel sdk injection layer
-              value: "OFF"
+              # The alternative of having a pod annotation to tell the filelog receive to NOT scrape this stream
+              # is NOT good because we would miss some logs. Note that K8s events like OOM Killer ar NOT logged
+              # in the container logs, but in the K8s events and in the K8s node logs.
+            #  value: "OFF"
           image: webshop-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:

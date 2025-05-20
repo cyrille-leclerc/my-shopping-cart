@@ -70,7 +70,7 @@ export OTEL_RESOURCE_ATTRIBUTES
 # don't pull service.name from the resource attributes as ECS already sets it
 export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.namespace,service.instance.id,deployment.environment.name"
 
-export OTEL_SEMCONV_STABILITY_OPT_IN=database
+export OTEL_SEMCONV_STABILITY_OPT_IN=database,http
 
 # see https://opentelemetry.io/docs/zero-code/java/spring-boot-starter/out-of-the-box-instrumentation/
 

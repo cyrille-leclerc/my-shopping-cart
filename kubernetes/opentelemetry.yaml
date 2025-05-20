@@ -100,13 +100,6 @@ spec:
           - id: container-parser
             type: container
             add_metadata_from_filepath: true
-          - type: trace_parser
-            trace_id:
-              parse_from: attributes.trace_id
-            span_id:
-              parse_from: attributes.span_id
-            trace_flags:
-              parse_from: attributes.trace_flags
     processors:
       batch: {}
       transform:
@@ -231,11 +224,13 @@ metadata:
   name: otel-instrumentation
 spec:
   exporter:
-    endpoint: http://otel-collector:4318
+    endpoint: http://otel-collector:4317
   sampler:
     type: "parentbased_always_on"
   java:
     env:
+      - name: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: "grpc"
       - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES
         value: "true"
       - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES
@@ -248,10 +243,30 @@ spec:
         value: "*"
       - name: OTEL_SEMCONV_STABILITY_OPT_IN
         value: "http,database"
+      - name: PYROSCOPE_LABELS
+        value: "environment=production,namespace=ecommerce"
+      - name: PYROSCOPE_SERVER_ADDRESS
+        valueFrom:
+          configMapKeyRef:
+            name: grafana-cloud-config
+            key: PYROSCOPE_SERVER_ADDRESS
+      - name: PYROSCOPE_BASIC_AUTH_USER
+        valueFrom:
+          configMapKeyRef:
+            name: grafana-cloud-config
+            key: PYROSCOPE_BASIC_AUTH_USER
+      - name: PYROSCOPE_BASIC_AUTH_PASSWORD
+        valueFrom:
+          configMapKeyRef:
+            name: grafana-cloud-config
+            key: PYROSCOPE_BASIC_AUTH_PASSWORD
       # we would like to pass the env var CONSOLE_LOG_THRESHOLD to the java apps so they disable logging in the console
       # when otel java sdk is injected to not duplicate logs from the logging framework with console logs
       # but this is not working to define "CONSOLE_LOG_THRESHOLD" in the otel sdk injection layer, it's not injected as
       # an env var of the pod
-      #- name: CONSOLE_LOG_THRESHOLD
-      #  value: "OFF"
-
+      - name: CONSOLE_LOG_THRESHOLD
+        value: "OFF"
+    # todo replacee "image" by a solution to change the annotation "instrumentation.opentelemetry.io/default-auto-instrumentation-java-image"
+    # on the "Instrumentation" resource
+    # see `kubectl describe otelinst`
+    image: "ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.15.0"
