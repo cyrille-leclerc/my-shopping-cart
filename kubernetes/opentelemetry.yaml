@@ -260,10 +260,8 @@ spec:
           configMapKeyRef:
             name: grafana-cloud-config
             key: PYROSCOPE_BASIC_AUTH_PASSWORD
-      # we would like to pass the env var CONSOLE_LOG_THRESHOLD to the java apps so they disable logging in the console
-      # when otel java sdk is injected to not duplicate logs from the logging framework with console logs
-      # but this is not working to define "CONSOLE_LOG_THRESHOLD" in the otel sdk injection layer, it's not injected as
-      # an env var of the pod
+      # don't duplicate app logs that are collected through OTLP, stop emitting them to stdout
+      # Use SpringBoot CONSOLE_LOG_THRESHOLD=OFF to disable console logs
       - name: CONSOLE_LOG_THRESHOLD
         value: "OFF"
     # todo replacee "image" by a solution to change the annotation "instrumentation.opentelemetry.io/default-auto-instrumentation-java-image"

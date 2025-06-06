@@ -18,41 +18,44 @@ kubectl port-forward service/frontend 8080:8080
 ```commandline
 helm repo add grafana https://grafana.github.io/helm-charts &&
   helm repo update &&
-  helm upgrade --install --version ^2 --atomic --timeout 300s grafana-k8s-monitoring grafana/k8s-monitoring \
+  helm upgrade --install --atomic --timeout 300s grafana-k8s-monitoring grafana/k8s-monitoring \
     --namespace "default" --create-namespace --values - <<'EOF'
 cluster:
   name: prod-eu-west-1-cluster
 destinations:
   - name: grafana-cloud-metrics
     type: prometheus
-    url: https://prometheus-prod-01-eu-west-0.grafana.net/api/prom/push
+    url: https://prometheus-prod-01-eu-west-0.grafana.net./api/prom/push
     auth:
       type: basic
-      username: "588311"
-      password: "****"
+      username: "***"
+      password: glc_***
   - name: grafana-cloud-logs
     type: loki
-    url: https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push
+    url: https://logs-prod-eu-west-0.grafana.net./loki/api/v1/push
     auth:
       type: basic
-      username: "293125"
-      password: "****"
-  - name: grafana-cloud-traces
+      username: "***"
+      password: glc_***
+  - name: grafana-cloud-otlp-endpoint
     type: otlp
-    url: https://tempo-eu-west-0.grafana.net:443
-    protocol: grpc
+    url: https://otlp-gateway-prod-eu-west-0.grafana.net./otlp
+    protocol: http
     auth:
       type: basic
-      username: "289638"
-      password: "****"
+      username: "***"
+      password: glc_***
     metrics:
-      enabled: false
+      enabled: true
     logs:
-      enabled: false
+      enabled: true
     traces:
       enabled: true
 clusterMetrics:
   enabled: true
+  node-exporter:
+    hostRootFsMount: false
+    mountPropagation: 'HostToContainer'
 clusterEvents:
   enabled: true
 podLogs:
@@ -70,6 +73,9 @@ applicationObservability:
     zipkin:
       enabled: true
       port: 9411
+  connectors:
+    grafanaCloudMetrics:
+      enabled: true
 integrations:
   alloy:
     instances:
