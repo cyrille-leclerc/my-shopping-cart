@@ -5,7 +5,7 @@ metadata:
   name: otel
   namespace: default
 spec:
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.125.0
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.129.1
   mode: daemonset
   serviceAccount: otel-collector
   env:
@@ -202,7 +202,7 @@ metadata:
   name: otel-collector-central
   namespace: default
 spec:
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.125.0
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.129.1
   mode: deployment
   serviceAccount: otel-collector-central
   env:
@@ -364,4 +364,4 @@ spec:
     # todo replacee "image" by a solution to change the annotation "instrumentation.opentelemetry.io/default-auto-instrumentation-java-image"
     # on the "Instrumentation" resource
     # see `kubectl describe otelinst`
-    image: "ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.15.0"
+    image: "ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.17.0"

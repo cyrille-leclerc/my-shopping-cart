@@ -8,8 +8,8 @@
 
 	<properties>
 		<spring-boot.version>3.4.5</spring-boot.version>
-		<opentelemetry.version>1.50.0</opentelemetry.version>
-		<opentelemetry-instrumentation.version>2.16.0</opentelemetry-instrumentation.version>
+		<opentelemetry.version>1.51.0</opentelemetry.version>
+		<opentelemetry-instrumentation.version>2.17.0</opentelemetry-instrumentation.version>
 
 		<!--suppress UnresolvedMavenProperty -->
 		<container-registry.username>${env.CONTAINER_REGISTRY_USERNAME}</container-registry.username>
@@ -56,7 +56,7 @@
 		<dependency>
 			<groupId>jakarta.validation</groupId>
 			<artifactId>jakarta.validation-api</artifactId>
-			<version>3.1.0</version>
+			<version>3.1.1</version>
 		</dependency>
 
 		<dependency>
