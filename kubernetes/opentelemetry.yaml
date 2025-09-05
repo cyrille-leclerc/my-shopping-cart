@@ -5,7 +5,7 @@ metadata:
   name: otel
   namespace: default
 spec:
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.129.1
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.134.1
   mode: daemonset
   serviceAccount: otel-collector
   env:
@@ -170,7 +170,7 @@ spec:
           processors: [transform, k8sattributes, resourcedetection, batch]
           exporters: [otlphttp/grafana_cloud, prometheus]
         logs:
-          receivers: [otlp, filelog]
+          receivers: [otlp, postgresql, filelog]
           processors: [transform, k8sattributes, resourcedetection, batch]
           exporters: [otlphttp/grafana_cloud]
     telemetry:
@@ -202,7 +202,7 @@ metadata:
   name: otel-collector-central
   namespace: default
 spec:
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.129.1
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.134.1
   mode: deployment
   serviceAccount: otel-collector-central
   env:
@@ -248,6 +248,21 @@ spec:
           password: "${env:GRAFANA_CLOUD_API_KEY}"
     processors:
       batch: {}
+      transform:
+        # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/transformprocessor
+        error_mode: ignore
+        log_statements:
+          - set(resource.attributes["k8s.cluster.name"], "prod-eu-west-1-cluster")
+          - set(resource.attributes["deployment.environment"], "production")
+          - set(resource.attributes["deployment.environment.name"], "production")
+        metric_statements:
+          - set(resource.attributes["k8s.cluster.name"], "prod-eu-west-1-cluster")
+          - set(resource.attributes["deployment.environment"], "production")
+          - set(resource.attributes["deployment.environment.name"], "production")
+        trace_statements:
+          - set(resource.attributes["k8s.cluster.name"], "prod-eu-west-1-cluster")
+          - set(resource.attributes["deployment.environment"], "production")
+          - set(resource.attributes["deployment.environment.name"], "production")
       k8sattributes:
         extract:
           metadata:
@@ -285,6 +300,8 @@ spec:
           - sources:
               - from: connection
     receivers:
+      k8s_events:
+        namespaces: [default]
       k8s_cluster:
         # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/k8sclusterreceiver
         collection_interval: 1m
@@ -306,12 +323,12 @@ spec:
       pipelines:
         metrics:
           receivers: [k8s_cluster]
-          processors: [k8sattributes, batch]
+          processors: [transform, k8sattributes, batch]
           exporters: [otlphttp/grafana_cloud, prometheus]
         logs:
-          receivers: [k8sobjects]
-          processors: [k8sattributes, batch]
-          exporters: [otlphttp/grafana_cloud]
+          receivers: [k8s_events, k8sobjects]
+          processors: [transform, k8sattributes, batch]
+          exporters: [otlphttp/grafana_cloud, debug]
 
 ---
 # https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md
@@ -364,4 +381,4 @@ spec:
     # todo replacee "image" by a solution to change the annotation "instrumentation.opentelemetry.io/default-auto-instrumentation-java-image"
     # on the "Instrumentation" resource
     # see `kubectl describe otelinst`
-    image: "ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.17.0"
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.19.0
