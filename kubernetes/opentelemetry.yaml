@@ -5,9 +5,8 @@ metadata:
   name: otel
   namespace: default
 spec:
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.134.1
   mode: daemonset
-  serviceAccount: otel-collector
+  serviceAccount: opentelemetry-operator
   env:
     - name: GRAFANA_CLOUD_INSTANCE_ID
       valueFrom:
@@ -52,23 +51,6 @@ spec:
         auth_type: "serviceAccount"
         endpoint: "${env:K8S_NODE_NAME}:10250"
         insecure_skip_verify: true
-      postgresql:
-        endpoint: postgres:5432
-        transport: tcp
-        username: "ecommerce"
-        password: "ecommerce"
-        databases:
-          - ecommerce
-        tls:
-          insecure: true
-      redis:
-        endpoint: "redis:6379"
-        collection_interval: 10s
-      rabbitmq:
-        endpoint: http://rabbitmq:15672
-        username: guest
-        password: guest
-        collection_interval: 10s
       filelog:
         # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/filelogreceiver
         exclude:
@@ -166,11 +148,11 @@ spec:
           processors: [transform, k8sattributes, resourcedetection, batch]
           exporters: [grafanacloud, otlphttp/grafana_cloud]
         metrics:
-          receivers: [otlp, hostmetrics, postgresql, redis, rabbitmq, kubeletstats, grafanacloud]
+          receivers: [otlp, hostmetrics, kubeletstats, grafanacloud]
           processors: [transform, k8sattributes, resourcedetection, batch]
           exporters: [otlphttp/grafana_cloud, prometheus]
         logs:
-          receivers: [otlp, postgresql, filelog]
+          receivers: [otlp, filelog]
           processors: [transform, k8sattributes, resourcedetection, batch]
           exporters: [otlphttp/grafana_cloud]
     telemetry:
@@ -202,9 +184,8 @@ metadata:
   name: otel-collector-central
   namespace: default
 spec:
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.134.1
   mode: deployment
-  serviceAccount: otel-collector-central
+  serviceAccount: opentelemetry-operator
   env:
     - name: GRAFANA_CLOUD_INSTANCE_ID
       valueFrom:
@@ -317,16 +298,32 @@ spec:
           - name: events
             mode: watch
             group: events.k8s.io
-
+      postgresql:
+        endpoint: postgres:5432
+        transport: tcp
+        username: "ecommerce"
+        password: "ecommerce"
+        databases:
+          - ecommerce
+        tls:
+          insecure: true
+      redis:
+        endpoint: "redis:6379"
+        collection_interval: 10s
+      rabbitmq:
+        endpoint: http://rabbitmq:15672
+        username: guest
+        password: guest
+        collection_interval: 10s
     service:
       extensions: [basicauth/grafana_cloud]
       pipelines:
         metrics:
-          receivers: [k8s_cluster]
+          receivers: [k8s_cluster, postgresql, redis, rabbitmq]
           processors: [transform, k8sattributes, batch]
           exporters: [otlphttp/grafana_cloud, prometheus]
         logs:
-          receivers: [k8s_events, k8sobjects]
+          receivers: [k8s_events, k8sobjects, postgresql]
           processors: [transform, k8sattributes, batch]
           exporters: [otlphttp/grafana_cloud, debug]
 
@@ -378,7 +375,4 @@ spec:
       # Use SpringBoot CONSOLE_LOG_THRESHOLD=OFF to disable console logs
       - name: CONSOLE_LOG_THRESHOLD
         value: "OFF"
-    # todo replacee "image" by a solution to change the annotation "instrumentation.opentelemetry.io/default-auto-instrumentation-java-image"
-    # on the "Instrumentation" resource
-    # see `kubectl describe otelinst`
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.19.0
+
