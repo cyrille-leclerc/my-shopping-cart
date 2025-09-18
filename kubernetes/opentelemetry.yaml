@@ -89,18 +89,25 @@ spec:
               enabled: false
       k8sattributes:
         extract:
+          otel_annotations: true 
+          labels:
+          - from: pod
+            key: app.kubernetes.io/instance
+            tag_name: k8s.app.instance
+          - from: pod
+            key: app.kubernetes.io/component
+            tag_name: k8s.app.component
           metadata:
             - k8s.cluster.uid
+            - k8s.container.name
             - k8s.cronjob.name
             - k8s.daemonset.name
             - k8s.daemonset.uid
             - k8s.deployment.name
-            - k8s.deployment.uid
             - k8s.job.name
             - k8s.job.uid
             - k8s.namespace.name
             - k8s.node.name
-            - k8s.pod.hostname
             - k8s.pod.ip
             - k8s.pod.name
             - k8s.pod.start_time
@@ -109,20 +116,37 @@ spec:
             - k8s.replicaset.uid
             - k8s.statefulset.name
             - k8s.statefulset.uid
+            - container.id
             - container.image.name
             - container.image.tag
+            - service.instance.id
+            - service.name
+            - service.namespace
+            - service.version
         filter:
           node_from_env_var: K8S_NODE_NAME
         passthrough: false
         pod_association:
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.ip
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.uid
-          - sources:
-              - from: connection
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.name
+          - from: resource_attribute
+            name: k8s.namespace.name
+          - from: resource_attribute
+            name: k8s.node.name
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.name
+          - from: resource_attribute
+            name: k8s.namespace.name
+        - sources:
+          - from: connection
     connectors:
       grafanacloud:
         host_identifiers: [ "k8s.node.uid", "k8s.node.name", "host.id", "host.name", "container.id" ]
@@ -246,18 +270,25 @@ spec:
           - set(resource.attributes["deployment.environment.name"], "production")
       k8sattributes:
         extract:
+          otel_annotations: true 
+          labels:
+          - from: pod
+            key: app.kubernetes.io/instance
+            tag_name: k8s.app.instance
+          - from: pod
+            key: app.kubernetes.io/component
+            tag_name: k8s.app.component
           metadata:
             - k8s.cluster.uid
+            - k8s.container.name
             - k8s.cronjob.name
             - k8s.daemonset.name
             - k8s.daemonset.uid
             - k8s.deployment.name
-            - k8s.deployment.uid
             - k8s.job.name
             - k8s.job.uid
             - k8s.namespace.name
             - k8s.node.name
-            - k8s.pod.hostname
             - k8s.pod.ip
             - k8s.pod.name
             - k8s.pod.start_time
@@ -267,19 +298,36 @@ spec:
             - k8s.statefulset.name
             - k8s.statefulset.uid
             - container.image.name
+            - container.id
             - container.image.tag
+            - service.instance.id
+            - service.name
+            - service.namespace
+            - service.version
         filter:
           node_from_env_var: K8S_NODE_NAME
         passthrough: false
         pod_association:
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.ip
-          - sources:
-              - from: resource_attribute
-                name: k8s.pod.uid
-          - sources:
-              - from: connection
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.uid
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.name
+          - from: resource_attribute
+            name: k8s.namespace.name
+          - from: resource_attribute
+            name: k8s.node.name
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.ip
+        - sources:
+          - from: resource_attribute
+            name: k8s.pod.name
+          - from: resource_attribute
+            name: k8s.namespace.name
+        - sources:
+          - from: connection
     receivers:
       k8s_events:
         namespaces: [default]
@@ -325,7 +373,7 @@ spec:
         logs:
           receivers: [k8s_events, k8sobjects, postgresql]
           processors: [transform, k8sattributes, batch]
-          exporters: [otlphttp/grafana_cloud, debug]
+          exporters: [otlphttp/grafana_cloud]
 
 ---
 # https://github.com/open-telemetry/opentelemetry-operator/blob/main/docs/api/instrumentations.md
