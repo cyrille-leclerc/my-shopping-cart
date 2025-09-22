@@ -1,0 +1,166 @@
+# https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-kube-stack
+
+clusterName: my-otel-stack
+crds:
+  installOtel: true
+  installPrometheus: false
+collectors:
+  daemon:
+    enabled: true
+    env:
+      - name: GRAFANA_CLOUD_INSTANCE_ID
+        valueFrom:
+          configMapKeyRef:
+            name: grafana-cloud-config
+            key: GRAFANA_CLOUD_INSTANCE_ID
+      - name: GRAFANA_CLOUD_API_KEY
+        valueFrom:
+          configMapKeyRef:
+            name: grafana-cloud-config
+            key: GRAFANA_CLOUD_API_KEY
+      - name: GRAFANA_CLOUD_OTLP_ENDPOINT
+        valueFrom:
+          configMapKeyRef:
+            name: grafana-cloud-config
+            key: GRAFANA_CLOUD_OTLP_ENDPOINT
+    # disable scrapping using daemon_scrape_configs.yaml as it assumes the Prometheus Node Exporter and CAdvisor are setup
+    # https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-kube-stack/daemon_scrape_configs.yaml
+    scrape_configs_file: ""
+    # Disable presets that require host access and cause issues on Docker Desktop
+    presets:
+      logsCollection:
+        enabled: false
+      hostMetrics:
+        enabled: false
+      kubeletMetrics:
+        enabled: true
+      kubernetesAttributes:
+        enabled: true
+      kubernetesEvents:
+        enabled: false
+      clusterMetrics:
+        enabled: false
+    config:
+      extensions:
+        basicauth/grafana_cloud:
+          # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/basicauthextension
+          client_auth:
+            username: "${env:GRAFANA_CLOUD_INSTANCE_ID}"
+            password: "${env:GRAFANA_CLOUD_API_KEY}"
+        health_check: # For K8s Liveness and Readiness Probes
+          endpoint: 0.0.0.0:13133
+      exporters:
+        otlphttp:
+          endpoint: "${env:GRAFANA_CLOUD_OTLP_ENDPOINT}"
+          auth:
+            authenticator: basicauth/grafana_cloud
+      service:
+        extensions: [basicauth/grafana_cloud, health_check]
+        pipelines:
+          traces:
+            receivers:
+              - otlp
+            processors:
+              - resourcedetection/env
+              - batch
+            exporters:
+              - otlphttp
+          metrics:
+            receivers:
+              - otlp
+            processors:
+              - resourcedetection/env
+              - batch
+            exporters:
+              - otlphttp
+          logs:
+            receivers:
+              - otlp
+            processors:
+              - resourcedetection/env
+              - batch
+            exporters:
+              - otlphttp
+        telemetry:
+          metrics:
+            readers:
+              - pull:
+                  exporter:
+                    prometheus:
+                      host: '0.0.0.0'
+                      port: 8888
+              - periodic:
+                  interval: 10000
+                  timeout: 5000
+                  exporter:
+                    otlp:
+                      protocol: http/protobuf
+                      endpoint: http://${OTEL_K8S_NODE_NAME}:4318
+          logs:
+            level: info
+instrumentation:
+  enabled: true
+  env:
+    - name: OTEL_EXPORTER_OTLP_PROTOCOL
+      value: "grpc"
+    - name: OTEL_K8S_NODE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: spec.nodeName
+  exporter:
+    endpoint: http://opentelemetry-stack-daemon-collector:4317
+  resource:
+    resourceAttributes:
+      deployment.environment.name: production
+  java:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.20.0
+    env:
+    - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES
+      value: "true"
+    - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES
+      value: "true"
+    - name: OTEL_INSTRUMENTATION_MICROMETER_BASE_TIME_UNIT
+      value: s
+    - name: OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE
+      value: "*"
+    - name: OTEL_JAVA_EXPERIMENTAL_SPAN_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE
+      value: "*"
+    - name: OTEL_SEMCONV_STABILITY_OPT_IN
+      value: "http,database"
+    - name: PYROSCOPE_LABELS
+      value: "environment=production,namespace=ecommerce"
+    - name: PYROSCOPE_SERVER_ADDRESS
+      valueFrom:
+        configMapKeyRef:
+          name: grafana-cloud-config
+          key: PYROSCOPE_SERVER_ADDRESS
+    - name: PYROSCOPE_BASIC_AUTH_USER
+      valueFrom:
+        configMapKeyRef:
+          name: grafana-cloud-config
+          key: PYROSCOPE_BASIC_AUTH_USER
+    - name: PYROSCOPE_BASIC_AUTH_PASSWORD
+      valueFrom:
+        configMapKeyRef:
+          name: grafana-cloud-config
+          key: PYROSCOPE_BASIC_AUTH_PASSWORD
+    # don't duplicate app logs that are collected through OTLP, stop emitting them to stdout
+    # Use SpringBoot CONSOLE_LOG_THRESHOLD=OFF to disable console logs
+    - name: CONSOLE_LOG_THRESHOLD
+      value: "OFF"
+
+  python:
+    env:
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: http://opentelemetry-stack-daemon-collector:4318
+
+opentelemetry-operator:
+  admissionWebhooks:
+    certManager:
+      enabled: false
+    autoGenerateCert:
+      enabled: true
+kubeStateMetrics:
+  enabled: false
+nodeExporter:
+  enabled: false
