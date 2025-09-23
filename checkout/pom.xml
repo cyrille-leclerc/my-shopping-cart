@@ -7,12 +7,12 @@
     <artifactId>checkout</artifactId>
 
     <properties>
-        <opentelemetry.version>1.51.0</opentelemetry.version>
-        <opentelemetry-instrumentation.version>2.17.0</opentelemetry-instrumentation.version>
+        <opentelemetry.version>1.54.1</opentelemetry.version>
+        <opentelemetry-instrumentation.version>2.20.1</opentelemetry-instrumentation.version>
 
-        <grpc.version>1.72.0</grpc.version>
-        <protobuf.version>4.31.0</protobuf.version>
-        <protoc.version>4.31.0</protoc.version>
+        <grpc.version>1.75.0</grpc.version>
+        <protobuf.version>4.32.1</protobuf.version>
+        <protoc.version>4.32.1</protoc.version>
 
         <!--suppress UnresolvedMavenProperty -->
         <container-registry.username>${env.CONTAINER_REGISTRY_USERNAME}</container-registry.username>
