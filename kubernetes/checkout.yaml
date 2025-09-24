@@ -35,7 +35,7 @@ spec:
           env:
             - name: SHIPPING_SERVICE_URL
               value: http://shipping:8080
-          image: webshop-checkout:latest
+          image: docker.io/cleclerc/webshop-checkout:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: grpc

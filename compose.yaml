@@ -11,7 +11,9 @@ services:
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
-    #container_name: webshop-frontend
+      platforms:
+        - linux/amd64
+        - linux/arm64
     deploy:
       mode: replicated
       replicas: 2
@@ -60,7 +62,9 @@ services:
     build:
       context: ./fraud-detection
       dockerfile: ./Dockerfile
-    #container_name: webshop-fraud-detection
+      platforms:
+        - linux/amd64
+        - linux/arm64
     depends_on:
       postgres:
         condition: service_healthy
@@ -93,7 +97,9 @@ services:
     build:
       context: ./checkout
       dockerfile: ./Dockerfile
-    #container_name: webshop-checkout
+      platforms:
+        - linux/amd64
+        - linux/arm64
     depends_on:
       postgres:
         condition: service_healthy
@@ -123,7 +129,9 @@ services:
     build:
       context: ./shipping
       dockerfile: ./Dockerfile
-    #container_name: webshop-shipping
+      platforms:
+        - linux/amd64
+        - linux/arm64
     depends_on:
       postgres:
         condition: service_healthy
@@ -156,6 +164,9 @@ services:
     build:
       context: ./warehouse
       dockerfile: ./Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
     #container_name: webshop-warehouse
     depends_on:
       postgres:

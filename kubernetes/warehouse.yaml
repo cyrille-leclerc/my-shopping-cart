@@ -35,7 +35,7 @@ spec:
           env:
             - name: SPRING_RABBITMQ_HOST
               value: rabbitmq
-          image: webshop-warehouse:latest
+          image: docker.io/cleclerc/webshop-warehouse:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

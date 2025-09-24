@@ -57,7 +57,7 @@ spec:
               # is NOT good because we would miss some logs. Note that K8s events like OOM Killer ar NOT logged
               # in the container logs, but in the K8s events and in the K8s node logs.
             #  value: "OFF"
-          image: webshop-frontend:latest
+          image: docker.io/cleclerc/webshop-frontend:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

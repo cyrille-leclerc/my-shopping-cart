@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Uninstalling OpenTelemetry stack..."
+helm uninstall opentelemetry-stack --namespace default
+
+echo "Removing Grafana Cloud endpoint configuration..."
+kubectl delete -f ../grafana-cloud-endpoint-config.yaml --ignore-not-found=true
+
+echo "OpenTelemetry stack uninstalled successfully!"
+
+# Optional: Show remaining resources
+echo ""
+echo "Checking for any remaining resources..."
+kubectl get pods,services,configmaps -l app.kubernetes.io/instance=opentelemetry-stack --namespace default
+
+# Remove OpenTelemetry CRDs (optional - be careful as this affects all OpenTelemetry resources)
+echo "Delete CRDs"
+kubectl delete crd opentelemetrycollectors.opentelemetry.io
+kubectl delete crd instrumentations.opentelemetry.io
+kubectl delete crd opampbridges.opentelemetry.io

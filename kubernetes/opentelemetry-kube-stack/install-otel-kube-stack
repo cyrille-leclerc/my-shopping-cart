@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# set -x
+
+# Validate required files exist
+if [[ ! -f "../grafana-cloud-endpoint-config.yaml" ]]; then
+    echo "Error: grafana-cloud-endpoint-config.yaml not found in parent directory"
+    exit 1
+fi
+
+echo "Applying Grafana Cloud endpoint configuration (url & credentials)..."
+kubectl apply -f ../grafana-cloud-endpoint-config.yaml
+
+echo ""
+echo "Upgrading/Installing OpenTelemetry stack..."
+helm upgrade --install opentelemetry-stack opentelemetry/opentelemetry-kube-stack \
+    -f values.yaml \
+    --namespace default \
+    --wait \
+    --timeout 300s
+
+echo ""
+echo "OpenTelemetry stack deployment completed successfully!"

@@ -40,7 +40,7 @@ spec:
               value: jdbc:postgresql://postgres:5432/ecommerce
             - name: SPRING_DATASOURCE_USERNAME
               value: ecommerce
-          image: webshop-fraud-detection:latest
+          image: docker.io/cleclerc/webshop-fraud-detection:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
