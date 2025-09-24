@@ -3,7 +3,7 @@
 clusterName: my-otel-stack
 crds:
   installOtel: true
-  installPrometheus: false
+  installPrometheus: false # disable to prevent install of Prometheus  components
 collectors:
   daemon:
     enabled: true
@@ -24,26 +24,26 @@ collectors:
             name: grafana-cloud-config
             key: GRAFANA_CLOUD_OTLP_ENDPOINT
     # disable scrapping using daemon_scrape_configs.yaml as it assumes the Prometheus Node Exporter and CAdvisor are setup
-    # https://github.com/open-telemetry/opentelemetry-helm-charts/blob/main/charts/opentelemetry-kube-stack/daemon_scrape_configs.yaml
+    # https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-kube-stack#scrape_configs_file-details
     scrape_configs_file: ""
     # Disable presets that require host access and cause issues on Docker Desktop
     presets:
       logsCollection:
-        enabled: false
+        enabled: false # TODO enable. It's disabled on Docker Desktop
+        storeCheckpoints: false # TODO enable. It's disabled on Docker Desktop.
       hostMetrics:
-        enabled: false
+        enabled: false # TODO enable. It's disabled on Docker Desktop
       kubeletMetrics:
         enabled: true
       kubernetesAttributes:
         enabled: true
       kubernetesEvents:
-        enabled: false
+        enabled: true
       clusterMetrics:
-        enabled: false
+        enabled: true
     config:
       extensions:
         basicauth/grafana_cloud:
-          # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/basicauthextension
           client_auth:
             username: "${env:GRAFANA_CLOUD_INSTANCE_ID}"
             password: "${env:GRAFANA_CLOUD_API_KEY}"
@@ -89,15 +89,11 @@ collectors:
                     prometheus:
                       host: '0.0.0.0'
                       port: 8888
-              - periodic:
-                  interval: 10000
-                  timeout: 5000
-                  exporter:
-                    otlp:
-                      protocol: http/protobuf
-                      endpoint: http://${OTEL_K8S_NODE_NAME}:4318
           logs:
             level: info
+    securityContext: # Run daemon collector as root for metrics & logs scrapping
+      runAsUser: 0
+      runAsGroup: 0
 instrumentation:
   enabled: true
   env:
@@ -112,6 +108,11 @@ instrumentation:
   resource:
     resourceAttributes:
       deployment.environment.name: production
+  propagators:
+    - tracecontext
+    - baggage
+  sampler:
+    type: parentbased_always_on # see https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_traces_sampler
   java:
     image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.20.0
     env:
@@ -153,14 +154,19 @@ instrumentation:
     env:
       - name: OTEL_EXPORTER_OTLP_ENDPOINT
         value: http://opentelemetry-stack-daemon-collector:4318
-
+      - name: OTEL_EXPORTER_OTLP_PROTOCOL
+        value: "http/protobuf"
 opentelemetry-operator:
   admissionWebhooks:
     certManager:
-      enabled: false
+      enabled: false # for production use cert-manager. See https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator#tls-certificate-requirement
     autoGenerateCert:
       enabled: true
-kubeStateMetrics:
-  enabled: false
-nodeExporter:
-  enabled: false
+      recreate: true # set to true when autoGenerateCert is enabled to prevent cert trust problems
+defaultCRConfig:
+  enabled: true
+  image:
+    repository: otel/opentelemetry-collector-contrib
+  targetAllocator:
+    enabled: false # For advanced use cases. See https://github.com/open-telemetry/opentelemetry-operator/tree/main/cmd/otel-allocator
+  config: {} # TODO add shared config
