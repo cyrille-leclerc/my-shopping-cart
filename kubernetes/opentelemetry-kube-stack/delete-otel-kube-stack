@@ -5,7 +5,7 @@ echo "Uninstalling OpenTelemetry stack..."
 helm uninstall opentelemetry-stack --namespace default
 
 echo "Removing Grafana Cloud endpoint configuration..."
-kubectl delete -f ../grafana-cloud-endpoint-config.yaml --ignore-not-found=true
+kubectl delete -f ./grafana-cloud-endpoint-config.yaml --ignore-not-found=true
 
 echo "OpenTelemetry stack uninstalled successfully!"
 

@@ -39,6 +39,8 @@ spec:
               value: "checkout:50051"
             - name: FRAUDDETECTIONSERVICE_BASEURL
               value: "http://fraud-detection:8080"
+            - name: UNINSTRUMENTEDSERVICE_URL
+              value: "http://example.com"
             - name: SPRING_DATASOURCE_PASSWORD
               value: "ecommerce"
             - name: SPRING_DATASOURCE_URL

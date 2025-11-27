@@ -7,12 +7,11 @@
     <artifactId>checkout</artifactId>
 
     <properties>
-        <opentelemetry.version>1.54.1</opentelemetry.version>
-        <opentelemetry-instrumentation.version>2.20.1</opentelemetry-instrumentation.version>
+        <opentelemetry.version>1.56.0</opentelemetry.version>
+        <opentelemetry-instrumentation.version>2.22.0</opentelemetry-instrumentation.version>
 
         <grpc.version>1.75.0</grpc.version>
-        <protobuf.version>4.32.1</protobuf.version>
-        <protoc.version>4.32.1</protoc.version>
+        <protobuf-java.version>4.32.1</protobuf-java.version>
 
         <!--suppress UnresolvedMavenProperty -->
         <container-registry.username>${env.CONTAINER_REGISTRY_USERNAME}</container-registry.username>
@@ -113,7 +112,7 @@
             <dependency>
                 <groupId>com.google.protobuf</groupId>
                 <artifactId>protobuf-bom</artifactId>
-                <version>${protobuf.version}</version>
+                <version>${protobuf-java.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -225,21 +224,23 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
+                <groupId>io.github.ascopes</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
+                <version>3.10.2</version>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}
-                    </protocArtifact>
-                    <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}
-                    </pluginArtifact>
+                    <protocVersion>${protobuf-java.version}</protocVersion>
+                    <binaryMavenPlugins>
+                        <binaryMavenPlugin>
+                            <groupId>io.grpc</groupId>
+                            <artifactId>protoc-gen-grpc-java</artifactId>
+                            <version>${grpc.version}</version>
+                        </binaryMavenPlugin>
+                    </binaryMavenPlugins>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
+                            <goal>generate</goal>
                         </goals>
                     </execution>
                 </executions>

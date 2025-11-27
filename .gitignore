@@ -42,6 +42,6 @@ secrets/
 .DS_Store
 
 # OpenTelemetry Grafana Cloud configuration (contains secrets)
-kubernetes/grafana-cloud-endpoint-config.yaml
+kubernetes/opentelemetry-kube-stack/grafana-cloud-endpoint-config.yaml
 # Keep the template file
-!kubernetes/grafana-cloud-endpoint-config.yaml.template
+!kubernetes/opentelemetry-kube-stack/grafana-cloud-endpoint-config.yaml.template

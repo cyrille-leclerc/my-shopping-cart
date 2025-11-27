@@ -26,13 +26,12 @@ collectors:
     # disable scrapping using daemon_scrape_configs.yaml as it assumes the Prometheus Node Exporter and CAdvisor are setup
     # https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-kube-stack#scrape_configs_file-details
     scrape_configs_file: ""
-    # Disable presets that require host access and cause issues on Docker Desktop
     presets:
       logsCollection:
-        enabled: false # TODO enable. It's disabled on Docker Desktop
-        storeCheckpoints: false # TODO enable. It's disabled on Docker Desktop.
+        enabled: false # TODO disable when running on Docker Desktop
+        storeCheckpoints: false # TODO disable when running on Docker Desktop
       hostMetrics:
-        enabled: false # TODO enable. It's disabled on Docker Desktop
+        enabled: false # TODO disable when running on Docker Desktop
       kubeletMetrics:
         enabled: true
       kubernetesAttributes:
@@ -54,31 +53,19 @@ collectors:
           endpoint: "${env:GRAFANA_CLOUD_OTLP_ENDPOINT}"
           auth:
             authenticator: basicauth/grafana_cloud
+      processors:
+        resourcedetection/digitalocean:
+          detectors: ["digitalocean"]
       service:
         extensions: [basicauth/grafana_cloud, health_check]
         pipelines:
           traces:
-            receivers:
-              - otlp
-            processors:
-              - resourcedetection/env
-              - batch
             exporters:
               - otlphttp
           metrics:
-            receivers:
-              - otlp
-            processors:
-              - resourcedetection/env
-              - batch
             exporters:
               - otlphttp
           logs:
-            receivers:
-              - otlp
-            processors:
-              - resourcedetection/env
-              - batch
             exporters:
               - otlphttp
         telemetry:
@@ -114,7 +101,7 @@ instrumentation:
   sampler:
     type: parentbased_always_on # see https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_traces_sampler
   java:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.20.0
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.22.0
     env:
     - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES
       value: "true"
@@ -147,8 +134,8 @@ instrumentation:
           key: PYROSCOPE_BASIC_AUTH_PASSWORD
     # don't duplicate app logs that are collected through OTLP, stop emitting them to stdout
     # Use SpringBoot CONSOLE_LOG_THRESHOLD=OFF to disable console logs
-    - name: CONSOLE_LOG_THRESHOLD
-      value: "OFF"
+    #- name: CONSOLE_LOG_THRESHOLD
+    #  value: "OFF"
 
   python:
     env:
@@ -165,8 +152,5 @@ opentelemetry-operator:
       recreate: true # set to true when autoGenerateCert is enabled to prevent cert trust problems
 defaultCRConfig:
   enabled: true
-  image:
-    repository: otel/opentelemetry-collector-contrib
   targetAllocator:
     enabled: false # For advanced use cases. See https://github.com/open-telemetry/opentelemetry-operator/tree/main/cmd/otel-allocator
-  config: {} # TODO add shared config
