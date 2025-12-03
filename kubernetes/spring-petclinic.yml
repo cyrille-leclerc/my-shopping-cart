@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: petclinic
+spec:
+  ports:
+    - port: 8079
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: petclinic
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petclinic
+  labels:
+    app.kubernetes.io/name: petclinic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: petclinic
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: petclinic
+      annotations:
+        resource.opentelemetry.io/service.name: petclinic
+        resource.opentelemetry.io/service.namespace: spring
+        instrumentation.opentelemetry.io/inject-java: "true"
+    spec:
+      containers:
+        - name: petclinic
+          image: springcommunity/spring-petclinic:3.5.6
+          imagePullPolicy: IfNotPresent
+          env:
+#            - name: SPRING_PROFILES_ACTIVE
+#              value: postgres
+            - name: SERVICE_BINDING_ROOT
+              value: /bindings
+            - name: SPRING_APPLICATION_JSON
+              value: |
+                {
+                  "management.endpoint.health.probes.add-additional-paths": true
+                }
+          ports:
+            - name: http
+              containerPort: 8080
+

@@ -1,0 +1,7 @@
+#!/bin/bash
+set -x
+set -euo pipefail
+
+docker run --name rabbitmq_my_shopping_cart \
+   -p 5672:5672 \
+   rabbitmq:4-alpine

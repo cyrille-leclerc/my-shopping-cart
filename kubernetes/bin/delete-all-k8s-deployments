@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# filepath: delete-all-k8s-deployments.sh
+set -euo pipefail
+
+KUBERNETES_DIR="../../kubernetes"
+
+echo "🗑️  Deleting all Kubernetes deployments from $KUBERNETES_DIR folder..."
+
+# Check if kubernetes directory exists
+if [ ! -d "$KUBERNETES_DIR" ]; then
+    echo "❌ Error: $KUBERNETES_DIR directory not found!"
+    exit 1
+fi
+
+# Function to delete resources from a YAML file
+delete_yaml_file() {
+    local file="$1"
+    echo "📄 Deleting resources from: $file"
+    
+    if kubectl delete -f "$file" --ignore-not-found=true --timeout=60s; then
+        echo "✅ Successfully deleted resources from $file"
+    else
+        echo "⚠️  Warning: Some resources from $file could not be deleted"
+    fi
+}
+
+# Find and delete all YAML files
+echo "🔍 Finding all YAML/YML files in $KUBERNETES_DIR..."
+
+# Delete OpenTelemetry stack first (if exists)
+OTEL_STACK_DIR="$KUBERNETES_DIR/opentelemetry-kube-stack"
+if [ -d "$OTEL_STACK_DIR" ]; then
+    echo "🔧 Uninstalling OpenTelemetry stack..."
+    
+    # Try to uninstall helm chart first
+    if helm list | grep -q "opentelemetry-stack"; then
+        echo "📦 Uninstalling Helm chart..."
+        helm uninstall opentelemetry-stack --namespace default --no-hooks --timeout 300s || true
+    fi
+    
+    # Delete any remaining YAML files in otel directory
+    find "$OTEL_STACK_DIR" -name "*.yaml" -o -name "*.yml" | while read -r file; do
+        if [[ "$file" != *"values.yaml" ]]; then  # Skip values.yaml
+            delete_yaml_file "$file"
+        fi
+    done
+fi
+
+# Delete all other YAML files in kubernetes directory
+find "$KUBERNETES_DIR" -name "*.yaml" -o -name "*.yml" | while read -r file; do
+    # Skip certain files that shouldn't be deleted
+    case "$file" in
+        *values.yaml|*values.yml)
+            echo "⏭️  Skipping values file: $file"
+            ;;
+        *template*|*example*)
+            echo "⏭️  Skipping template/example file: $file"
+            ;;
+        *)
+            delete_yaml_file "$file"
+            ;;
+    esac
+done
+
+# Force delete any stuck resources
+echo "🧹 Cleaning up any stuck resources..."
+
+# Delete any remaining pods, services, deployments with your app labels
+kubectl delete all -l app.kubernetes.io/part-of=webshop --force --grace-period=0 --timeout=60s || true
+kubectl delete all -l app=webshop --force --grace-period=0 --timeout=60s || true
+
+# Clean up OpenTelemetry CRDs if they exist
+echo "🔧 Cleaning up OpenTelemetry CRDs..."
+kubectl delete crd opentelemetrycollectors.opentelemetry.io --ignore-not-found=true || true
+kubectl delete crd instrumentations.opentelemetry.io --ignore-not-found=true || true
+kubectl delete crd opampbridges.opentelemetry.io --ignore-not-found=true || true
+
+# Clean up any config maps that might have been created
+echo "🗂️  Cleaning up ConfigMaps..."
+kubectl delete configmap grafana-cloud-config --ignore-not-found=true || true
+
+# Show remaining resources
+echo ""
+echo "📊 Checking for any remaining resources..."
+echo "=== Pods ==="
+kubectl get pods --all-namespaces | grep -v "kube-system\|default.*Running" || echo "No custom pods found"
+
+echo ""
+echo "=== Services ==="
+kubectl get svc | grep -v "kubernetes\|ClusterIP.*443" || echo "No custom services found"
+
+echo ""
+echo "=== Deployments ==="
+kubectl get deployments || echo "No deployments found"
+
+echo ""
+echo "=== ConfigMaps ==="
+kubectl get configmaps | grep -v "kube-root-ca.crt" || echo "No custom configmaps found"
+
+echo ""
+echo "✅ Cleanup completed!"
+echo "💡 If you see any stuck resources, you may need to force delete them manually:"
+echo "   kubectl delete <resource-type> <resource-name> --force --grace-period=0"

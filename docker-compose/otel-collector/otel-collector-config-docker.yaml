@@ -1,0 +1,65 @@
+
+extensions:
+  basicauth/grafana_cloud:
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension/basicauthextension
+    client_auth:
+      username: "${env:GRAFANA_CLOUD_INSTANCE_ID}"
+      password: "${env:GRAFANA_CLOUD_API_KEY}"
+  health_check:
+    # https://github:com/open-telemetry/opentelemetry-collector-contrib/blob/main/extension/healthcheckextension/README.md
+    endpoint: "0.0.0.0:13133"
+
+receivers:
+  otlp:
+    # https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver/otlpreceiver
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  datadog:
+    endpoint: 0.0.0.0:8126
+processors:
+  batch:
+  # https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor
+  resourcedetection:
+    # Enriches telemetry data with resource information from the host
+    # https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourcedetectionprocessor
+    detectors: ["env", "system"]
+    override: false
+
+connectors:
+  grafanacloud:
+    host_identifiers: ["k8s.node.uid", "k8s.node.name", "host.id", "host.name", "container.id"]
+
+exporters:
+  otlphttp/grafana_cloud:
+    # https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter/otlpexporter
+    endpoint: "${env:GRAFANA_CLOUD_OTLP_ENDPOINT}"
+    auth:
+      authenticator: basicauth/grafana_cloud
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+service:
+  extensions: [basicauth/grafana_cloud]
+  pipelines:
+    traces:
+      receivers: [otlp, datadog]
+      processors: [resourcedetection, batch]
+      exporters: [grafanacloud, otlphttp/grafana_cloud]
+    metrics:
+      receivers: [otlp, datadog, grafanacloud]
+      processors: [resourcedetection, batch]
+      exporters: [otlphttp/grafana_cloud, prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [resourcedetection, batch]
+      exporters: [otlphttp/grafana_cloud]
+  telemetry:
+    metrics:
+      readers:
+        - pull:
+            exporter:
+              prometheus:
+                host: '0.0.0.0'
+                port: 8888

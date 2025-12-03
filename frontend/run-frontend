@@ -148,6 +148,11 @@ export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SER
 export LOG_FILE=$PRGDIR/../logs/frontend.log
 export FILE_LOG_PATTERN="%d{yyyy-MM-dd HH:mm:ss.SSSXXX} [%15.15thread] %-5level %-30.30logger{29} : %msg%n%ex"
 
+export spring_datasource_url=jdbc:postgresql://localhost:5432/my_shopping_cart
+export fraudDetectionService_baseUrl=http://localhost:8081
+export checkoutService.grpcEndpoint=localhost:50051
+export spring_rabbitmq_host=localhost
+
 java -javaagent:$PRGDIR/../.otel/opentelemetry-javaagent-$OPEN_TELEMETRY_AGENT_VERSION.jar \
      -javaagent:$PYROSCOPE_AGENT_JAR \
      -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \

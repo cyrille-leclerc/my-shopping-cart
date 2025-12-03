@@ -1,0 +1,32 @@
+#!/bin/bash
+set -euo pipefail
+
+set -x
+source /Users/cyrilleleclerc/git/opentelemetry/opentelemetry-demo/.env
+
+source .env
+
+CONTAINER_NAME=otelcol_my_shopping_cart
+
+# If a container with the same name exists, stop and remove it
+if docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
+  echo "Removing existing container ${CONTAINER_NAME}"
+  docker rm -f "${CONTAINER_NAME}"
+fi
+
+export COLLECTOR_CONTRIB_IMAGE="otelcontribcol:latest"
+
+export COLLECTOR_CONTRIB_IMAGE="sha256:48738018d167c7f9d60d0a55e1ff40c0735db59b3967522b92637c655cdb7f1e"
+
+docker run -d --name "${CONTAINER_NAME}" \
+  --env GRAFANA_CLOUD_API_KEY=$GRAFANA_CLOUD_API_KEY \
+  --env GRAFANA_CLOUD_INSTANCE_ID=$GRAFANA_CLOUD_INSTANCE_ID \
+  --env GRAFANA_CLOUD_OTLP_ENDPOINT=$GRAFANA_CLOUD_OTLP_ENDPOINT \
+   -v $(pwd)/docker-compose/otel-collector/otel-collector-config-docker.yaml:/etc/otelcol-contrib/config.yaml \
+   -v $(pwd)/docker-compose/otel-collector/otel-collector-config-docker.yaml:/etc/otel/config.yaml \
+   -p 4317:4317 \
+   -p 4318:4318 \
+   -p 8126:8126 \
+   -p 8888:8888 \
+   -p 8889:8889 \
+   $COLLECTOR_CONTRIB_IMAGE

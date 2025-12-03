@@ -105,6 +105,8 @@ export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SER
 
 export OTEL_SEMCONV_STABILITY_OPT_IN=http,database
 
+export spring_datasource_url=jdbc:postgresql://localhost:5432/my_shopping_cart
+
 java -javaagent:"$OPEN_TELEMETRY_AGENT_JAR" \
      -Dserver.port=8081 \
      -Dotel.instrumentation.logback-appender.experimental-log-attributes=true \

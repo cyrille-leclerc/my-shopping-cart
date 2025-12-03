@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# set -x
+
+##########################################################################################
+# PARENT DIRECTORY
+# code copied from Tomcat's `catalina.sh`
+##########################################################################################
+# resolve links - $0 may be a softlink
+PRG="$0"
+
+while [ -h "$PRG" ]; do
+  ls=$(ls -ld "$PRG")
+  link=$(expr "$ls" : '.*-> \(.*\)$')
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=$(dirname "$PRG")/"$link"
+  fi
+done
+
+# Get standard environment variables
+PRGDIR=$(dirname "$PRG")
+
+# LOAD ENVIRONMENT VARIABLES
+if [ -r "$PRGDIR/../setenv.sh" ]; then
+  . "$PRGDIR/../setenv.sh"
+else
+  . "$PRGDIR/../setenv.default.sh"
+fi
+if [ -r "$PRGDIR/setenv.sh" ]; then
+  . "$PRGDIR/setenv.sh"
+fi
+
+export DATADOG_AGENT_HOME=$PRGDIR/../.datadog
+mkdir -p "$DATADOG_AGENT_HOME"
+
+##########################################################################################
+# DOWNLOAD DATADOG AGENT IF NOT FOUND
+# code copied from Maven Wrappers's mvnw`
+##########################################################################################
+
+export DATADOG_AGENT_JAR=$DATADOG_AGENT_HOME/dd-java-agent-$DATADOG_AGENT_VERSION.jar
+if [ -r "$DATADOG_AGENT_JAR" ]; then
+    echo "Found $DATADOG_AGENT_JAR"
+else
+    echo "Couldn't find $DATADOG_AGENT_JAR, downloading it ..."
+    jarUrl="https://github.com/DataDog/dd-trace-java/releases/download/v$DATADOG_AGENT_VERSION/dd-java-agent-$DATADOG_AGENT_VERSION.jar"
+
+    if command -v wget > /dev/null; then
+        wget "$jarUrl" -O "$DATADOG_AGENT_JAR"
+    elif command -v curl > /dev/null; then
+        curl -L --max-redirs 5 -o "$DATADOG_AGENT_JAR" "$jarUrl"
+    else
+        echo "FAILURE: Datadog agent not found and none of curl and wget found"
+        exit 1;
+    fi
+fi
+
+$PRGDIR/../mvnw -DskipTests package
+
+echo "####################"
+echo "# START FRONTEND #"
+echo "####################"
+echo ""
+
+export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
+export PATH=$JAVA_HOME/bin:$PATH
+
+# see https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/java/?tab=wget
+export DD_ENV="production"
+export DD_SERVICE="frontend"
+export DD_VERSION="1.1"
+
+export DD_TRACE_DEBUG=false
+export DD_TRACE_AGENT_URL="http://localhost:8126"
+export DD_REMOTE_CONFIGURATION_ENABLED=false
+export DD_TRACE_PROPAGATION_STYLE=tracecontext
+
+
+# https://docs.spring.io/spring-boot/reference/features/logging.html
+export LOG_FILE=$PRGDIR/../logs/frontend.log
+export FILE_LOG_PATTERN="%d{yyyy-MM-dd HH:mm:ss.SSSXXX} [%15.15thread] %-5level %-30.30logger{29} : %msg%n%ex"
+
+export spring_datasource_url=jdbc:postgresql://localhost:5432/my_shopping_cart
+export fraudDetectionService_baseUrl=http://localhost:8081
+export checkoutService_grpcEndpoint=localhost:50051
+export spring_rabbitmq_host=localhost
+
+java -version
+
+java --show-version \
+     -javaagent:"$DATADOG_AGENT_JAR" \
+     -Dserver.port=8080 \
+     -jar target/frontend-1.1-SNAPSHOT.jar
+

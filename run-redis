@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+
+source /Users/cyrilleleclerc/git/opentelemetry/opentelemetry-demo/.env
+
+docker run --name valkey_my_shopping_cart \
+   -p 6379:6379 \
+   $VALKEY_IMAGE
