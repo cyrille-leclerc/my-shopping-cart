@@ -48,6 +48,15 @@ collectors:
             password: "${env:GRAFANA_CLOUD_API_KEY}"
         health_check: # For K8s Liveness and Readiness Probes
           endpoint: 0.0.0.0:13133
+        k8s_observer:
+          observe_nodes: true
+          observe_services: true
+          observe_ingresses: true
+      receivers:
+        receiver_creator/k8s:
+          watch_observers: [k8s_observer]
+          discovery:
+            enabled: true
       exporters:
         otlphttp:
           endpoint: "${env:GRAFANA_CLOUD_OTLP_ENDPOINT}"

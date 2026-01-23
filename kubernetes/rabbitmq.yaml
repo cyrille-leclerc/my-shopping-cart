@@ -27,6 +27,13 @@ spec:
       app.kubernetes.io/name: rabbitmq
   template:
     metadata:
+      annotations:
+        io.opentelemetry.discovery.metrics/enabled: 'false'
+        io.opentelemetry.discovery.metrics/scraper: rabbitmq
+        io.opentelemetry.discovery.metrics/config: |
+          endpoint: http://`endpoint`:15672 #:15672
+          username: guest
+          password: guest
       labels:
         app.kubernetes.io/name: rabbitmq
     spec:
@@ -37,5 +44,7 @@ spec:
             - containerPort: 5672
               protocol: TCP
             - containerPort: 15672
+              protocol: TCP
+            - containerPort: 15692
               protocol: TCP
       restartPolicy: Always

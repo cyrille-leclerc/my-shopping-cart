@@ -1,9 +1,7 @@
 package com.mycompany.ecommerce;
 
 import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.datatype.hibernate6.Hibernate6Module;
-import com.mycompany.ecommerce.model.Product;
-import com.mycompany.ecommerce.service.ProductService;
+import com.fasterxml.jackson.datatype.hibernate7.Hibernate7Module;
 import io.opentelemetry.api.GlobalOpenTelemetry;
 import io.opentelemetry.api.metrics.Meter;
 import org.springframework.amqp.core.Binding;
@@ -14,25 +12,28 @@ import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.redis.cache.RedisCache;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 @SpringBootApplication
+@EnableJpaRepositories(basePackages = "com.mycompany.ecommerce.repository")
 public class EcommerceApplication {
 
     public static final String AMQP_EXCHANGE = "ecommerce-exchange";
@@ -60,7 +61,7 @@ public class EcommerceApplication {
 
     @Bean
     public MessageConverter amqpMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+        return new JacksonJsonMessageConverter();
     }
 
     @Bean
@@ -82,13 +83,17 @@ public class EcommerceApplication {
     }
 
     @Bean
-    public RestTemplate getRestTemplate() {
-        return new RestTemplateBuilder().readTimeout(Duration.of(1200, ChronoUnit.MILLIS)).build();
+    public RestClient getRestClient() {
+        JdkClientHttpRequestFactory clientHttpRequestFactory = new JdkClientHttpRequestFactory();
+        clientHttpRequestFactory.setReadTimeout(Duration.of(1200, ChronoUnit.MILLIS));
+        return RestClient.builder()
+                .requestFactory(clientHttpRequestFactory)
+                .build();
     }
 
     @Bean
     public Module getJacksonHibernate5Module() {
-        return new Hibernate6Module();
+        return new Hibernate7Module();
     }
 
     @Bean
@@ -98,12 +103,11 @@ public class EcommerceApplication {
 
     @Bean
     public RedisCacheConfiguration cacheConfiguration() {
+        GenericJacksonJsonRedisSerializer serializer = GenericJacksonJsonRedisSerializer.builder().typePropertyName("_type").enableUnsafeDefaultTyping().build();
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(5))
                 .disableCachingNullValues()
-                .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(
-                                new GenericJackson2JsonRedisSerializer()));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));
     }
 
     @Bean

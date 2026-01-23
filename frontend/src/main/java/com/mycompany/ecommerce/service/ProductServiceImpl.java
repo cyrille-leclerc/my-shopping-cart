@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -41,9 +42,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @WithSpan
     public Product getProduct(@SpanAttribute("productId") long id) throws ResourceNotFoundException {
-        Object cacheKey = cacheMissAttack ? UUID.randomUUID().toString() : id;
+        Object cacheKey = Product.class.getName() + "-" + (cacheMissAttack ? UUID.randomUUID().toString() : id);
 
-        final Product product = productCache.get(cacheKey, () -> {
+        Callable<Product> productLoader = () -> {
             long beforeInNanos = System.nanoTime();
             try {
                 Product product1 = productRepository.doFindByIdWithThrottle(id).orElseThrow(() -> new ResourceNotFoundException("Product " + id + " not found"));
@@ -53,9 +54,11 @@ public class ProductServiceImpl implements ProductService {
                 logger.atInfo()
                         .addKeyValue("product.id", id)
                         .addKeyValue("loadTimeMs", TimeUnit.MILLISECONDS.convert(System.nanoTime() - beforeInNanos, TimeUnit.NANOSECONDS))
-                        .log("Cache miss");
+                        .log("product-cache-miss");
             }
-        });
+        };
+
+        final Product product = productCache.get(cacheKey, productLoader);
         if (product == null) {
             throw new ResourceNotFoundException("product " + id);
         }

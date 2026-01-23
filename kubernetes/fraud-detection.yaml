@@ -26,8 +26,7 @@ spec:
       annotations:
         resource.opentelemetry.io/service.name: fraud-detection
         resource.opentelemetry.io/service.namespace: ecommerce
-        resource.opentelemetry.io/service.version: "1.1"
-        instrumentation.opentelemetry.io/inject-java: "true"
+        instrumentation.opentelemetry.io/inject-java: "opentelemetry-operator-system/otel-instrumentation"
       labels:
         app.kubernetes.io/name: fraud-detection
     spec:
@@ -37,10 +36,10 @@ spec:
             - name: SPRING_DATASOURCE_PASSWORD
               value: ecommerce
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres:5432/ecommerce
+              value: jdbc:postgresql://pg-ecommerce:5432/ecommerce
             - name: SPRING_DATASOURCE_USERNAME
               value: ecommerce
-          image: docker.io/cleclerc/webshop-fraud-detection:latest
+          image: docker.io/cyrilleleclerc937/webshop-fraud-detection:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

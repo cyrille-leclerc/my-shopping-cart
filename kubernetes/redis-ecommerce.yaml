@@ -2,29 +2,34 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis
+  name: redis-ecommerce
 spec:
   ports:
     - name: redis
       port: 6379
       targetPort: 6379
   selector:
-    app.kubernetes.io/name: redis
+    app.kubernetes.io/name: redis-ecommerce
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: redis
+  name: redis-ecommerce
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: redis
+      app.kubernetes.io/name: redis-ecommerce
   template:
     metadata:
+      annotations:
+        io.opentelemetry.discovery.metrics/enabled: 'true'
+        io.opentelemetry.discovery.metrics/scraper: redis
+        io.opentelemetry.discovery.metrics/config: |
+          collection_interval: 10s
       labels:
-        app.kubernetes.io/name: redis
+        app.kubernetes.io/name: redis-ecommerce
     spec:
       containers:
         - name: redis

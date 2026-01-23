@@ -25,8 +25,7 @@ spec:
       annotations:
         resource.opentelemetry.io/service.name: checkout
         resource.opentelemetry.io/service.namespace: ecommerce
-        resource.opentelemetry.io/service.version: "1.1"
-        instrumentation.opentelemetry.io/inject-java: "true"
+        instrumentation.opentelemetry.io/inject-java: "opentelemetry-operator-system/otel-instrumentation"
       labels:
         app.kubernetes.io/name: checkout
     spec:
@@ -35,7 +34,7 @@ spec:
           env:
             - name: SHIPPING_SERVICE_URL
               value: http://shipping:8080
-          image: docker.io/cleclerc/webshop-checkout:latest
+          image: docker.io/cyrilleleclerc937/webshop-checkout:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: grpc

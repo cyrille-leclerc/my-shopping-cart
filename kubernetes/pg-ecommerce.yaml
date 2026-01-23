@@ -15,32 +15,57 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres
+  name: pg-ecommerce
 spec:
   ports:
     - protocol: TCP
       port: 5432
       targetPort: 5432
   selector:
-    app.kubernetes.io/name: postgres
+    app.kubernetes.io/name: pg-ecommerce
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres
+  name: pg-ecommerce
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: postgres
+      app.kubernetes.io/name: pg-ecommerce
   template:
     metadata:
+      annotations:
+        io.opentelemetry.discovery.metrics/enabled: 'true'
+        io.opentelemetry.discovery.metrics/scraper: postgresql
+        io.opentelemetry.discovery.metrics/config: |
+          username: ecommerce
+          password: ecommerce
+          metrics:
+            postgresql.blks_hit:
+              enabled: true
+            postgresql.blks_read:
+              enabled: true
+            postgresql.tup_fetched:
+              enabled: true
+            postgresql.tup_returned:
+              enabled: true
+            postgresql.tup_inserted:
+              enabled: true
+            postgresql.tup_updated:
+              enabled: true
+            postgresql.tup_deleted:
+              enabled: true
+            postgresql.deadlocks:
+              enabled: true
+          tls:
+            insecure: true
       labels:
-        app.kubernetes.io/name: postgres
+        app.kubernetes.io/name: pg-ecommerce
     spec:
       containers:
         - name: postgres
-          image: postgres:17.6-alpine
+          image: postgres:17-alpine
           args: ["-c", "shared_preload_libraries=pg_stat_statements"]
           env:
             - name: POSTGRES_PASSWORD

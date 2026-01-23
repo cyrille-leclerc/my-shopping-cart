@@ -36,15 +36,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 
 import javax.annotation.Nonnull;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -61,7 +66,7 @@ public class OrderController {
     final OrderProductService orderProductService;
     final CheckoutService checkoutService;
     RabbitTemplate rabbitTemplate;
-    RestTemplate restTemplate;
+    RestClient restClient;
     String fraudDetectionServiceBaseUrl;
     String unInstrumentedServiceUrl;
     final DoubleHistogram orderValueHistogram;
@@ -95,6 +100,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<Order> create(@RequestBody OrderForm orderForm, HttpServletRequest request) {
+
         Span span = Span.current();
 
         List<OrderProductDto> formDtos = orderForm.getProductOrders();
@@ -115,59 +121,61 @@ public class OrderController {
         span.setAttribute(EcommerceAttributes.PAYMENT_METHOD.getKey(), paymentMethod);
 
         ResponseEntity<String> fraudDetectionResult;
-        String url = this.fraudDetectionServiceBaseUrl + (fraudDetectionServiceBaseUrl.endsWith("/") ? "" : "/") + "fraud/checkOrder?orderValue={q}&customerIpAddress={q}&shippingCountry={q}&paymentMethod={q}";
+        String fraudDetectionServiceUrl = this.fraudDetectionServiceBaseUrl + (fraudDetectionServiceBaseUrl.endsWith("/") ? "" : "/") + "fraud/checkOrder?orderValue={orderValue}&customerIpAddress={customerIpAddress}&shippingCountry={shippingCountry}&paymentMethod={paymentMethod}";
         try {
-            fraudDetectionResult = restTemplate.getForEntity(
-                    url,
-                    String.class,
-                    orderValue, request.getRemoteAddr(),
-                    shippingCountry,
-                    paymentMethod);
+            Map<String, ? extends Serializable> params = Map.of(
+                    "orderValue", orderValue,
+                    "customerIpAddress", request.getRemoteAddr(),
+                    "shippingCountry", shippingCountry,
+                    "paymentMethod", paymentMethod
+            );
+
+            fraudDetectionResult = this.restClient.get().uri(fraudDetectionServiceUrl, params).retrieve().toEntity(String.class);
         } catch (RestClientException e) {
             String exceptionShortDescription = e.getClass().getSimpleName();
             FraudDetectionException fde = new FraudDetectionException(exceptionShortDescription, e);
             span.recordException(fde);
 
-//            logger.atWarn()
-//                    .addKeyValue("order", form)
-//                    .addKeyValue("orderValue", orderValue)
-//                    .addKeyValue("fraud.url", url)
-//                    .addKeyValue("fraud.exception", exceptionShortDescription)
-//                    .log("Fraud detection failure");
-            logger.warn("Fraud detection failure for order: {}, orderValue: {}, fraud.url: {}, type: RestClientException", orderForm, orderValue, url, e);
+            logger.atWarn()
+                    .addKeyValue("order", orderForm)
+                    .addKeyValue("orderValue", orderValue)
+                    .addKeyValue("fraud.url", fraudDetectionServiceUrl)
+                    .addKeyValue("fraud.exception", exceptionShortDescription)
+                    .log("Fraud detection failure");
+//            logger.warn("Fraud detection failure for order: {}, orderValue: {}, fraud.url: {}, type: RestClientException", orderForm, orderValue, url, e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (fraudDetectionResult.getStatusCode().isError()) {
             String exceptionShortDescription = "fraudDetection-status-" + fraudDetectionResult.getStatusCode();
             FraudDetectionException fde = new FraudDetectionException(exceptionShortDescription);
             span.recordException(fde);
-//            logger.atWarn()
-//                    .addKeyValue("order.paymentMethod", orderForm.paymentMethod)
-//                    .addKeyValue("order.shippingMethod", orderForm.shippingMethod)
-//                    .addKeyValue("order.shippingCountry", orderForm.shippingCountry)
-//                    .addKeyValue("order.value", orderValue)
-//                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
-//                    .addKeyValue("fraud.status_code", fraudDetectionResult.getStatusCode())
-//                    .addKeyValue("fraud.exception", exceptionShortDescription)
-//                    .log("Fraud detected on order");
-            logger.warn("Fraud detected for fraud.score: {}, fraud.status_code: {}, order: {}, orderValue: {}, type: response.status_code", fraudDetectionResult.getBody(), fraudDetectionResult.getStatusCode(), orderForm, orderValue, fde);
+            logger.atWarn()
+                    .addKeyValue("order.paymentMethod", orderForm.paymentMethod)
+                    .addKeyValue("order.shippingMethod", orderForm.shippingMethod)
+                    .addKeyValue("order.shippingCountry", orderForm.shippingCountry)
+                    .addKeyValue("order.value", orderValue)
+                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
+                    .addKeyValue("fraud.status_code", fraudDetectionResult.getStatusCode())
+                    .addKeyValue("fraud.exception", exceptionShortDescription)
+                    .log("Fraud detected on order");
+//            logger.warn("Fraud detected for fraud.score: {}, fraud.status_code: {}, order: {}, orderValue: {}, type: response.status_code", fraudDetectionResult.getBody(), fraudDetectionResult.getStatusCode(), orderForm, orderValue, fde);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (!"approved".equals(fraudDetectionResult.getBody())) {
             String exceptionShortDescription = "fraudDetection-" + fraudDetectionResult.getBody();
             FraudDetectionException fde = new FraudDetectionException(exceptionShortDescription);
             span.recordException(fde);
-//            logger.atWarn()
-//                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
-//                    .addKeyValue("order", form)
-//                    .addKeyValue("orderValue", orderValue)
-//                    .log("Fraud detected");
-            logger.warn("Fraud detected for fraud.score: {}, order: {}, orderValue: {}, type: response.body", fraudDetectionResult.getBody(), orderForm, orderValue, fde);
+            logger.atWarn()
+                    .addKeyValue("fraud.score", fraudDetectionResult.getBody())
+                    .addKeyValue("order", orderForm)
+                    .addKeyValue("orderValue", orderValue)
+                    .log("Fraud detected");
+//            logger.warn("Fraud detected for fraud.score: {}, order: {}, orderValue: {}, type: response.body", fraudDetectionResult.getBody(), orderForm, orderValue, fde);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         // invoke un-instrumented service.
-        ResponseEntity<String> unInstrumentedServiceResponse = restTemplate.getForEntity(this.unInstrumentedServiceUrl, String.class);
+        ResponseEntity<String> unInstrumentedServiceResponse = restClient.get().uri(this.unInstrumentedServiceUrl).retrieve().toEntity(String.class);
         if (unInstrumentedServiceResponse.getStatusCode() != HttpStatus.OK) {
             String exceptionShortDescription = unInstrumentedServiceUrl + "-status-" + fraudDetectionResult.getStatusCode();
             span.recordException(new Exception(exceptionShortDescription));
@@ -231,11 +239,11 @@ public class OrderController {
                 .log("Success placeOrder (structured logging example)");
 
 
-        logger.info("Order {} successfully placed, customerId: {}, price: {}, paymentMethod: {}, shippingMethod: {}, shippingCountry: {}",
-                order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry);
+        //logger.info("Order {} successfully placed, customerId: {}, price: {}, paymentMethod: {}, shippingMethod: {}, shippingCountry: {}",
+        //        order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry);
 
-        logger.info("msg=order-successfully-placed orderId={} customerId={} price={}, paymentMethod={} shippingMethod={} shippingCountry={}",
-                order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry);
+        //logger.info("msg=order-successfully-placed orderId={} customerId={} price={}, paymentMethod={} shippingMethod={} shippingCountry={}",
+        //        order.getId(), customerId, orderValue, paymentMethod, shippingMethod, shippingCountry);
 
         span.addEvent("order-creation", Attributes.builder()
                 .put(EcommerceAttributes.OUTCOME, "success")
@@ -263,9 +271,10 @@ public class OrderController {
         this.rabbitTemplate = rabbitTemplate;
     }
 
+
     @Autowired
-    public void setRestTemplate(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public void setRestClient(RestClient restClient) {
+        this.restClient = restClient;
     }
 
     @Value("${unInstrumentedService.url}")
@@ -292,11 +301,11 @@ public class OrderController {
 
         private List<OrderProductDto> productOrders;
 
-        private String paymentMethod;
+        private String paymentMethod = "#unknown#";
 
-        private String shippingCountry;
+        private String shippingCountry = "#unknown#";
 
-        private String shippingMethod;
+        private String shippingMethod = "#unknown#";
 
         public List<OrderProductDto> getProductOrders() {
             return productOrders;

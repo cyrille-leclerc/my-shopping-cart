@@ -25,8 +25,7 @@ spec:
       annotations:
         resource.opentelemetry.io/service.name: warehouse
         resource.opentelemetry.io/service.namespace: ecommerce
-        resource.opentelemetry.io/service.version: "1.1"
-        instrumentation.opentelemetry.io/inject-java: "true"
+        instrumentation.opentelemetry.io/inject-java: "opentelemetry-operator-system/otel-instrumentation"
       labels:
         app.kubernetes.io/name: warehouse
     spec:
@@ -35,7 +34,7 @@ spec:
           env:
             - name: SPRING_RABBITMQ_HOST
               value: rabbitmq
-          image: docker.io/cleclerc/webshop-warehouse:latest
+          image: docker.io/cyrilleleclerc937/webshop-warehouse:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http

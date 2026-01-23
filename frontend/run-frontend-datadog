@@ -63,8 +63,6 @@ echo "# START FRONTEND #"
 echo "####################"
 echo ""
 
-export JAVA_HOME=/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
-export PATH=$JAVA_HOME/bin:$PATH
 
 # see https://docs.datadoghq.com/tracing/trace_collection/automatic_instrumentation/dd_libraries/java/?tab=wget
 export DD_ENV="production"

@@ -10,8 +10,8 @@
         <opentelemetry.version>1.56.0</opentelemetry.version>
         <opentelemetry-instrumentation.version>2.22.0</opentelemetry-instrumentation.version>
 
-        <grpc.version>1.75.0</grpc.version>
-        <protobuf-java.version>4.32.1</protobuf-java.version>
+        <grpc.version>1.77.0</grpc.version>
+        <protobuf-java.version>4.33.1</protobuf-java.version>
 
         <!--suppress UnresolvedMavenProperty -->
         <container-registry.username>${env.CONTAINER_REGISTRY_USERNAME}</container-registry.username>
@@ -21,9 +21,9 @@
         <snyk.token>${env.SNYK_TOKEN}</snyk.token>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.release>21</maven.compiler.release>
-        <maven.compiler.target>21</maven.compiler.target>
-        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.release>25</maven.compiler.release>
+        <maven.compiler.target>25</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
     </properties>
 
     <dependencies>

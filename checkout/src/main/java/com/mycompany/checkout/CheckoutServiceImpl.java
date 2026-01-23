@@ -70,7 +70,7 @@ class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplBase {
                 .addKeyValue("shippingSvcResponse", shippingResponse)
                 .addKeyValue("durationInMillis", millis)
                 .log("placeOrder");
-        logger.info("Order {} successfully placed", "order-" + CheckoutServiceServer.RANDOM.nextInt(1_00000));
+        // logger.info("Order {} successfully placed", "order-" + CheckoutServiceServer.RANDOM.nextInt(1_00000));
 
         if (CheckoutServiceServer.RANDOM.nextInt(100) <= exceptionPercentage) {
             RuntimeException exception = new RuntimeException("Checkout failure");

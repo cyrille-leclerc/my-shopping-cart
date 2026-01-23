@@ -15,8 +15,7 @@ if docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
 fi
 
 export COLLECTOR_CONTRIB_IMAGE="otelcontribcol:latest"
-
-export COLLECTOR_CONTRIB_IMAGE="sha256:48738018d167c7f9d60d0a55e1ff40c0735db59b3967522b92637c655cdb7f1e"
+export COLLECTOR_CONTRIB_IMAGE="otel/opentelemetry-collector-contrib:nightly"
 
 docker run -d --name "${CONTAINER_NAME}" \
   --env GRAFANA_CLOUD_API_KEY=$GRAFANA_CLOUD_API_KEY \
