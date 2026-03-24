@@ -5,12 +5,26 @@ metadata:
   name: postgres-init
 data:
   init.sql: |
-    -- Create extension in the current database (ecommerce)
+    -- Enable pg_stat_statements in the default postgres database
     CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
-    
-    -- Also create extension in postgres database
-    \c postgres
+
+    -- Create ecommerce_db database
+    CREATE DATABASE ecommerce_db;
+
+    -- Create ecommerce_user with access to the ecommerce_db database
+    CREATE USER ecommerce_user WITH PASSWORD 'ecommerce_password';
+    GRANT ALL PRIVILEGES ON DATABASE ecommerce_db TO ecommerce_user;
+
+    -- Create monitoring_user with pg_monitor role, with access to both databases
+    CREATE USER monitoring_user WITH PASSWORD 'monitoring_password';
+    GRANT pg_monitor TO monitoring_user;
+    GRANT CONNECT ON DATABASE postgres TO monitoring_user;
+    GRANT CONNECT ON DATABASE ecommerce_db TO monitoring_user;
+
+    -- Set up ecommerce_db database
+    \c ecommerce_db
     CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+    GRANT ALL ON SCHEMA public TO ecommerce_user;
 ---
 apiVersion: v1
 kind: Service
@@ -36,11 +50,12 @@ spec:
   template:
     metadata:
       annotations:
+        io.opentelemetry.discovery.logs/enabled: 'true'
         io.opentelemetry.discovery.metrics/enabled: 'true'
         io.opentelemetry.discovery.metrics/scraper: postgresql
         io.opentelemetry.discovery.metrics/config: |
-          username: ecommerce
-          password: ecommerce
+          username: monitoring_user
+          password: monitoring_password
           metrics:
             postgresql.blks_hit:
               enabled: true
@@ -69,9 +84,7 @@ spec:
           args: ["-c", "shared_preload_libraries=pg_stat_statements"]
           env:
             - name: POSTGRES_PASSWORD
-              value: ecommerce
-            - name: POSTGRES_USER
-              value: ecommerce
+              value: change_it
           ports:
             - containerPort: 5432
               protocol: TCP

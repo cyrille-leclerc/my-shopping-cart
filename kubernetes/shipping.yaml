@@ -33,11 +33,11 @@ spec:
         - name: shipping
           env:
             - name: SPRING_DATASOURCE_PASSWORD
-              value: ecommerce
+              value: ecommerce_password
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://pg-ecommerce:5432/ecommerce
+              value: jdbc:postgresql://pg-ecommerce:5432/ecommerce_db
             - name: SPRING_DATASOURCE_USERNAME
-              value: ecommerce
+              value: ecommerce_user
           image: docker.io/cyrilleleclerc937/webshop-shipping:latest
           imagePullPolicy: IfNotPresent
           ports:

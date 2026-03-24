@@ -26,6 +26,7 @@ spec:
         resource.opentelemetry.io/service.name: frontend
         resource.opentelemetry.io/service.namespace: ecommerce
         instrumentation.opentelemetry.io/inject-java: "opentelemetry-operator-system/otel-instrumentation"
+        io.opentelemetry.discovery.logs/enabled: 'false'
       labels:
         app.kubernetes.io/name: frontend
     spec:
@@ -41,11 +42,11 @@ spec:
             - name: UNINSTRUMENTEDSERVICE_URL
               value: "http://example.com"
             - name: SPRING_DATASOURCE_PASSWORD
-              value: "ecommerce"
+              value: "ecommerce_password"
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:postgresql://pg-ecommerce:5432/ecommerce"
+              value: "jdbc:postgresql://pg-ecommerce:5432/ecommerce_db"
             - name: SPRING_DATASOURCE_USERNAME
-              value: "ecommerce"
+              value: "ecommerce_user"
             - name: SPRING_DATA_REDIS_HOST
               value: "redis-ecommerce"
             - name: SPRING_JPA_HIBERNATE_DDL_AUTO

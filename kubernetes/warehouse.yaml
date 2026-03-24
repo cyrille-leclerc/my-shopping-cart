@@ -26,6 +26,7 @@ spec:
         resource.opentelemetry.io/service.name: warehouse
         resource.opentelemetry.io/service.namespace: ecommerce
         instrumentation.opentelemetry.io/inject-java: "opentelemetry-operator-system/otel-instrumentation"
+        io.opentelemetry.discovery.logs/enabled: 'false'
       labels:
         app.kubernetes.io/name: warehouse
     spec:

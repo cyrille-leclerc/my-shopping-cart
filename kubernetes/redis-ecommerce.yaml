@@ -24,6 +24,7 @@ spec:
   template:
     metadata:
       annotations:
+        io.opentelemetry.discovery.logs/enabled: 'false'
         io.opentelemetry.discovery.metrics/enabled: 'true'
         io.opentelemetry.discovery.metrics/scraper: redis
         io.opentelemetry.discovery.metrics/config: |
