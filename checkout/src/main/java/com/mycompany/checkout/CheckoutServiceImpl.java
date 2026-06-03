@@ -1,6 +1,7 @@
 package com.mycompany.checkout;
 
 import io.grpc.stub.StreamObserver;
+import io.prometheus.metrics.core.metrics.Counter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -16,6 +17,11 @@ class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplBase {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
+    private static final Counter ordersTotal = Counter.builder()
+            .name("checkout_orders_total")
+            .help("Total number of placeOrder invocations on the checkout service")
+            .register();
+
     final HttpClient httpClient;
 
     final URI shippingServiceUrl;
@@ -30,6 +36,7 @@ class CheckoutServiceImpl extends CheckoutServiceGrpc.CheckoutServiceImplBase {
 
     @Override
     public void placeOrder(PlaceOrderRequest placeOrderRequest, StreamObserver<PlaceOrderReply> responseObserver) {
+        ordersTotal.inc();
         final int millis = 25 + CheckoutServiceServer.RANDOM.nextInt(50);
         try {
             Thread.sleep(millis);

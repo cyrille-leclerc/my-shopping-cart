@@ -27,6 +27,10 @@ spec:
         resource.opentelemetry.io/service.name: fraud-detection
         resource.opentelemetry.io/service.namespace: ecommerce
         instrumentation.opentelemetry.io/inject-java: "opentelemetry-operator-system/otel-instrumentation"
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: "8080"
+        ts: "2026-05-16T12:11:00Z"
       labels:
         app.kubernetes.io/name: fraud-detection
     spec:
@@ -40,7 +44,7 @@ spec:
             - name: SPRING_DATASOURCE_USERNAME
               value: ecommerce_user
           image: docker.io/cyrilleleclerc937/webshop-fraud-detection:latest
-          imagePullPolicy: IfNotPresent
+#          imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080

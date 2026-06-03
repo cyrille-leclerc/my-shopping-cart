@@ -27,7 +27,7 @@ public class WarehouseApplication {
 
     @Bean
     public Queue queue() {
-        return new Queue(AMQP_QUEUE, false);
+        return new Queue(AMQP_QUEUE, true);
     }
 
     @Bean

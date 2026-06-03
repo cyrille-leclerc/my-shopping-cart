@@ -1,5 +1,7 @@
 package com.mycompany.antifraud;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.incubator.metrics.ExtendedDoubleHistogramBuilder;
 import io.opentelemetry.api.metrics.DoubleHistogram;
@@ -58,12 +60,15 @@ public class FraudDetectionController {
 
     final DoubleHistogram fraudDetectionHistogram;
 
+    final MeterRegistry meterRegistry;
+
     final DataSource dataSource;
 
-    public FraudDetectionController(Meter meter, DataSource dataSource) {
+    public FraudDetectionController(Meter meter, MeterRegistry meterRegistry, DataSource dataSource) {
         this.fraudDetectionHistogram = ((ExtendedDoubleHistogramBuilder) meter.histogramBuilder("fraud.check_order"))
                 .setAttributesAdvice(List.of(FraudDetectionAttributes.OUTCOME, FraudDetectionAttributes.TENANT_SHORTCODE, FraudDetectionAttributes.PAYMENT_METHOD))
                 .setUnit("usd").build();
+        this.meterRegistry = meterRegistry;
         this.dataSource = dataSource;
     }
 
@@ -190,6 +195,15 @@ public class FraudDetectionController {
                         FraudDetectionAttributes.OUTCOME, outcome,
                         FraudDetectionAttributes.TENANT_SHORTCODE, tenant.getShortCode(),
                         FraudDetectionAttributes.PAYMENT_METHOD, paymentMethod));
+
+        Counter.builder("fraud.check_order.total")
+                .description("Number of fraud check_order calls")
+                .tag("outcome", outcome)
+                .tag("tenant", tenant.getShortCode())
+                .tag("payment_method", paymentMethod)
+                .register(meterRegistry)
+                .increment();
+
         cfg.loggingEventBuilder.log("checkOrder: outcome={}, orderValue={}, shippingCountry={}, customerIpAddress={}, fraudScore={}, msg={}, tenant={}, paymentMethod={}",
                 outcome, orderValueDollars, shippingCountry, customerIpAddress, fraudScore, cfg.msg, tenant.getShortCode(), paymentMethod);
 

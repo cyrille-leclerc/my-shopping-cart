@@ -118,6 +118,7 @@ services:
       - OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE=*
     ports:
       - "50051:50051"
+      - "9400:9400" # Prometheus metrics
   shipping:
     labels:
       instrumentation.opentelemetry.io/inject-sdk: "true"

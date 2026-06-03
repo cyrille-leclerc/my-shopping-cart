@@ -14,6 +14,7 @@ spec:
       containers:
         - name: telemetrygen-traces-job
           image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.139.0
+          imagePullPolicy: IfNotPresent
           command: ["./telemetrygen"]
           args:
             - "--otlp-endpoint=otel-collector:4317"
@@ -41,6 +42,7 @@ spec:
       containers:
         - name: telemetrygen-traces-app
           image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:v0.125.0
+          imagePullPolicy: IfNotPresent
           command: ["./telemetrygen"]
           args:
             - "--otlp-endpoint=otel-collector:4317"

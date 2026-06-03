@@ -16,7 +16,5 @@ WORKDIR /usr/src/app/
 
 COPY --from=builder /usr/src/app/target/frontend-1.1-SNAPSHOT.jar ./app.jar
 
-ADD --chmod=644 https://github.com/grafana/pyroscope-java/releases/latest/download/pyroscope.jar /usr/src/app/pyroscope.jar
-
 EXPOSE 8080
-ENTRYPOINT [ "java", "-javaagent:/usr/src/app/pyroscope.jar", "-jar", "./app.jar" ]
+ENTRYPOINT [ "java", "-jar", "./app.jar" ]

@@ -2,6 +2,7 @@ package com.mycompany.checkout;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.prometheus.metrics.exporter.httpserver.HTTPServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,8 @@ public class CheckoutServiceServer {
 
     private Server server;
 
+    private HTTPServer metricsServer;
+
     public CheckoutServiceServer(String shippingServiceUrl) {
         this.shippingServiceUrl = shippingServiceUrl;
     }
@@ -34,6 +37,9 @@ public class CheckoutServiceServer {
     private void stop() throws InterruptedException {
         if (server != null) {
             server.shutdown().awaitTermination(30, TimeUnit.SECONDS);
+        }
+        if (metricsServer != null) {
+            metricsServer.close();
         }
     }
 
@@ -54,6 +60,10 @@ public class CheckoutServiceServer {
                 .build()
                 .start();
         logger.info("GRPC server started, listening on " + port);
+
+        int metricsPort = Integer.parseInt(Optional.ofNullable(System.getenv("METRICS_PORT")).orElse("9400"));
+        metricsServer = HTTPServer.builder().port(metricsPort).buildAndStart();
+        logger.info("Prometheus metrics endpoint listening on " + metricsServer.getPort() + "/metrics");
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Use stderr here since the logger may have been reset by its JVM shutdown hook.
