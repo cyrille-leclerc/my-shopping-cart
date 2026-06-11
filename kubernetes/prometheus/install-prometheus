@@ -1,0 +1,9 @@
+set -euo pipefail
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+
+helm upgrade kube-prometheus-stack \
+    prometheus-community/kube-prometheus-stack \
+    --install \
+    --namespace monitoring --create-namespace \
+    -f values.yaml

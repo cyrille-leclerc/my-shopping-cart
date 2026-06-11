@@ -1,37 +1,35 @@
 # https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-kube-stack
 
-clusterName: my-otel-stack
-crds:
-  installOtel: true
-  installPrometheus: false # disable to prevent install of Prometheus  components
+## @param clusterName Name of the Kubernetes cluster to be used as a resource attribute in telemetry data.
+## When the Kubernetes provider supports naming the cluster (eg EKS, AKS, GKE...), this value should be set accordingly.
+## TODO overwrite this value
+clusterName: unknown_k8s_cluster
 collectors:
   daemon:
     enabled: true
     env:
-      - name: GRAFANA_CLOUD_INSTANCE_ID
+      - name: DD_SITE  # Datadog intake: datadoghq.com, us3.datadoghq.com, datadoghq.eu... Defaults to datadoghq.com
         valueFrom:
-          configMapKeyRef:
-            name: grafana-cloud-config
-            key: GRAFANA_CLOUD_INSTANCE_ID
-      - name: GRAFANA_CLOUD_API_KEY
+          secretKeyRef:
+            name: dd-secrets
+            key: DD_SITE
+            optional: true
+      - name: DD_API_KEY
         valueFrom:
-          configMapKeyRef:
-            name: grafana-cloud-config
-            key: GRAFANA_CLOUD_API_KEY
-      - name: GRAFANA_CLOUD_OTLP_ENDPOINT
-        valueFrom:
-          configMapKeyRef:
-            name: grafana-cloud-config
-            key: GRAFANA_CLOUD_OTLP_ENDPOINT
-    # disable scrapping using daemon_scrape_configs.yaml as it assumes the Prometheus Node Exporter and CAdvisor are setup
-    # https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-kube-stack#scrape_configs_file-details
+          secretKeyRef:
+            name: dd-secrets
+            key: DD_API_KEY
+      - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE # cumulative, delta
+        value: delta
+    ## @param scrape_configs_file Path to a custom Prometheus scrape_configs file to be used by the OpenTelemetry Collector.
+    ## disable Prometheus scrapping as it assumes the Prometheus Node Exporter and CAdvisor are setup
     scrape_configs_file: ""
     presets:
       logsCollection:
-        enabled: false # TODO disable when running on Docker Desktop
-        storeCheckpoints: false # TODO disable when running on Docker Desktop
+        enabled: false
+        storeCheckpoints: false
       hostMetrics:
-        enabled: false # TODO disable when running on Docker Desktop
+        enabled: true
       kubeletMetrics:
         enabled: true
       kubernetesAttributes:
@@ -40,126 +38,171 @@ collectors:
         enabled: true
       clusterMetrics:
         enabled: true
+      annotationDiscovery:
+        logs:
+          enabled: false
+        metrics:
+          enabled: true
     config:
       extensions:
-        basicauth/grafana_cloud:
-          client_auth:
-            username: "${env:GRAFANA_CLOUD_INSTANCE_ID}"
-            password: "${env:GRAFANA_CLOUD_API_KEY}"
-        health_check: # For K8s Liveness and Readiness Probes
-          endpoint: 0.0.0.0:13133
-        k8s_observer:
-          observe_nodes: true
-          observe_services: true
-          observe_ingresses: true
-      receivers:
-        receiver_creator/k8s:
-          watch_observers: [k8s_observer]
-          discovery:
-            enabled: true
+        datadog/extension:
+          api:
+            key: ${env:DD_API_KEY}
+            site: ${env:DD_SITE:-datadoghq.com}
+          deployment_type: daemonset
+          http:
+            endpoint: "localhost:9875"
+            path: "/metadata"
       exporters:
-        otlphttp:
-          endpoint: "${env:GRAFANA_CLOUD_OTLP_ENDPOINT}"
-          auth:
-            authenticator: basicauth/grafana_cloud
+        datadog:
+          traces:
+            compute_stats_by_span_kind: true
+            trace_buffer: 500
+          # hostname: "otelcol-helm" # FIXME
+          api:
+            site: ${env:DD_SITE:-datadoghq.com}
+            key: ${env:DD_API_KEY}
+          sending_queue:
+            batch:
+              min_size: 10
+              max_size: 100
+              flush_timeout: 10s
+        debug:
+          verbosity: detailed
+#        otlp_http/prometheus:
+#          endpoint: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/otlp
+#          tls:
+#            insecure: true
+#          sending_queue:
+#            batch: {}
+        otlp_http/jaeger:
+          endpoint: http://jaeger.jaeger.svc.cluster.local:4318
+          tls:
+            insecure: true
+
+      connectors:
+        datadog/connector:
+          traces:
+            compute_stats_by_span_kind: true
       processors:
-        resourcedetection/digitalocean:
-          detectors: ["digitalocean"]
+        cumulativetodelta:
+          include:
+            match_type: regexp
+            metrics:
+              - .*          # convert all cumulative metrics
+#      receivers:
+#        prometheus/collector_internal_telemetry:
+#          trim_metric_suffixes: true
+#          config:
+#            scrape_configs:
+#              - job_name: 'otel-collector'
+#                scrape_interval: 30s
+#                static_configs:
+#                  - targets: ['0.0.0.0:8888']
       service:
-        extensions: [basicauth/grafana_cloud, health_check]
+        extensions: [datadog/extension]
         pipelines:
           traces:
             exporters:
-              - otlphttp
+              - datadog
+              - datadog/connector
+              - otlp_http/jaeger
           metrics:
             exporters:
-              - otlphttp
+              - datadog
+#              - otlp_http/prometheus
+            processors:
+              - cumulativetodelta
+              # restore processors mistakenly discarded by the helm template when specifying additional receivers
+              - k8sattributes
+              - resourcedetection/env
+              - resource/hostname
+              - batch
+            receivers:
+              # - prometheus/collector_internal_telemetry
+              # restore receivers mistakenly discarded by the helm template when specifying additional receivers
+              - otlp
+          metrics/datadog_direct:
+            exporters:
+              - datadog
+            receivers:
+              - datadog/connector
           logs:
             exporters:
-              - otlphttp
+              - datadog
         telemetry:
+          resource:
+            deployment.environment.name: production  # overwrite as needed
           metrics:
             readers:
+              - periodic:
+                  exporter:
+                    otlp:
+                      protocol: http/protobuf
+                      endpoint: "https://otlp.${env:DD_SITE:-datadoghq.com}/v1/metrics"
+                      temporality_preference: delta
+                      headers:
+                        - name: "dd-api-key"
+                          value: "${DD_API_KEY}"
+                        - name: dd-otel-metric-config
+                          value: '{"resource_attributes_as_tags": true}'
+#              - periodic:
+#                  exporter:
+#                    otlp:
+#                      protocol: http/protobuf
+#                      endpoint: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/otlp"
+#                      insecure: true
               - pull:
                   exporter:
+                    ## Publish internal metrics to ease troubleshooting connecting to the pod when needed
                     prometheus:
                       host: '0.0.0.0'
                       port: 8888
           logs:
-            level: info
-    securityContext: # Run daemon collector as root for metrics & logs scrapping
-      runAsUser: 0
-      runAsGroup: 0
+            processors:
+              - batch:
+                  exporter:
+                    otlp:
+                      protocol: http/protobuf
+                      endpoint: "https://otlp.${env:DD_SITE:-datadoghq.com}/v1/logs"
+                      headers:
+                        - name: "dd-api-key"
+                          value: "${DD_API_KEY}"
+
 instrumentation:
   enabled: true
+  name: "otel-instrumentation"
   env:
-    - name: OTEL_EXPORTER_OTLP_PROTOCOL
-      value: "grpc"
-    - name: OTEL_K8S_NODE_NAME
-      valueFrom:
-        fieldRef:
-          fieldPath: spec.nodeName
+    - name: OTEL_SEMCONV_STABILITY_OPT_IN
+      value: "http,database,rpc,messaging"
+    - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE # cumulative, delta
+      value: cumulative
   exporter:
-    endpoint: http://opentelemetry-stack-daemon-collector:4317
+    endpoint: http://opentelemetry-stack-daemon-collector.opentelemetry-operator-system.svc.cluster.local:4318
   resource:
     resourceAttributes:
-      deployment.environment.name: production
+      deployment.environment.name: production # overwrite as needed
   propagators:
     - tracecontext
     - baggage
   sampler:
-    type: parentbased_always_on # see https://opentelemetry.io/docs/languages/sdk-configuration/general/#otel_traces_sampler
+    type: parentbased_always_on
   java:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.22.0
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.28.1
     env:
-    - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES
-      value: "true"
-    - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_LOG_ATTRIBUTES
-      value: "true"
-    - name: OTEL_INSTRUMENTATION_MICROMETER_BASE_TIME_UNIT
-      value: s
-    - name: OTEL_JAVA_EXPERIMENTAL_LOG_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE
-      value: "*"
-    - name: OTEL_JAVA_EXPERIMENTAL_SPAN_ATTRIBUTES_COPY_FROM_BAGGAGE_INCLUDE
-      value: "*"
-    - name: OTEL_SEMCONV_STABILITY_OPT_IN
-      value: "http,database"
-    - name: PYROSCOPE_LABELS
-      value: "environment=production,namespace=ecommerce"
-    - name: PYROSCOPE_SERVER_ADDRESS
-      valueFrom:
-        configMapKeyRef:
-          name: grafana-cloud-config
-          key: PYROSCOPE_SERVER_ADDRESS
-    - name: PYROSCOPE_BASIC_AUTH_USER
-      valueFrom:
-        configMapKeyRef:
-          name: grafana-cloud-config
-          key: PYROSCOPE_BASIC_AUTH_USER
-    - name: PYROSCOPE_BASIC_AUTH_PASSWORD
-      valueFrom:
-        configMapKeyRef:
-          name: grafana-cloud-config
-          key: PYROSCOPE_BASIC_AUTH_PASSWORD
-    # don't duplicate app logs that are collected through OTLP, stop emitting them to stdout
-    # Use SpringBoot CONSOLE_LOG_THRESHOLD=OFF to disable console logs
-    #- name: CONSOLE_LOG_THRESHOLD
-    #  value: "OFF"
-
+      - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES
+        value: "true"
+  nodejs:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.76.0
+  dotnet:
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.15.0
   python:
-    env:
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://opentelemetry-stack-daemon-collector:4318
-      - name: OTEL_EXPORTER_OTLP_PROTOCOL
-        value: "http/protobuf"
+    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.63b1
 opentelemetry-operator:
-  admissionWebhooks:
-    certManager:
-      enabled: false # for production use cert-manager. See https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator#tls-certificate-requirement
-    autoGenerateCert:
-      enabled: true
-      recreate: true # set to true when autoGenerateCert is enabled to prevent cert trust problems
-defaultCRConfig:
-  enabled: true
-  targetAllocator:
-    enabled: false # For advanced use cases. See https://github.com/open-telemetry/opentelemetry-operator/tree/main/cmd/otel-allocator
+  manager:
+    collectorImage:
+      repository: otel/opentelemetry-collector-contrib
+      tag: "0.153.0"
+    podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8080"

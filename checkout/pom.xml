@@ -268,7 +268,7 @@
                 <version>3.1.4</version>
                 <configuration>
                     <to>
-                        <image>docker.io/cleclerc/${project.artifactId}:latest</image>
+                        <image>https://ghcr.io/cyrille-leclerc/${project.artifactId}:latest</image>
                         <tags>
                             <tag>${project.version}</tag>
                         </tags>

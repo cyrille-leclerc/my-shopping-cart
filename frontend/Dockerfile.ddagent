@@ -10,7 +10,7 @@ COPY pom.xml ./
 COPY ./src ./src
 RUN --mount=type=cache,target=/root/.m2 mvn package -DskipTests
 
-FROM eclipse-temurin:25-jre
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:25
 
 WORKDIR /usr/src/app/
 

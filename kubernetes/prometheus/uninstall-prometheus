@@ -1,0 +1,4 @@
+set -euo pipefail
+
+helm uninstall kube-prometheus-stack \
+    --namespace monitoring

@@ -1,0 +1,31 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: datadog-operator-extra
+  labels:
+    app.kubernetes.io/instance: datadog-operator
+    app.kubernetes.io/name: datadog-operator
+rules:
+  # Required to grant the appsec ClusterRole (datadog-datadog-appsec-dca) these permissions
+  - apiGroups: ["gateway.envoyproxy.io"]
+    resources: ["backend", "envoypatchpolicies"]
+    verbs: ["create", "delete", "get"]
+  - apiGroups: ["networking.istio.io"]
+    resources: ["gateways"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: datadog-operator-extra
+  labels:
+    app.kubernetes.io/instance: datadog-operator
+    app.kubernetes.io/name: datadog-operator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: datadog-operator-extra
+subjects:
+  - kind: ServiceAccount
+    name: datadog-operator
+    namespace: datadog

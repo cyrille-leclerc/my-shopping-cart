@@ -36,12 +36,7 @@ target/
 # SECRETS
 setenv.sh
 secrets/
-/.env
+**/.env
 
 
 .DS_Store
-
-# OpenTelemetry Grafana Cloud configuration (contains secrets)
-kubernetes/opentelemetry-kube-stack/grafana-cloud-endpoint-config.yaml
-# Keep the template file
-!kubernetes/opentelemetry-kube-stack/grafana-cloud-endpoint-config.yaml.template

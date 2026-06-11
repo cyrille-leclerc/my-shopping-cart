@@ -1,22 +1,84 @@
 #!/usr/bin/env bash
-# set -x
+set -euo pipefail
 
-# Validate required files exist
-if [[ ! -f "grafana-cloud-endpoint-config.yaml" ]]; then
-    echo "Error: grafana-cloud-endpoint-config.yaml not found in parent directory"
-    exit 1
+#### BEGINNING OF BOILERPLATE SCRIPT WAITING TO GET THE GUI
+
+# Load environment variables from .env file if it exists
+[[ -f .env ]] && source .env
+
+if [[ ! -f ".env" ]]; then
+    echo ".env file not found. Entering interactive setup..."
+
+    read -p "Datadog Site (eg: 'datadoghq.eu'): " DD_SITE
+    [[ -z "DD_SITE" ]] && error "Datadog Site cannot be empty"
+
+    read -p "Datadog API Key (eg: 'gcp_...'): " DD_API_KEY
+    [[ -z "DD_API_KEY" ]] && error "Datadog API Key cannot be empty"
+
+    # Ask if user wants to save to .env file
+    read -p "Save credentials to .env file? (y/n): " SAVE_TO_ENV
+    if [[ "$SAVE_TO_ENV" == "y" || "$SAVE_TO_ENV" == "Y" ]]; then
+        # Save to .env file
+        {
+            echo "export DD_SITE=\"${DD_SITE}\""
+            echo "export DD_API_KEY=\"${DD_API_KEY}\""
+        } >> .env
+        echo ".env file created successfully."
+    fi
 fi
 
-echo "Applying Grafana Cloud endpoint configuration (url & credentials)..."
-kubectl apply -f grafana-cloud-endpoint-config.yaml
+# Verify all required credentials are set
+[[ -z "${DD_API_KEY:-}" ]] && error "DD_API_KEY is not set"
 
 echo ""
-echo "Upgrading/Installing OpenTelemetry stack..."
-helm upgrade --install opentelemetry-stack opentelemetry/opentelemetry-kube-stack \
-    -f values.yaml \
-    --namespace default \
-    --wait \
-    --timeout 300s
+echo "Collecting deployment configuration..."
+echo ""
+
+read -p "Kubernetes Cluster Name (default: 'my_k8s_cluster'): " K8S_CLUSTER_NAME
+export K8S_CLUSTER_NAME=${K8S_CLUSTER_NAME:-my_k8s_cluster}
+
+read -p "Deployment Environment Name like 'production', 'staging'... (default: 'production'): " DEPLOYMENT_ENVIRONMENT_NAME
+export DEPLOYMENT_ENVIRONMENT_NAME=${DEPLOYMENT_ENVIRONMENT_NAME:-production}
+
+read -p "OpenTelemetry Operator certificates: use cert-manager? (true: uses cert-manager, recommended for production; false: uses self-signed certificates, discouraged in production; default: false): " OTEL_OPERATOR_CERT_MANAGER_ENABLED
+export OTEL_OPERATOR_CERT_MANAGER_ENABLED=${OTEL_OPERATOR_CERT_MANAGER_ENABLED:-false}
+
+# Validate cert-manager choice
+if [[ "$OTEL_OPERATOR_CERT_MANAGER_ENABLED" != "true" && "$OTEL_OPERATOR_CERT_MANAGER_ENABLED" != "false" ]]; then
+    error "OTEL_OPERATOR_CERT_MANAGER_ENABLED must be 'true' or 'false'"
+fi
 
 echo ""
-echo "OpenTelemetry stack deployment completed successfully!"
+
+
+#### BEGINNING OF INSTALLATION SCRIPT
+
+# WARNING: dont change "namespace=opentelemetry-operator-system" as it is used in the 'instrumentation' CRD defined in values.yaml
+
+# TODO
+# - NICE TO HAVE: Add Kubernetes provider handling in the pipeline to get `k8s.cluster.name`, `host.id`, `cloud.*``, requires user to indicate which provider they are using (EKS, GKE, AKS, etc)
+
+echo "Installing OpenTelemetry Kube Stack Helm Chart..."
+
+kubectl create namespace opentelemetry-operator-system || echo "WARNING: Could not create namespace 'opentelemetry-operator-system' (may already exist or insufficient permissions). Continuing..."
+
+kubectl create secret generic dd-secrets \
+  --namespace opentelemetry-operator-system  \
+  --from-literal="DD_SITE=${DD_SITE:-datadoghq.com}" \
+  --from-literal="DD_API_KEY=$DD_API_KEY" \
+  || echo "WARNING: Could not create secret 'dd-secrets' (may already exist or insufficient permissions). Continuing..."
+
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update
+
+/opt/homebrew/opt/helm@3/bin/helm upgrade opentelemetry-stack \
+    open-telemetry/opentelemetry-kube-stack \
+    --version 0.15.2 \
+    --install \
+    --namespace opentelemetry-operator-system \
+    --set opentelemetry-operator.admissionWebhooks.certManager.enabled=$OTEL_OPERATOR_CERT_MANAGER_ENABLED \
+    --set-string clusterName=$K8S_CLUSTER_NAME \
+    --set-string instrumentation.resource.resourceAttributes.deployment\\.environment\\.name=$DEPLOYMENT_ENVIRONMENT_NAME \
+    --set-string collectors.daemon.config.service.telemetry.resource.k8s\\.cluster\\.name=$K8S_CLUSTER_NAME \
+    --set-string collectors.daemon.config.service.telemetry.resource.deployment\\.environment\\.name=$DEPLOYMENT_ENVIRONMENT_NAME \
+    -f values.yaml

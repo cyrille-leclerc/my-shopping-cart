@@ -1,0 +1,9 @@
+set -euo pipefail
+
+helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
+
+helm upgrade \
+    jaeger \
+    jaegertracing/jaeger \
+    --install \
+    --namespace jaeger --create-namespace

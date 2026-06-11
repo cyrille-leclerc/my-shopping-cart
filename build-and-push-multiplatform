@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# filepath: build-and-push-multiplatform.sh
+set -euo pipefail
+
+# Enable buildx
+# docker buildx create --use --name multiarch --driver docker-container || true
+
+# Set platform for builds
+# export DOCKER_DEFAULT_PLATFORM=linux/amd64,linux/arm64
+
+echo "Building multi-platform images with docker compose..."
+
+# Build all services
+# docker compose build
+
+# Push images (you'll need to push manually since compose build doesn't push)
+GITHUB_USER="cyrille-leclerc"
+REGISTRY="ghcr.io/${GITHUB_USER}"
+
+# services=("checkout"  "fraud-detection" "frontend" "shipping" "warehouse")
+# services=("checkout" "fraud-detection" "shipping" "warehouse")
+services=("frontend")
+
+for service in "${services[@]}"; do
+    docker build -t "webshop-$service:latest" "$service"
+    echo "Pushing ${REGISTRY}/webshop-$service:latest..."
+    docker tag "webshop-$service:latest" "${REGISTRY}/webshop-$service:latest"
+    docker push "${REGISTRY}/webshop-$service:latest"
+done
+
+echo "All images built and pushed!"

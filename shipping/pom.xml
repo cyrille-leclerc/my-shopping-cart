@@ -170,14 +170,14 @@
 				</executions>
 				<configuration>
 					<image>
-						<name>docker.io/cleclerc/${project.artifactId}:${project.version}</name>
+						<name>https://ghcr.io/cyrille-leclerc/${project.artifactId}:${project.version}</name>
 					</image>
 					<publish>true</publish>
 					<docker>
 						<publishRegistry>
 							<username>${container-registry.username}</username>
 							<password>${container-registry.password}</password>
-							<url>https://docker.io</url>
+							<url>https://ghcr.io/</url>
 						</publishRegistry>
 					</docker>
 				</configuration>

@@ -1,0 +1,9 @@
+clusterName: a_k8s_cluster
+instrumentation:
+  resource:
+    resourceAttributes:
+      deployment.environment.name: staging
+opentelemetry-operator:
+  admissionWebhooks:
+    certManager:
+      enabled: false
