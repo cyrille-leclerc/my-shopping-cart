@@ -58,7 +58,6 @@ collectors:
           traces:
             compute_stats_by_span_kind: true
             trace_buffer: 500
-          # hostname: "otelcol-helm" # FIXME
           api:
             site: ${env:DD_SITE:-datadoghq.com}
             key: ${env:DD_API_KEY}
@@ -67,19 +66,10 @@ collectors:
               min_size: 10
               max_size: 100
               flush_timeout: 10s
-        debug:
-          verbosity: detailed
-#        otlp_http/prometheus:
-#          endpoint: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/otlp
-#          tls:
-#            insecure: true
-#          sending_queue:
-#            batch: {}
         otlp_http/jaeger:
           endpoint: http://jaeger.jaeger.svc.cluster.local:4318
           tls:
             insecure: true
-
       connectors:
         datadog/connector:
           traces:
@@ -90,15 +80,6 @@ collectors:
             match_type: regexp
             metrics:
               - .*          # convert all cumulative metrics
-#      receivers:
-#        prometheus/collector_internal_telemetry:
-#          trim_metric_suffixes: true
-#          config:
-#            scrape_configs:
-#              - job_name: 'otel-collector'
-#                scrape_interval: 30s
-#                static_configs:
-#                  - targets: ['0.0.0.0:8888']
       service:
         extensions: [datadog/extension]
         pipelines:
@@ -110,18 +91,14 @@ collectors:
           metrics:
             exporters:
               - datadog
-#              - otlp_http/prometheus
             processors:
               - cumulativetodelta
               # restore processors mistakenly discarded by the helm template when specifying additional receivers
+              # https://github.com/open-telemetry/opentelemetry-helm-charts/issues/2254
               - k8sattributes
               - resourcedetection/env
               - resource/hostname
               - batch
-            receivers:
-              # - prometheus/collector_internal_telemetry
-              # restore receivers mistakenly discarded by the helm template when specifying additional receivers
-              - otlp
           metrics/datadog_direct:
             exporters:
               - datadog
@@ -146,18 +123,6 @@ collectors:
                           value: "${DD_API_KEY}"
                         - name: dd-otel-metric-config
                           value: '{"resource_attributes_as_tags": true}'
-#              - periodic:
-#                  exporter:
-#                    otlp:
-#                      protocol: http/protobuf
-#                      endpoint: "http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/otlp"
-#                      insecure: true
-              - pull:
-                  exporter:
-                    ## Publish internal metrics to ease troubleshooting connecting to the pod when needed
-                    prometheus:
-                      host: '0.0.0.0'
-                      port: 8888
           logs:
             processors:
               - batch:
