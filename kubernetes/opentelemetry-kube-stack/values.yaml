@@ -24,8 +24,8 @@ collectors:
     scrape_configs_file: ""
     presets:
       logsCollection:
-        enabled: false
-        storeCheckpoints: false
+        enabled: true
+        storeCheckpoints: true
       hostMetrics:
         enabled: true
       kubeletMetrics:
@@ -41,6 +41,13 @@ collectors:
           enabled: false
         metrics:
           enabled: true
+      resourceDetection: # enable the desired detector
+        aks:
+          enabled: false
+        eks:
+          enabled: false
+        gcp:
+          enabled: false
     config:
       extensions:
         datadog/extension:
