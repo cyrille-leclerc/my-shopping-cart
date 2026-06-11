@@ -19,8 +19,6 @@ collectors:
           secretKeyRef:
             name: dd-secrets
             key: DD_API_KEY
-      - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE # cumulative, delta
-        value: delta
     ## @param scrape_configs_file Path to a custom Prometheus scrape_configs file to be used by the OpenTelemetry Collector.
     ## disable Prometheus scrapping as it assumes the Prometheus Node Exporter and CAdvisor are setup
     scrape_configs_file: ""
@@ -140,8 +138,8 @@ instrumentation:
   env:
     - name: OTEL_SEMCONV_STABILITY_OPT_IN
       value: "http,database,rpc,messaging"
-    - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE # cumulative, delta
-      value: cumulative
+    - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+      value: delta
   exporter:
     endpoint: http://opentelemetry-stack-daemon-collector.opentelemetry-operator-system.svc.cluster.local:4318
   resource:
