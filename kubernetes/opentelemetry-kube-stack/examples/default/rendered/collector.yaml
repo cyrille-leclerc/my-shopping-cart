@@ -6,7 +6,7 @@ metadata:
   name: opentelemetry-stack-daemon
   namespace: opentelemetry-operator-system
   labels:
-    helm.sh/chart: opentelemetry-kube-stack-0.15.1
+    helm.sh/chart: opentelemetry-kube-stack-0.17.0
     app.kubernetes.io/version: "0.151.0"
     app.kubernetes.io/managed-by: Helm
     release: "opentelemetry-stack"        
@@ -23,6 +23,8 @@ spec:
         api:
           key: ${env:DD_API_KEY}
           site: ${env:DD_SITE:-datadoghq.com}
+        orchestrator_explorer:
+          enabled: true
         sending_queue:
           batch:
             flush_timeout: 10s
@@ -33,10 +35,6 @@ spec:
           trace_buffer: 500
       debug:
         verbosity: detailed
-      otlp_http/jaeger:
-        endpoint: http://jaeger.jaeger.svc.cluster.local:4318
-        tls:
-          insecure: true
     extensions:
       datadog/extension:
         api:
@@ -125,6 +123,11 @@ spec:
             name: k8s.namespace.name
         - sources:
           - from: connection
+      resource/fake_k8s_cluster_uid:
+        attributes:
+        - action: insert
+          key: k8s.cluster.uid
+          value: 218fc5a9-a5f1-4b54-aa05-46717d0ab26d
       resource/hostname:
         attributes:
         - action: insert
@@ -218,8 +221,71 @@ spec:
         - DiskPressure
         - NetworkUnavailable
       k8sobjects:
+        interval: 3m
         k8s_leader_elector: k8s_leader_elector/k8s_objects
         objects:
+        - mode: pull
+          name: namespaces
+        - mode: pull
+          name: pods
+        - mode: pull
+          name: nodes
+        - mode: pull
+          name: services
+        - mode: pull
+          name: serviceaccounts
+        - group: apps
+          mode: pull
+          name: deployments
+        - group: apps
+          mode: pull
+          name: replicasets
+        - group: apps
+          mode: pull
+          name: daemonsets
+        - group: apps
+          mode: pull
+          name: statefulsets
+        - group: batch
+          mode: pull
+          name: jobs
+        - group: batch
+          mode: pull
+          name: cronjobs
+        - group: rbac.authorization.k8s.io
+          mode: pull
+          name: roles
+        - group: rbac.authorization.k8s.io
+          mode: pull
+          name: rolebindings
+        - group: rbac.authorization.k8s.io
+          mode: pull
+          name: clusterroles
+        - group: rbac.authorization.k8s.io
+          mode: pull
+          name: clusterrolebindings
+        - group: storage.k8s.io
+          mode: pull
+          name: storageclasses
+        - mode: pull
+          name: persistentvolumes
+        - mode: pull
+          name: persistentvolumeclaims
+        - group: networking.k8s.io
+          mode: pull
+          name: ingresses
+        - group: networking.k8s.io
+          mode: pull
+          name: networkpolicies
+        - group: autoscaling
+          mode: pull
+          name: horizontalpodautoscalers
+        - group: policy
+          mode: pull
+          name: poddisruptionbudgets
+        - group: apiextensions.k8s.io
+          mode: pull
+          name: customresourcedefinitions
         - exclude_watch_type:
           - DELETED
           group: events.k8s.io
@@ -274,6 +340,7 @@ spec:
           - datadog
           processors:
           - k8sattributes
+          - resource/fake_k8s_cluster_uid
           - resourcedetection/env
           - resource/hostname
           - batch
@@ -290,7 +357,6 @@ spec:
           - resource/hostname
           - batch
           receivers:
-#          - prometheus/collector_internal_telemetry
           - otlp
           - receiver_creator/metrics
           - hostmetrics
@@ -305,7 +371,6 @@ spec:
           exporters:
           - datadog
           - datadog/connector
-          - otlp_http/jaeger
           processors:
           - k8sattributes
           - resourcedetection/env
@@ -337,11 +402,6 @@ spec:
                     value: '{"resource_attributes_as_tags": true}'
                   protocol: http/protobuf
                   temporality_preference: delta
-          - pull:
-              exporter:
-                prometheus:
-                  host: 0.0.0.0
-                  port: 8888
         resource:
           deployment.environment.name: staging
           k8s.cluster.name: my_testing_k8s_cluster
@@ -393,8 +453,6 @@ spec:
   - name: OTEL_RESOURCE_ATTRIBUTES
     value: "k8s.pod.name=$(OTEL_K8S_POD_NAME),k8s.namespace.name=$(OTEL_K8S_NAMESPACE),k8s.node.name=$(OTEL_K8S_NODE_NAME),host.name=$(OTEL_K8S_NODE_NAME),k8s.node.ip=$(OTEL_K8S_NODE_IP),k8s.pod.ip=$(OTEL_K8S_POD_IP),k8s.cluster.name=my_testing_k8s_cluster"
   
-  - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-    value: "delta"
   - name: DD_API_KEY
     valueFrom:
       secretKeyRef:

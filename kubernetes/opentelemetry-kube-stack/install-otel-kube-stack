@@ -72,7 +72,7 @@ helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm
 helm repo update
 
 /opt/homebrew/opt/helm@3/bin/helm upgrade opentelemetry-stack \
-    open-telemetry/opentelemetry-kube-stack \
+				/Users/cyrille.leclerc/src/opentelemetry/opentelemetry-helm-charts/charts/opentelemetry-kube-stack \
     --version 0.15.2 \
     --install \
     --namespace opentelemetry-operator-system \

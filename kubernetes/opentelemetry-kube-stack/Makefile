@@ -15,7 +15,7 @@ generate-examples:
 		rm -rf "$${EXAMPLES_DIR}/$${example}/rendered"; \
 		for value in $${VALUES}; do \
 			helm template opentelemetry-stack \
-				open-telemetry/opentelemetry-kube-stack \
+				/Users/cyrille.leclerc/src/opentelemetry/opentelemetry-helm-charts/charts/opentelemetry-kube-stack \
 				--namespace opentelemetry-operator-system \
 				--version "0.15.1" \
 				--set-string clusterName="my_testing_k8s_cluster" \

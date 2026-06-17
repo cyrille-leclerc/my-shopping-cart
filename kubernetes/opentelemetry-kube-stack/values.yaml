@@ -24,15 +24,15 @@ collectors:
     scrape_configs_file: ""
     presets:
       logsCollection:
-        enabled: true
-        storeCheckpoints: true
+        enabled: false
+        storeCheckpoints: false
       hostMetrics:
         enabled: true
       kubeletMetrics:
         enabled: true
       kubernetesAttributes:
         enabled: true
-      kubernetesEvents:
+      kubernetesObjects:
         enabled: true
       clusterMetrics:
         enabled: true
@@ -59,6 +59,8 @@ collectors:
             endpoint: "localhost:9875"
             path: "/metadata"
       exporters:
+        debug:
+          verbosity: detailed
         datadog:
           traces:
             compute_stats_by_span_kind: true
@@ -66,25 +68,31 @@ collectors:
           api:
             site: ${env:DD_SITE:-datadoghq.com}
             key: ${env:DD_API_KEY}
+          orchestrator_explorer:
+            enabled: true
           sending_queue:
             batch:
               min_size: 10
               max_size: 100
               flush_timeout: 10s
-        otlp_http/jaeger:
-          endpoint: http://jaeger.jaeger.svc.cluster.local:4318
-          tls:
-            insecure: true
       connectors:
         datadog/connector:
           traces:
             compute_stats_by_span_kind: true
       processors:
+        resource/fake_k8s_cluster_uid:
+          attributes:
+            - action: insert
+              value: "218fc5a9-a5f1-4b54-aa05-46717d0ab26d"
+              key: k8s.cluster.uid
         cumulativetodelta:
           include:
             match_type: regexp
             metrics:
               - .*          # convert all cumulative metrics
+      receivers:
+        k8sobjects:
+          interval: 3m
       service:
         extensions: [datadog/extension]
         pipelines:
@@ -92,7 +100,6 @@ collectors:
             exporters:
               - datadog
               - datadog/connector
-              - otlp_http/jaeger
           metrics:
             exporters:
               - datadog
@@ -112,6 +119,12 @@ collectors:
           logs:
             exporters:
               - datadog
+            processors:
+              - k8sattributes
+              - resource/fake_k8s_cluster_uid
+              - resourcedetection/env
+              - resource/hostname
+              - batch
         telemetry:
           resource:
             deployment.environment.name: production  # overwrite as needed
@@ -172,7 +185,7 @@ opentelemetry-operator:
   manager:
     collectorImage:
       repository: otel/opentelemetry-collector-contrib
-      tag: "0.153.0"
+      tag: "0.154.0"
     podAnnotations:
       prometheus.io/scrape: "true"
       prometheus.io/port: "8080"
