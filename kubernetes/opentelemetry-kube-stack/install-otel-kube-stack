@@ -40,8 +40,8 @@ export K8S_CLUSTER_NAME=${K8S_CLUSTER_NAME:-my_k8s_cluster}
 read -p "Deployment Environment Name like 'production', 'staging'... (default: 'production'): " DEPLOYMENT_ENVIRONMENT_NAME
 export DEPLOYMENT_ENVIRONMENT_NAME=${DEPLOYMENT_ENVIRONMENT_NAME:-production}
 
-read -p "OpenTelemetry Operator certificates: use cert-manager? (true: uses cert-manager, recommended for production; false: uses self-signed certificates, discouraged in production; default: false): " OTEL_OPERATOR_CERT_MANAGER_ENABLED
-export OTEL_OPERATOR_CERT_MANAGER_ENABLED=${OTEL_OPERATOR_CERT_MANAGER_ENABLED:-false}
+read -p "OpenTelemetry Operator certificates: use cert-manager? (true: uses cert-manager, recommended for production; false: uses self-signed certificates, discouraged in production; default: true): " OTEL_OPERATOR_CERT_MANAGER_ENABLED
+export OTEL_OPERATOR_CERT_MANAGER_ENABLED=${OTEL_OPERATOR_CERT_MANAGER_ENABLED:-true}
 
 # Validate cert-manager choice
 if [[ "$OTEL_OPERATOR_CERT_MANAGER_ENABLED" != "true" && "$OTEL_OPERATOR_CERT_MANAGER_ENABLED" != "false" ]]; then
@@ -72,8 +72,8 @@ helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm
 helm repo update
 
 /opt/homebrew/opt/helm@3/bin/helm upgrade opentelemetry-stack \
-				/Users/cyrille.leclerc/src/opentelemetry/opentelemetry-helm-charts/charts/opentelemetry-kube-stack \
-    --version 0.15.2 \
+		/Users/cyrille.leclerc/src/opentelemetry/opentelemetry-helm-charts/charts/opentelemetry-kube-stack \
+    --version 0.16.0 \
     --install \
     --namespace opentelemetry-operator-system \
     --set opentelemetry-operator.admissionWebhooks.certManager.enabled=$OTEL_OPERATOR_CERT_MANAGER_ENABLED \
