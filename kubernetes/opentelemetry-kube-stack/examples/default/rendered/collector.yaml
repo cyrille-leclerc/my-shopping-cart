@@ -6,7 +6,7 @@ metadata:
   name: opentelemetry-stack-daemon
   namespace: opentelemetry-operator-system
   labels:
-    helm.sh/chart: opentelemetry-kube-stack-0.18.0
+    helm.sh/chart: opentelemetry-kube-stack-0.18.1
     app.kubernetes.io/version: "0.153.0"
     app.kubernetes.io/managed-by: Helm
     release: "opentelemetry-stack"        
@@ -282,11 +282,6 @@ spec:
         - group: apiextensions.k8s.io
           mode: pull
           name: customresourcedefinitions
-        - exclude_watch_type:
-          - DELETED
-          group: events.k8s.io
-          mode: watch
-          name: events
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 15s

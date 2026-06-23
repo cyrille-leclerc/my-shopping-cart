@@ -33,6 +33,9 @@ collectors:
         enabled: true
       kubernetesAttributes:
         enabled: true
+      kubernetesEvents:
+        enabled: false # disable for exporters/datadog/orchestrator_explorer/enabled: true
+      # WARNING requires https://github.com/open-telemetry/opentelemetry-helm-charts/pull/2266
       kubernetesObjects:
         enabled: true
       clusterMetrics:
@@ -86,7 +89,7 @@ collectors:
           traces:
             compute_stats_by_span_kind: true
       processors:
-        resource/fake_k8s_cluster_uid: # TODO replace by the resourcedetection processor's k8s_api detector
+        resource/fake_k8s_cluster_uid: # TODO replace by https://github.com/open-telemetry/opentelemetry-helm-charts/pull/2270
           attributes:
             - action: insert
               value: "218fc5a9-a5f1-4b54-aa05-46717d0ab26d"
@@ -129,7 +132,7 @@ collectors:
               - batch
         telemetry:
           resource:
-            deployment.environment.name: production  # overwrite as needed
+            deployment.environment.name: production  # TODO overwrite as needed
           metrics:
             readers:
               - periodic:
@@ -177,12 +180,6 @@ instrumentation:
     env:
       - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES
         value: "true"
-  nodejs:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-nodejs:0.76.0
-  dotnet:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-dotnet:1.15.0
-  python:
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-python:0.63b1
 opentelemetry-operator:
   manager:
     collectorImage:
