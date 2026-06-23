@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-helm repo add jetstack https://charts.jetstack.io --force-update
-
-helm install \
-  cert-manager oci://quay.io/jetstack/charts/cert-manager \
-  --version v1.20.2 \
-  --namespace cert-manager \
-  --create-namespace \
-  --set crds.enabled=true
+# https://cert-manager.io/docs/reference/cmctl/#installation
+cmctl x install
