@@ -1,6 +1,7 @@
 
 # Application logs (SDK emitted logs emitted through OTLP)
-# String template style log message
+
+## String template style log message
 
 ```java
 logger.info("checkOrder: outcome={}, orderValue={}, shippingCountry={}, customerIpAddress={}, fraudScore={}, msg={}, tenant={}, paymentMethod={}",
@@ -109,7 +110,7 @@ checkOrder: outcome=approved, orderValue=4, shippingCountry=DE, customerIpAddres
 }
 ```
 
-# Logs with exceptions
+## Logs with exceptions
 
 ```java
 logger.atWarn()
@@ -222,7 +223,7 @@ logger.atWarn()
 }
 ```
 
-# Structured logging
+## Structured logging
 
 ```java
 logger.atInfo()
