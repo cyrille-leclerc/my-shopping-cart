@@ -73,6 +73,9 @@ spec:
               enabled: true
             postgresql.deadlocks:
               enabled: true
+          events:
+            db.server.top_query:
+              enabled: true
           tls:
             insecure: true
       labels:
