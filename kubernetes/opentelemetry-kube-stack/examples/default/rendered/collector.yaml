@@ -451,6 +451,7 @@ spec:
           - resource/fake_k8s_cluster_uid
           - resourcedetection/env
           - resource/hostname
+          - batch
           receivers:
           - filelog
           - k8sobjects
