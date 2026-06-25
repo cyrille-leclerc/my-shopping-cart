@@ -346,7 +346,10 @@ Success placeOrder
 ```
 
 # OTel Collector Logs
+
 ## Filelog receiver
+
+Filelog receiver config:
 
 ```yaml
 receivers:
@@ -492,6 +495,295 @@ Started collecting
     "environment": {
       "name": "production"
     }
+  }
+}
+```
+
+
+## K8s Object receivber
+
+Message: none
+
+```json
+{
+  "@timestamp": "2026-06-25T08:25:00.692Z",
+  "apiVersion": "apps/v1",
+  "host": {
+    "name": "lima-rancher-desktop"
+  },
+  "hostname": "lima-rancher-desktop-my_k8s_cluster",
+  "k8s": {
+    "cluster": {
+      "name": "my_k8s_cluster",
+      "uid": "218fc5a9-a5f1-4b54-aa05-46717d0ab26d"
+    },
+    "namespace": {
+      "name": "cert-manager"
+    },
+    "node": {
+      "ip": "192.168.5.15",
+      "name": "lima-rancher-desktop",
+      "uid": "e6fd46dd-64c9-404e-885c-38f7286bfdf6"
+    },
+    "pod": {
+      "ip": "10.42.0.137",
+      "name": "opentelemetry-stack-daemon-collector-2hljl"
+    },
+    "resource": {
+      "name": "deployments"
+    }
+  },
+  "kind": "Deployment",
+  "metadata": {
+    "annotations": {
+      "deployment": {
+        "kubernetes": {
+          "io/revision": "1"
+        }
+      },
+      "meta": {
+        "helm": {
+          "sh/release-name": "cert-manager",
+          "sh/release-namespace": "cert-manager"
+        }
+      }
+    },
+    "creationTimestamp": "2026-06-23T17:43:42Z",
+    "generation": 1,
+    "labels": {
+      "app": {
+        "kubernetes": {
+          "io/component": "controller",
+          "io/instance": "cert-manager",
+          "io/managed-by": "Helm",
+          "io/name": "cert-manager",
+          "io/version": "v1.20.2"
+        }
+      },
+      "helm": {
+        "sh/chart": "cert-manager-v1.20.2"
+      }
+    },
+    "managedFields": [
+      {
+        "apiVersion": "apps/v1",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {
+          "f:metadata": {
+            "f:annotations": {
+              "f:meta": {
+                "helm": {}
+              }
+            },
+            "f:labels": {
+              "f:app": {
+                "kubernetes": {}
+              },
+              "f:helm": {}
+            }
+          },
+          "f:spec": {
+            "f:template": {
+              "f:metadata": {
+                "f:annotations": {
+                  "f:prometheus": {}
+                },
+                "f:labels": {
+                  "f:app": {
+                    "kubernetes": {}
+                  },
+                  "f:helm": {}
+                }
+              }
+            }
+          }
+        },
+        "manager": "cmctl",
+        "operation": "Apply",
+        "time": "2026-06-23T17:43:42Z"
+      },
+      {
+        "apiVersion": "apps/v1",
+        "fieldsType": "FieldsV1",
+        "fieldsV1": {
+          "f:metadata": {
+            "f:annotations": {
+              "f:deployment": {
+                "kubernetes": {}
+              }
+            }
+          }
+        },
+        "manager": "k3s",
+        "operation": "Update",
+        "subresource": "status",
+        "time": "2026-06-25T06:44:36Z"
+      }
+    ],
+    "name": "cert-manager",
+    "namespace": "cert-manager",
+    "resourceVersion": "35390",
+    "uid": "bce43f3d-2dd3-4b1e-81b8-f73c80cebb7c"
+  },
+  "otel": {
+    "timestamp": "1782375900692701584"
+  },
+  "service": {
+    "namespace": "cert-manager"
+  },
+  "spec": {
+    "progressDeadlineSeconds": 600,
+    "replicas": 1,
+    "revisionHistoryLimit": 10,
+    "selector": {
+      "matchLabels": {
+        "app": {
+          "kubernetes": {
+            "io/component": "controller",
+            "io/instance": "cert-manager",
+            "io/name": "cert-manager"
+          }
+        }
+      }
+    },
+    "strategy": {
+      "rollingUpdate": {
+        "maxSurge": "25%",
+        "maxUnavailable": "25%"
+      },
+      "type": "RollingUpdate"
+    },
+    "template": {
+      "metadata": {
+        "annotations": {
+          "prometheus": {
+            "io/path": "/metrics",
+            "io/port": "9402",
+            "io/scrape": "true"
+          }
+        },
+        "labels": {
+          "app": {
+            "kubernetes": {
+              "io/component": "controller",
+              "io/instance": "cert-manager",
+              "io/managed-by": "Helm",
+              "io/name": "cert-manager",
+              "io/version": "v1.20.2"
+            }
+          },
+          "helm": {
+            "sh/chart": "cert-manager-v1.20.2"
+          }
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "args": [
+              "--v=2",
+              "--cluster-resource-namespace=$(POD_NAMESPACE)",
+              "--leader-election-namespace=kube-system",
+              "--acme-http01-solver-image=quay.io/jetstack/cert-manager-acmesolver:v1.20.2",
+              "--max-concurrent-challenges=60"
+            ],
+            "env": [
+              {
+                "name": "POD_NAMESPACE",
+                "valueFrom": {
+                  "fieldRef": {
+                    "apiVersion": "v1",
+                    "fieldPath": "metadata.namespace"
+                  }
+                }
+              }
+            ],
+            "image": "quay.io/jetstack/cert-manager-controller:v1.20.2",
+            "imagePullPolicy": "IfNotPresent",
+            "livenessProbe": {
+              "failureThreshold": 8,
+              "httpGet": {
+                "path": "/livez",
+                "port": "http-healthz",
+                "scheme": "HTTP"
+              },
+              "initialDelaySeconds": 10,
+              "periodSeconds": 10,
+              "successThreshold": 1,
+              "timeoutSeconds": 15
+            },
+            "name": "cert-manager-controller",
+            "ports": [
+              {
+                "containerPort": 9402,
+                "name": "http-metrics",
+                "protocol": "TCP"
+              },
+              {
+                "containerPort": 9403,
+                "name": "http-healthz",
+                "protocol": "TCP"
+              }
+            ],
+            "securityContext": {
+              "allowPrivilegeEscalation": false,
+              "capabilities": {
+                "drop": [
+                  "ALL"
+                ]
+              },
+              "readOnlyRootFilesystem": true
+            },
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File"
+          }
+        ],
+        "dnsPolicy": "ClusterFirst",
+        "enableServiceLinks": false,
+        "nodeSelector": {
+          "kubernetes": {
+            "io/os": "linux"
+          }
+        },
+        "restartPolicy": "Always",
+        "schedulerName": "default-scheduler",
+        "securityContext": {
+          "runAsNonRoot": true,
+          "seccompProfile": {
+            "type": "RuntimeDefault"
+          }
+        },
+        "serviceAccount": "cert-manager",
+        "serviceAccountName": "cert-manager",
+        "terminationGracePeriodSeconds": 30
+      }
+    }
+  },
+  "status": {
+    "availableReplicas": 1,
+    "conditions": [
+      {
+        "lastTransitionTime": "2026-06-23T17:43:42Z",
+        "lastUpdateTime": "2026-06-23T17:43:43Z",
+        "message": "ReplicaSet \"cert-manager-5957746d66\" has successfully progressed.",
+        "reason": "NewReplicaSetAvailable",
+        "status": "True",
+        "type": "Progressing"
+      },
+      {
+        "lastTransitionTime": "2026-06-25T06:44:36Z",
+        "lastUpdateTime": "2026-06-25T06:44:36Z",
+        "message": "Deployment has minimum availability.",
+        "reason": "MinimumReplicasAvailable",
+        "status": "True",
+        "type": "Available"
+      }
+    ],
+    "observedGeneration": 1,
+    "readyReplicas": 1,
+    "replicas": 1,
+    "terminatingReplicas": 0,
+    "updatedReplicas": 1
   }
 }
 ```
