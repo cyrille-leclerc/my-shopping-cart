@@ -25,11 +25,6 @@ spec:
           site: ${env:DD_SITE:-datadoghq.com}
         orchestrator_explorer:
           enabled: true
-        sending_queue:
-          batch:
-            flush_timeout: 10s
-            max_size: 100
-            min_size: 10
         traces:
           compute_stats_by_span_kind: true
           trace_buffer: 500
