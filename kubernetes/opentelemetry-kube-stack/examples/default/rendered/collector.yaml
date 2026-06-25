@@ -136,6 +136,19 @@ spec:
         override: false
         timeout: 2s
     receivers:
+      filelog:
+        exclude: []
+        include:
+        - /var/log/pods/*/*/*.log
+        include_file_name: false
+        include_file_path: true
+        operators:
+        - id: container-parser
+          max_log_size: 102400
+          type: container
+        retry_on_failure:
+          enabled: true
+        start_at: end
       hostmetrics:
         collection_interval: 10s
         root_path: /hostfs
@@ -445,7 +458,7 @@ spec:
           - resource/hostname
           - batch
           receivers:
-          - otlp
+          - filelog
           - k8sobjects
         metrics:
           exporters:
@@ -521,6 +534,12 @@ spec:
   securityContext:
     {}
   volumeMounts:
+  - name: varlogpods
+    mountPath: /var/log/pods
+    readOnly: true
+  - name: varlibdockercontainers
+    mountPath: /var/lib/docker/containers
+    readOnly: true
   - name: hostfs
     mountPath: /hostfs
     readOnly: true
@@ -568,6 +587,12 @@ spec:
         name: dd-secrets
         optional: true
   volumes:
+  - name: varlogpods
+    hostPath:
+      path: /var/log/pods
+  - name: varlibdockercontainers
+    hostPath:
+      path: /var/lib/docker/containers
   - name: hostfs
     hostPath:
       path: /

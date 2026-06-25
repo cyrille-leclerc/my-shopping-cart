@@ -25,7 +25,7 @@ collectors:
     scrape_configs_file: ""
     presets:
       logsCollection:
-        enabled: false
+        enabled: true
         storeCheckpoints: false
       hostMetrics:
         enabled: true
@@ -130,6 +130,7 @@ collectors:
               - resourcedetection/env
               - resource/hostname
               - batch
+            receivers: []
         telemetry:
           resource:
             deployment.environment.name: production  # TODO overwrite as needed
