@@ -129,7 +129,7 @@ collectors:
               - resource/fake_k8s_cluster_uid
               - resourcedetection/env
               - resource/hostname
-              - batch
+              # - batch
             receivers: []
         telemetry:
           resource:
