@@ -79,11 +79,6 @@ collectors:
             key: ${env:DD_API_KEY}
           orchestrator_explorer:
             enabled: true
-          sending_queue:
-            batch:
-              min_size: 10
-              max_size: 100
-              flush_timeout: 10s
       connectors:
         datadog/connector:
           traces:
