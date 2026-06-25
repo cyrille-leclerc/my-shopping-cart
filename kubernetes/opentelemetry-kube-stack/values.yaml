@@ -79,6 +79,11 @@ collectors:
             key: ${env:DD_API_KEY}
           orchestrator_explorer:
             enabled: true
+          #sending_queue:
+          #  batch:
+          #    flush_timeout: 10s
+          #    max_size: 100
+          #    min_size: 10
       connectors:
         datadog/connector:
           traces:
@@ -124,7 +129,7 @@ collectors:
               - resource/fake_k8s_cluster_uid
               - resourcedetection/env
               - resource/hostname
-              # - batch
+              #- batch
             receivers: []
         telemetry:
           resource:
