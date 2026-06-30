@@ -120,6 +120,9 @@ rules:
     - get
     - list
     - watch
+- apiGroups: ["events.k8s.io"]
+  resources: ["events"]
+  verbs: ["watch", "list"]
 - apiGroups: [""]
   resources: ["namespaces", "pods", "nodes", "services", "serviceaccounts"]
   verbs: ["get", "list", "watch"]
@@ -164,4 +167,7 @@ subjects:
 - kind: ServiceAccount
   # quirk of the Operator
   name: "opentelemetry-stack-daemon-collector"
+  namespace: opentelemetry-operator-system
+- kind: ServiceAccount
+  name: opentelemetry-stack-daemon-targetallocator
   namespace: opentelemetry-operator-system

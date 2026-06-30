@@ -6,7 +6,7 @@ metadata:
   name: opentelemetry-stack-daemon
   namespace: opentelemetry-operator-system
   labels:
-    helm.sh/chart: opentelemetry-kube-stack-0.18.1
+    helm.sh/chart: opentelemetry-kube-stack-0.18.0
     app.kubernetes.io/version: "0.153.0"
     app.kubernetes.io/managed-by: Helm
     release: "opentelemetry-stack"        
@@ -290,6 +290,11 @@ spec:
         - group: apiextensions.k8s.io
           mode: pull
           name: customresourcedefinitions
+        - exclude_watch_type:
+          - DELETED
+          group: events.k8s.io
+          mode: watch
+          name: events
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 15s
@@ -322,6 +327,9 @@ spec:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
+      prometheus:
+        config:
+          scrape_configs: []
       prometheus/cadvisor:
         config:
           scrape_configs:
@@ -465,6 +473,7 @@ spec:
           - batch
           receivers:
           - otlp
+          - prometheus
           - receiver_creator/metrics
           - hostmetrics
           - kubeletstats
@@ -527,6 +536,12 @@ spec:
       memory: 250Mi
   securityContext:
     {}
+  targetAllocator:
+    allocationStrategy: per-node
+    enabled: true
+    prometheusCR:
+      enabled: true
+      serviceMonitorSelector: {}
   volumeMounts:
   - name: varlogpods
     mountPath: /var/log/pods

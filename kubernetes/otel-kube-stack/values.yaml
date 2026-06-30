@@ -8,6 +8,13 @@ clusterName: unknown_k8s_cluster
 collectors:
   daemon:
     enabled: true
+    # scrape KSM
+    targetAllocator:
+      enabled: true
+      allocationStrategy: per-node
+      prometheusCR:
+        enabled: true
+        serviceMonitorSelector: {}
     env:
       - name: DD_SITE  # Datadog intake: datadoghq.com, us3.datadoghq.com, datadoghq.eu... Defaults to datadoghq.com
         valueFrom:
@@ -20,8 +27,7 @@ collectors:
           secretKeyRef:
             name: dd-secrets
             key: DD_API_KEY
-    ## @param scrape_configs_file Path to a custom Prometheus scrape_configs file to be used by the OpenTelemetry Collector.
-    ## disable Prometheus scrapping as it assumes the Prometheus Node Exporter and CAdvisor are setup
+    # disable Prometheus scrapping through external scrapping file in favor of presets
     scrape_configs_file: ""
     presets:
       logsCollection:
@@ -34,8 +40,7 @@ collectors:
       kubernetesAttributes:
         enabled: true
       kubernetesEvents:
-        enabled: false # disable for exporters/datadog/orchestrator_explorer/enabled: true
-      # WARNING requires https://github.com/open-telemetry/opentelemetry-helm-charts/pull/2266
+        enabled: true
       kubernetesObjects:
         enabled: true
       clusterMetrics:
@@ -79,7 +84,7 @@ collectors:
             key: ${env:DD_API_KEY}
           orchestrator_explorer:
             enabled: true
-          #sending_queue:
+          #sending_queue:  # disable batching for https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/49322
           #  batch:
           #    flush_timeout: 10s
           #    max_size: 100
@@ -129,7 +134,7 @@ collectors:
               - resource/fake_k8s_cluster_uid
               - resourcedetection/env
               - resource/hostname
-              #- batch
+              #- batch # disable batching for https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/49322
             receivers: []
         telemetry:
           resource:

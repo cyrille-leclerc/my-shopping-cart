@@ -72,8 +72,8 @@ helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm
 helm repo update
 
 /opt/homebrew/opt/helm@3/bin/helm upgrade opentelemetry-stack \
-		/Users/cyrille.leclerc/src/opentelemetry/opentelemetry-helm-charts/charts/opentelemetry-kube-stack \
-    --version 0.16.0 \
+    open-telemetry/opentelemetry-kube-stack \
+    --version 0.18.0 \
     --install \
     --namespace opentelemetry-operator-system \
     --set opentelemetry-operator.admissionWebhooks.certManager.enabled=$OTEL_OPERATOR_CERT_MANAGER_ENABLED \
@@ -82,3 +82,6 @@ helm repo update
     --set-string collectors.daemon.config.service.telemetry.resource.k8s\\.cluster\\.name=$K8S_CLUSTER_NAME \
     --set-string collectors.daemon.config.service.telemetry.resource.deployment\\.environment\\.name=$DEPLOYMENT_ENVIRONMENT_NAME \
     -f values.yaml
+
+
+#    		/Users/cyrille.leclerc/src/opentelemetry/opentelemetry-helm-charts/charts/opentelemetry-kube-stack \
