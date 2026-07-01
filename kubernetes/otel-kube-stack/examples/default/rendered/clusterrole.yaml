@@ -158,6 +158,21 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
+  name: opentelemetry-stack-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: opentelemetry-stack-collector
+subjects:
+- kind: ServiceAccount
+  # quirk of the Operator
+  name: "opentelemetry-stack-collector-collector"
+  namespace: opentelemetry-operator-system
+---
+# Source: opentelemetry-kube-stack/templates/clusterrole.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
   name: opentelemetry-stack-daemon
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -167,7 +182,4 @@ subjects:
 - kind: ServiceAccount
   # quirk of the Operator
   name: "opentelemetry-stack-daemon-collector"
-  namespace: opentelemetry-operator-system
-- kind: ServiceAccount
-  name: opentelemetry-stack-daemon-targetallocator
   namespace: opentelemetry-operator-system
