@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Push images (you'll need to push manually since compose build doesn't push)
+GITHUB_USER="cyrille-leclerc"
+REGISTRY="ghcr.io/${GITHUB_USER}"
+
+if ! gh auth status 2>&1 | grep -q "write:packages"; then
+    gh auth refresh --scopes write:packages
+fi
+GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
+echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_USER}" --password-stdin
+
+languages=("java")
+
+for language in "${languages[@]}"; do
+    cd "$language"
+    version=$(cat version.txt)
+    image="${REGISTRY}/dd-autoinstrumentation-${language}:${version}"
+    echo "Building ${image}..."
+    docker buildx build \
+        --platform linux/amd64,linux/arm64 \
+        --build-arg version="${version}" \
+        --tag "${image}" \
+        --push \
+        .
+    cd ..
+done
+
+echo "All autoinstrumentation images built and pushed!"
