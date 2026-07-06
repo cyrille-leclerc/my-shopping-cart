@@ -37,6 +37,14 @@ spec:
             ddTraceConfigs:
               - name: "DD_PROFILING_ENABLED"
                 value: "auto"
+              - name: "DD_TRACE_DEBUG"
+                value: "false"
+              - name: "DD_TRACE_OTEL_ENABLED"
+                value: "true"
+              - name: "OTEL_TRACES_EXPORTER"
+                value: "otlp"
+              - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
+                value: http://opentelemetry-stack-daemon-collector.opentelemetry-operator-system.svc.cluster.local:4318
     logCollection:
       enabled: true
       containerCollectAll: true

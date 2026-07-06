@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+set -x
+
+#### BEGINNING OF BOILERPLATE SCRIPT WAITING TO GET THE GUI
+
+# Load environment variables from .env file if it exists
+[[ -f .env ]] && source .env
+
+if [[ ! -f ".env" ]]; then
+    echo ".env file not found. Entering interactive setup..."
+
+    read -p "Datadog Site (eg: 'datadoghq.eu'): " DD_SITE
+    [[ -z "DD_SITE" ]] && error "Datadog Site cannot be empty"
+
+    read -p "Datadog API Key (eg: 'gcp_...'): " DD_API_KEY
+    [[ -z "DD_API_KEY" ]] && error "Datadog API Key cannot be empty"
+
+    # Ask if user wants to save to .env file
+    read -p "Save credentials to .env file? (y/n): " SAVE_TO_ENV
+    if [[ "$SAVE_TO_ENV" == "y" || "$SAVE_TO_ENV" == "Y" ]]; then
+        # Save to .env file
+        {
+            echo "export DD_SITE=\"${DD_SITE}\""
+            echo "export DD_API_KEY=\"${DD_API_KEY}\""
+        } >> .env
+        echo ".env file created successfully."
+    fi
+fi
+
+# Verify all required credentials are set
+[[ -z "${DD_API_KEY:-}" ]] && error "DD_API_KEY is not set"
+
+echo ""
+
+
+#### BEGINNING OF INSTALLATION SCRIPT
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+helm install kube-state-metrics prometheus-community/kube-state-metrics
+
+kubectl create secret generic datadog-secret \
+  --from-literal="dd-site=${DD_SITE:-datadoghq.com}" \
+  --from-literal="api-key=$DD_API_KEY" \
+  || echo "WARNING: Could not create secret 'datadog-secret' (may already exist or insufficient permissions). Continuing..."
+
+helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+helm repo update
+
+/opt/homebrew/opt/helm@3/bin/helm upgrade \
+      otel-daemon-collector open-telemetry/opentelemetry-collector \
+      -f /Users/cyrille.leclerc/src/datadog/opentelemetry-examples/guides/kubernetes/configuration/daemonset-collector.yaml \
+      --set image.repository=otel/opentelemetry-collector-contrib \
+      --set image.tag=0.154.0 \
+      --install
+
+/opt/homebrew/opt/helm@3/bin/helm upgrade \
+      otel-cluster-collector open-telemetry/opentelemetry-collector \
+      -f /Users/cyrille.leclerc/src/datadog/opentelemetry-examples/guides/kubernetes/configuration/cluster-collector.yaml \
+      --set image.repository=otel/opentelemetry-collector-contrib \
+      --set image.tag=0.154.0 \
+      --install
