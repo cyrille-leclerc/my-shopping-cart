@@ -81,6 +81,7 @@ helm repo update
     --set-string instrumentation.resource.resourceAttributes.deployment\\.environment\\.name=$DEPLOYMENT_ENVIRONMENT_NAME \
     --set-string collectors.daemon.config.service.telemetry.resource.k8s\\.cluster\\.name=$K8S_CLUSTER_NAME \
     --set-string collectors.daemon.config.service.telemetry.resource.deployment\\.environment\\.name=$DEPLOYMENT_ENVIRONMENT_NAME \
+    --set-string collectors.cluster.config.processors.resource/k8s_cluster_name.attributes[0].value=$K8S_CLUSTER_NAME \
     -f values.yaml
 
 

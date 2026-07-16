@@ -70,14 +70,18 @@ collectors:
             - action: insert
               value: "218fc5a9-a5f1-4b54-aa05-46717d0ab26d"
               key: k8s.cluster.uid
+        resource/k8s_cluster_name: # TODO cleanup
+          attributes:
+            - action: insert
+              value: "unknown_k8s_cluster"
+              key: k8s.cluster.name
         cumulativetodelta: { }
-        # Rename KSM metric prometheus label uid -> k8s.pod.uid to adhere to OTel standard and
-        # facilitate the groupby specified below.
+        # uid was already renamed to k8s.<kind>.uid by transform/ksm_to_otel_semantics (which runs
+        # earlier in the pipeline); drop the leftover raw label to facilitate the groupby below.
         transform/rename_uid:
           metric_statements:
             - context: datapoint
               statements:
-                - set(attributes["k8s.pod.uid"], attributes["uid"])
                 - delete_key(attributes, "uid")
             # We have to delete these from the resource because they were incorrectly
             # set by the prometheus receiver, k8s_attributes will repopulate them but
@@ -130,6 +134,36 @@ collectors:
                 # service
                 - set(attributes["kube_service"], attributes["service"])
                 - delete_key(attributes, "service")
+
+        transform/ksm_to_otel_semantics:
+          # https://opentelemetry.io/docs/specs/semconv/registry/attributes/k8s/
+          metric_statements:
+            - context: datapoint
+              statements:
+                - set(attributes["k8s.namespace.name"], attributes["namespace"])
+                - set(attributes["k8s.pod.name"], attributes["pod"])
+                - set(attributes["k8s.pod.ip"], attributes["pod_ip"])
+                - set(attributes["k8s.node.name"], attributes["node"])
+                - set(attributes["k8s.container.name"], attributes["container"])
+                - set(attributes["k8s.deployment.name"], attributes["deployment"])
+                - set(attributes["k8s.pod.status.phase"], attributes["phase"])
+                - set(attributes["k8s.statefulset.name"], attributes["statefulset"])
+                - set(attributes["k8s.daemonset.name"], attributes["daemonset"])
+                - set(attributes["k8s.replicaset.name"], attributes["replicaset"])
+                - set(attributes["k8s.job.name"], attributes["job_name"])
+                - set(attributes["k8s.service.name"], attributes["service"])
+                - set(attributes["k8s.service.type"], attributes["type"]) where metric.name == "kube_service_spec_type"
+                - set(attributes["k8s.cronjob.name"], attributes["owner_name"]) where metric.name == "kube_job_owner" and attributes["owner_kind"] == "CronJob"
+                # "reason" and "condition"/"status" mean different things depending on the source metric, so they must be mapped per metric.name
+                - set(attributes["k8s.pod.status.reason"], attributes["reason"]) where metric.name == "kube_pod_status_reason"
+                - set(attributes["k8s.container.status.reason"], attributes["reason"]) where metric.name == "kube_pod_container_status_terminated_reason"
+                - set(attributes["k8s.container.status.last_terminated_reason"], attributes["reason"]) where metric.name == "kube_pod_container_status_last_terminated_reason"
+                - set(attributes["k8s.node.condition.type"], attributes["condition"]) where metric.name == "kube_node_status_condition"
+                - set(attributes["k8s.node.condition.status"], attributes["status"]) where metric.name == "kube_node_status_condition"
+                # "uid" means a different resource's UID depending on the metric family
+                - set(attributes["k8s.pod.uid"], attributes["uid"]) where IsMatch(metric.name, "^kube_pod_")
+                - set(attributes["k8s.node.uid"], attributes["uid"]) where metric.name == "kube_node_info"
+                - set(attributes["k8s.service.uid"], attributes["uid"]) where IsMatch(metric.name, "^kube_service_")
 
         # k8s_attributes processor is used to enrich metrics with additional metadata, namely, service.
         k8s_attributes:
@@ -245,8 +279,10 @@ collectors:
           metrics/ksm:
             receivers:
               - prometheus/ksm
-              - count/k8s_entities
+              - count/k8s_entities # TODO dedicated pipeline for this
             processors:
+              - transform/ksm_to_otel_semantics
+              - resource/k8s_cluster_name
               - resource/fake_k8s_cluster_uid
               - filter/ksm
               - transform/ksm_to_dd
@@ -257,6 +293,7 @@ collectors:
               - transform/sum_to_gauge
             exporters:
               - datadog
+
           metrics/ksm_entities_counter:
             receivers:
               - prometheus/ksm
@@ -444,7 +481,7 @@ collectors:
                           value: "${DD_API_KEY}"
 
 instrumentation:
-  enabled: true
+  enabled: false
   name: "otel-instrumentation"
   env:
     - name: OTEL_SEMCONV_STABILITY_OPT_IN

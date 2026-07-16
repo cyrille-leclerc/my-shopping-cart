@@ -18,10 +18,16 @@ spec:
   sampler:
     type: parentbased_always_on
   env:
+    - name: DD_TRACE_DEBUG
+      value: "false"
+    - name: DD_TRACE_OTEL_ENABLED
+      value: "true"
     - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       value: "delta"
     - name: OTEL_SEMCONV_STABILITY_OPT_IN
       value: "http,database,rpc,messaging"
+    - name: OTEL_TRACES_EXPORTER
+      value: "otlp"
   resource:
     addK8sUIDAttributes: true
     resourceAttributes:
@@ -30,4 +36,4 @@ spec:
     env:
     - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES
       value: "true"
-    image: ghcr.io/open-telemetry/opentelemetry-operator/autoinstrumentation-java:2.28.1
+    image: ghcr.io/cyrille-leclerc/autoinstrumentation-java:1.63.2

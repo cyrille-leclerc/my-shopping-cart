@@ -7,13 +7,13 @@ metadata:
     agent.datadoghq.com/appsec.injector.enabled: "true"
 spec:
   global:
-    clusterName: "your-cluster-name-here"
+    clusterName: "my_k8s_cluster"
     site: "datadoghq.eu"
     tags:
       - "env:production"
     credentials:
       apiSecret:
-        secretName: "datadog-secret"
+        secretName: "dd-secrets"
         keyName: "api-key"
     kubelet:
       tlsVerify: false
@@ -27,6 +27,9 @@ spec:
         enabled: true
         targets:
           - name: "default-target"
+            namespaceSelector:
+              matchNames:
+                - "ecommerce"
             ddTraceVersions:
               java: "1"
               python: "4"

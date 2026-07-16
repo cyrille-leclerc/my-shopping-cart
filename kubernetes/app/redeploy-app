@@ -1,7 +1,7 @@
 set -euo pipefail
 
-kubectl rollout restart deployment checkout
-kubectl rollout restart deployment fraud-detection
-kubectl rollout restart deployment frontend
-kubectl rollout restart deployment shipping
-kubectl rollout restart deployment warehouse
+kubectl rollout restart -n ecommerce deployment checkout
+kubectl rollout restart -n ecommerce deployment fraud-detection
+kubectl rollout restart -n ecommerce deployment frontend
+kubectl rollout restart -n ecommerce deployment shipping
+kubectl rollout restart -n ecommerce deployment warehouse

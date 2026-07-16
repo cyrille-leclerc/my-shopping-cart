@@ -22,6 +22,7 @@ generate-examples:
 				--set-string instrumentation.resource.resourceAttributes.deployment\\.environment\\.name="staging" \
 				--set-string collectors.daemon.config.service.telemetry.resource.k8s\\.cluster\\.name="my_testing_k8s_cluster" \
 				--set-string collectors.daemon.config.service.telemetry.resource.deployment\\.environment\\.name="staging" \
+			    --set-string collectors.cluster.config.processors.resource/k8s_cluster_name.attributes[0].value="my_testing_k8s_cluster" \
 				--values ./values.yaml --values $${value} \
 				--output-dir "$${EXAMPLES_DIR}/$${example}/rendered"; \
 			mv $${EXAMPLES_DIR}/$${example}/rendered/opentelemetry-kube-stack/templates/* "$${EXAMPLES_DIR}/$${example}/rendered"; \

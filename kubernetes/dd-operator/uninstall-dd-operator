@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Delete CRDs before uninstalling the helm chart"
+kubectl delete crd datadogagents.datadoghq.com
+kubectl delete crd datadogagentinternals.datadoghq.com
+
+
+helm uninstall my-datadog-operator --namespace datadog  || echo "WARNING: Could not uninstall helm release "
+
+kubectl delete secrets --namespace datadog  --ignore-not-found=true dd-secrets
+
+echo "Delete namespace"
+kubectl delete namespace datadog

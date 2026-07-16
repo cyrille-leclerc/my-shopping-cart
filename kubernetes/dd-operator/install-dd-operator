@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-kubectl create namespace datadog || echo "WARNING: Could not create namespace 'datadog' (may already exist or insufficient permissions). Continuing..."
+function error {
+    echo "$1" & exit 1
+}
+
 
 # Load environment variables from .env file if it exists
 if [[ -f .env ]]; then
@@ -12,16 +15,21 @@ fi
 
 [[ -z "${DD_API_KEY:-}" ]] && error "DD_API_KEY is not set"
 
+kubectl create namespace datadog || echo "WARNING: Could not create namespace 'datadog' (may already exist or insufficient permissions). Continuing..."
+
 kubectl create secret generic dd-secrets \
+   --namespace datadog \
    --from-literal api-key=$DD_API_KEY \
-   --from-literal dd-site=${DD_SITE:-datadoghq.com}
+   --from-literal dd-site=${DD_SITE:-datadoghq.com} \
+  || echo "WARNING: Could not create secret 'dd-secrets' (may already exist or insufficient permissions). Continuing..."
 
 helm repo add datadog https://helm.datadoghq.com
 helm repo update
 
 helm upgrade my-datadog-operator datadog/datadog-operator\
        --install \
-       --namespace datadog \
-       -f values.yaml
+       --namespace datadog
+
+kubectl apply -f datadog-agent.yaml
 
 kubectl apply -f operator-extra-rbac.yaml

@@ -33,8 +33,6 @@ spec:
       containers:
         - name: frontend
           env:
-            - name: PYROSCOPE_APPLICATION_NAME
-              value: "frontend"
             - name: CHECKOUTSERVICE_GRPCENDPOINT
               value: "checkout:50051"
             - name: FRAUDDETECTIONSERVICE_BASEURL

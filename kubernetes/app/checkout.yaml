@@ -65,7 +65,7 @@ spec:
       app.kubernetes.io/name: checkout
   namespaceSelector:
     matchNames:
-      - default
+      - ecommerce
   endpoints:
     - port: http-metrics
       path: /metrics
