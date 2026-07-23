@@ -4,4 +4,6 @@ kubectl create namespace ecommerce || echo "WARNING: Could not create namespace 
 
 kubectl label namespace ecommerce admission.datadoghq.com/enabled=true --overwrite
 
-kubectl apply -n ecommerce -f .
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+kubectl apply -n ecommerce -f "$SCRIPT_DIR"

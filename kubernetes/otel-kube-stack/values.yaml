@@ -452,7 +452,6 @@ collectors:
               - resourcedetection/env
               - resource/hostname
               #- batch # disable batching for https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/49322
-            receivers: [ ]
         telemetry:
           resource:
             deployment.environment.name: production  # TODO overwrite as needed
