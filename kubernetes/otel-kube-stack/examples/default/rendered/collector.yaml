@@ -56,10 +56,6 @@ spec:
         traces:
           compute_stats_by_span_kind: true
           trace_buffer: 500
-      prometheus:
-        endpoint: 127.0.0.1:8080
-        resource_to_telemetry_conversion:
-          enabled: false
     extensions:
       datadog/extension:
         api:
@@ -166,11 +162,15 @@ spec:
             metric.name == "kube_node_status_condition"
           - set(attributes["k8s.node.condition.status"], attributes["status"]) where metric.name
             == "kube_node_status_condition"
+          - set(attributes["k8s.pod.uid"], attributes["uid"]) where IsMatch(metric.name,
+            "^kube_pod_")
+          - set(attributes["k8s.node.uid"], attributes["uid"]) where metric.name == "kube_node_info"
+          - set(attributes["k8s.service.uid"], attributes["uid"]) where IsMatch(metric.name,
+            "^kube_service_")
       transform/rename_uid:
         metric_statements:
         - context: datapoint
           statements:
-          - set(attributes["k8s.pod.uid"], attributes["uid"])
           - delete_key(attributes, "uid")
         - context: resource
           statements:
@@ -768,6 +768,7 @@ spec:
           - resourcedetection/env
           - resource/hostname
           receivers:
+          - otlp
           - filelog
           - k8sobjects
         metrics:
@@ -907,3 +908,4 @@ spec:
   - name: hostfs
     hostPath:
       path: /
+

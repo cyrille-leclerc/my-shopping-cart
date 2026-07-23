@@ -480,19 +480,18 @@ collectors:
                           value: "${DD_API_KEY}"
 
 instrumentation:
-  enabled: false
+  enabled: true
   name: "otel-instrumentation"
   env:
     - name: OTEL_SEMCONV_STABILITY_OPT_IN
       value: "http,database,rpc,messaging"
     - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
       value: delta
+    # OTEL_TRACES_EXPORTER and DD_TRACE_OTEL_ENABLED are needed when injecting Datadog SDKs in OTel Mode
     - name: OTEL_TRACES_EXPORTER
       value: otlp
     - name: DD_TRACE_OTEL_ENABLED
       value: "true"
-    - name: DD_TRACE_DEBUG
-      value: "false"
   exporter:
     endpoint: http://opentelemetry-stack-daemon-collector.opentelemetry-operator-system.svc.cluster.local:4318
   resource:

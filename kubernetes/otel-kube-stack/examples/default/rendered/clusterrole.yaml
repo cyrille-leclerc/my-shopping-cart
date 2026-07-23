@@ -183,3 +183,4 @@ subjects:
   # quirk of the Operator
   name: "opentelemetry-stack-daemon-collector"
   namespace: opentelemetry-operator-system
+

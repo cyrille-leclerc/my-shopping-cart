@@ -18,8 +18,6 @@ spec:
   sampler:
     type: parentbased_always_on
   env:
-    - name: DD_TRACE_DEBUG
-      value: "false"
     - name: DD_TRACE_OTEL_ENABLED
       value: "true"
     - name: OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
@@ -37,3 +35,4 @@ spec:
     - name: OTEL_INSTRUMENTATION_LOGBACK_APPENDER_EXPERIMENTAL_CAPTURE_KEY_VALUE_PAIR_ATTRIBUTES
       value: "true"
     image: ghcr.io/cyrille-leclerc/autoinstrumentation-java:1.63.2
+

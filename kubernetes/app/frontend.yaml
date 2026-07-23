@@ -33,6 +33,12 @@ spec:
       containers:
         - name: frontend
           env:
+            # Set OTEL_TRACES_EXPORTER and OTEL_EXPORTER_OTLP_ENDPOINT when using the
+            # Datadog SDK in OTel mode
+            #- name: OTEL_TRACES_EXPORTER
+            #  value: "otlp"
+            #- name: OTEL_EXPORTER_OTLP_ENDPOINT
+            #  value: http://datadog-agent.datadog.svc.cluster.local:4318
             - name: CHECKOUTSERVICE_GRPCENDPOINT
               value: "checkout:50051"
             - name: FRAUDDETECTIONSERVICE_BASEURL
