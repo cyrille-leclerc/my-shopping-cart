@@ -64,15 +64,15 @@ spec:
               dotnet: "3"
               ruby: "2"
             ddTraceConfigs:
+              - name: "DD_PROFILING_ENABLED"
+                value: "auto"
+              - name: "DD_TRACE_DEBUG"
+                value: "false"
               # IMPORTANT
               # `OTEL_TRACES_EXPORTER: otlp` and
               # `OTEL_EXPORTER_OTLP_ENDPOINT: http://datadog-agent.datadog.svc.cluster.local:4318` must be set
               # to activate the OTel mode but can't bet set by the DD Operator that only accepts
               # `DD_*` env var for the moment so we set those env var through the application deployment manifests
-              - name: "DD_PROFILING_ENABLED"
-                value: "auto"
-              - name: "DD_TRACE_DEBUG"
-                value: "false"
               - name: "DD_TRACE_OTEL_ENABLED"
                 value: "true"
     logCollection:
@@ -124,6 +124,11 @@ spec:
                 batch:
                   flush_timeout: 10s
           processors:
+            resource:
+              attributes:
+                - key: deployment.environment.name
+                  value: "production"
+                  action: upsert
             infraattributes:
               cardinality: 2
           connectors:
@@ -133,15 +138,15 @@ spec:
             pipelines:
               traces:
                 receivers: [otlp]
-                processors: [infraattributes]
+                processors: [resource, infraattributes]
                 exporters: [datadog, datadog/connector]
               metrics:
                 receivers: [otlp, datadog/connector, prometheus]
-                processors: [infraattributes]
+                processors: [resource, infraattributes]
                 exporters: [datadog]
               logs:
                 receivers: [otlp]
-                processors: [infraattributes]
+                processors: [resource, infraattributes]
                 exporters: [datadog]
   override:
     clusterAgent:
