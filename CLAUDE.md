@@ -271,8 +271,8 @@ Services are instrumented via:
 
 ### Dependency Versions (Aligned Across Services)
 - Spring Boot: 4.0.6
-- OpenTelemetry: 1.62.0
-- OpenTelemetry Instrumentation: 2.27.0
+- OpenTelemetry: 1.63.0
+- OpenTelemetry Instrumentation: 2.29.0
 - gRPC: 1.77.0
 - Protobuf: 4.33.1
 - Java: 25 (source/target/release)
