@@ -22,14 +22,24 @@ spec:
       enabled: true
     orchestratorExplorer:
       enabled: true
+    admissionController:
+      enabled: true
+      mutateUnlabelled: true
     apm:
       instrumentation:
         enabled: true
         targets:
           - name: "default-target"
             namespaceSelector:
-              matchNames:
-                - "ecommerce"
+              matchExpressions:
+                - key: kubernetes.io/metadata.name
+                  operator: NotIn
+                  values:
+                    - "datadog"
+                    - "cert-manager"
+                    - "opentelemetry-operator-system"
+                    # use the `otel-mode-target` to instrument the following k8s namespaces:
+                    - "ecommerce"
             ddTraceVersions:
               java: "1"
               python: "4"
@@ -42,12 +52,29 @@ spec:
                 value: "auto"
               - name: "DD_TRACE_DEBUG"
                 value: "false"
+          - name: "otel-mode-target"
+            namespaceSelector:
+              matchNames:
+                - "ecommerce"
+            ddTraceVersions:
+              java: "1"
+              python: "4"
+              js: "5"
+              php: "1"
+              dotnet: "3"
+              ruby: "2"
+            ddTraceConfigs:
+              # IMPORTANT
+              # `OTEL_TRACES_EXPORTER: otlp` and
+              # `OTEL_EXPORTER_OTLP_ENDPOINT: http://datadog-agent.datadog.svc.cluster.local:4318` must be set
+              # to activate the OTel mode but can't bet set by the DD Operator that only accepts
+              # `DD_*` env var for the moment so we set those env var through the application deployment manifests
+              - name: "DD_PROFILING_ENABLED"
+                value: "auto"
+              - name: "DD_TRACE_DEBUG"
+                value: "false"
               - name: "DD_TRACE_OTEL_ENABLED"
                 value: "true"
-              - name: "OTEL_TRACES_EXPORTER"
-                value: "otlp"
-              - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
-                value: http://opentelemetry-stack-daemon-collector.opentelemetry-operator-system.svc.cluster.local:4318
     logCollection:
       enabled: true
       containerCollectAll: true
@@ -62,13 +89,68 @@ spec:
       enabled: true
     liveProcessCollection:
       enabled: true
+    otelCollector:
+      enabled: true
+      ports:
+        - containerPort: 4317
+          hostPort: 4317
+          name: otel-grpc
+        - containerPort: 4318
+          hostPort: 4318
+          name: otel-http
+      conf:
+        configData: |-
+          receivers:
+            prometheus:
+              config:
+                scrape_configs:
+                  - job_name: "otelcol"
+                    scrape_interval: 10s
+                    static_configs:
+                      - targets:
+                          - 0.0.0.0:8888
+            otlp:
+              protocols:
+                grpc:
+                  endpoint: 0.0.0.0:4317
+                http:
+                  endpoint: 0.0.0.0:4318
+          exporters:
+            datadog:
+              api:
+                key: ${env:DD_API_KEY}
+                site: ${env:DD_SITE}
+              sending_queue:
+                batch:
+                  flush_timeout: 10s
+          processors:
+            infraattributes:
+              cardinality: 2
+          connectors:
+            datadog/connector:
+              traces:
+          service:
+            pipelines:
+              traces:
+                receivers: [otlp]
+                processors: [infraattributes]
+                exporters: [datadog, datadog/connector]
+              metrics:
+                receivers: [otlp, datadog/connector, prometheus]
+                processors: [infraattributes]
+                exporters: [datadog]
+              logs:
+                receivers: [otlp]
+                processors: [infraattributes]
+                exporters: [datadog]
   override:
     clusterAgent:
       image:
         name: "registry.datadoghq.com/cluster-agent:latest"
     nodeAgent:
       image:
-        name: "registry.datadoghq.com/agent:latest"
+        # IMPORTANT tag must be `latest-full` when activating the otelCollector feature
+        name: "registry.datadoghq.com/agent:latest-full"
       tolerations:
         - key: "node-role.kubernetes.io/controlplane"
           operator: "Exists"

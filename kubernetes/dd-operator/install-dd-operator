@@ -5,12 +5,13 @@ function error {
     echo "$1" & exit 1
 }
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Load environment variables from .env file if it exists
-if [[ -f .env ]]; then
-    source .env
+if [[ -f "$SCRIPT_DIR/.env" ]]; then
+    source "$SCRIPT_DIR/.env"
 else
-    error ".env file not found. Aborting..."
+    error "$SCRIPT_DIR/.env file not found. Aborting..."
 fi
 
 [[ -z "${DD_API_KEY:-}" ]] && error "DD_API_KEY is not set"
@@ -30,6 +31,6 @@ helm upgrade my-datadog-operator datadog/datadog-operator\
        --install \
        --namespace datadog
 
-kubectl apply -f datadog-agent.yaml
+kubectl apply -f "$SCRIPT_DIR/datadog-agent.yaml"
 
-kubectl apply -f operator-extra-rbac.yaml
+kubectl apply -f "$SCRIPT_DIR/operator-extra-rbac.yaml"
