@@ -29,16 +29,13 @@ spec:
       instrumentation:
         enabled: true
         targets:
-          - name: "default-target"
+          - name: "default-target" # DATADOG NATIVE MODE
             namespaceSelector:
               matchExpressions:
                 - key: kubernetes.io/metadata.name
                   operator: NotIn
                   values:
-                    - "datadog"
-                    - "cert-manager"
-                    - "opentelemetry-operator-system"
-                    # use the `otel-mode-target` to instrument the following k8s namespaces:
+                    # use the OpenTelemetry mode (`otel-mode-target`) to instrument the following k8s namespaces:
                     - "ecommerce"
             ddTraceVersions:
               java: "1"
@@ -52,7 +49,7 @@ spec:
                 value: "auto"
               - name: "DD_TRACE_DEBUG"
                 value: "false"
-          - name: "otel-mode-target"
+          - name: "otel-mode-target" # OPENTELEMETRY MODE
             namespaceSelector:
               matchNames:
                 - "ecommerce"
@@ -74,6 +71,10 @@ spec:
               # to activate the OTel mode but can't bet set by the DD Operator that only accepts
               # `DD_*` env var for the moment so we set those env var through the application deployment manifests
               - name: "DD_TRACE_OTEL_ENABLED"
+                value: "true"
+              - name: "DD_LOGS_OTEL_ENABLED"
+                value: "true"
+              - name: "DD_METRICS_OTEL_ENABLED"
                 value: "true"
     logCollection:
       enabled: true

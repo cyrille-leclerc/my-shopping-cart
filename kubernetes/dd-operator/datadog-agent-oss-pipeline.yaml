@@ -1,0 +1,338 @@
+kind: "DatadogAgent"
+apiVersion: "datadoghq.com/v2alpha1"
+metadata:
+  name: "datadog"
+  namespace: "datadog"
+  annotations:
+    agent.datadoghq.com/appsec.injector.enabled: "true"
+spec:
+  global:
+    clusterName: "my_k8s_cluster"
+    site: "datadoghq.eu"
+    tags:
+      - "env:production"
+    credentials:
+      apiSecret:
+        secretName: "dd-secrets"
+        keyName: "api-key"
+    kubelet:
+      tlsVerify: false
+  features:
+    clusterChecks:
+      enabled: true
+    orchestratorExplorer:
+      enabled: true
+    admissionController:
+      enabled: true
+      mutateUnlabelled: true
+    apm:
+      instrumentation:
+        enabled: true
+        targets:
+          - name: "default-target" # DATADOG NATIVE MODE
+            namespaceSelector:
+              matchExpressions:
+                - key: kubernetes.io/metadata.name
+                  operator: NotIn
+                  values:
+                    # use the OpenTelemetry mode (`otel-mode-target`) to instrument the following k8s namespaces:
+                    - "ecommerce"
+            ddTraceVersions:
+              java: "1"
+              python: "4"
+              js: "5"
+              php: "1"
+              dotnet: "3"
+              ruby: "2"
+            ddTraceConfigs:
+              - name: "DD_PROFILING_ENABLED"
+                value: "auto"
+              - name: "DD_TRACE_DEBUG"
+                value: "false"
+          - name: "otel-mode-target" # OPENTELEMETRY MODE
+            namespaceSelector:
+              matchNames:
+                - "ecommerce"
+            ddTraceVersions:
+              java: "1"
+              python: "4"
+              js: "5"
+              php: "1"
+              dotnet: "3"
+              ruby: "2"
+            ddTraceConfigs:
+              - name: "DD_PROFILING_ENABLED"
+                value: "auto"
+              - name: "DD_TRACE_DEBUG"
+                value: "false"
+              # IMPORTANT
+              # `OTEL_TRACES_EXPORTER: otlp` and
+              # `OTEL_EXPORTER_OTLP_ENDPOINT: http://datadog-agent.datadog.svc.cluster.local:4318` must be set
+              # to activate the OTel mode but can't bet set by the DD Operator that only accepts
+              # `DD_*` env var for the moment so we set those env var through the application deployment manifests
+              - name: "DD_TRACE_OTEL_ENABLED"
+                value: "true"
+              - name: "DD_LOGS_OTEL_ENABLED"
+                value: "true"
+              - name: "DD_METRICS_OTEL_ENABLED"
+                value: "true"
+    logCollection:
+      enabled: true
+      containerCollectAll: true
+    asm:
+      threats:
+        enabled: true
+      sca:
+        enabled: true
+      iast:
+        enabled: true
+    usm:
+      enabled: true
+    liveProcessCollection:
+      enabled: true
+    otelCollector:
+      enabled: true
+      ports:
+        - containerPort: 4317
+          hostPort: 4317
+          name: otel-grpc
+        - containerPort: 4318
+          hostPort: 4318
+          name: otel-http
+      conf:
+        configData: |-
+         receivers:
+             otlp:
+               protocols:
+                 grpc:
+                   endpoint: 0.0.0.0:4317
+                 http:
+                   endpoint: 0.0.0.0:4318             
+             processors:
+               resourcedetection:
+                 detectors: [ env, system ]
+                 timeout: 2s
+                 override: true # Disable if incoming attributes (especially host.name) are verified correct
+                 system:
+                   resource_attributes:
+                     host.name:
+                       enabled: false # Containers report inaccurate host names
+               k8s_attributes:
+                 # Requires setting up ServiceAccount, (Cluster)Role, and (Cluster)RoleBinding resources
+                 # See https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/k8sattributesprocessor#role-based-access-control
+                 extract:
+                   otel_annotations: true
+                   metadata:
+                     - k8s.node.name
+                     - k8s.namespace.name
+                     - service.namespace
+                     - service.name
+                     - service.version
+                     - service.instance.id
+                     - k8s.deployment.name
+                     - k8s.replicaset.name
+                     - k8s.daemonset.name
+                     - k8s.statefulset.name
+                     - k8s.cronjob.name
+                     - k8s.job.name
+                     - k8s.pod.uid
+                     - k8s.pod.name
+                     - container.id
+                     - k8s.container.name
+                     - container.image.name
+                     - container.image.tag
+                 pod_association:
+                   - sources:
+                       - from: resource_attribute
+                         name: k8s.pod.uid
+                   - sources:
+                       - from: resource_attribute
+                         name: k8s.pod.ip
+                   - sources:
+                       - from: resource_attribute
+                         name: k8s.pod.name
+                       - from: resource_attribute
+                         name: k8s.namespace.name
+                   - sources:
+                       - from: connection
+               
+               # Transform metrics to fit Datadog platform constraints
+               cumulativetodelta: { }
+
+             connectors:
+               # Generate RED (Rate, Error, Duration) metrics from traces for APM
+               span_metrics:
+                 # Note: Spans without service.name will be ignored
+                 aggregation_temporality: AGGREGATION_TEMPORALITY_DELTA
+                 add_resource_attributes: true
+                 histogram:
+                   exponential: { }
+                   unit: s
+                 dimensions:
+                   # (Duplicate dimensions are not allowed and are thus commented out)
+                   
+                   ## Unified Service Tagging
+                   - name: deployment.environment.name
+                   - name: service.version
+                   - name: http.response.status_code
+                   
+                   ## Container tags
+                   ## May be used as additional primary tags or in service remapping rules
+                   - name: container.id # Required for correct aggregation
+                   
+                   ## Host name inference
+                   - name: aws.ecs.launchtype
+                   - name: aws.ecs.task.arn
+                   - name: cloud.provider
+                   - name: cloud.account.id
+                   - name: host.id
+                   - name: host.name
+                   - name: k8s.node.name
+                   - name: k8s.cluster.name
+                   - name: azure.resourcegroup.name
+                   
+                   ## Peer service inference
+                   - name: aws.s3.bucket
+                   - name: db.namespace
+                   - name: messaging.destination.name
+                   - name: messaging.system
+                   - name: server.address
+                   
+                   ## Operation name inference
+                   - name: operation.name
+                   - name: http.request.method
+                   - name: http.method
+                   - name: db.system
+                   #- name: messaging.system
+                   - name: messaging.operation
+                   - name: rpc.system
+                   - name: rpc.service
+                   - name: faas.invoked_provider
+                   - name: faas.invoked_name
+                   - name: faas.trigger
+                   - name: graphql.operation.type
+                   - name: network.protocol.name
+                   
+                   ## Resource name inference
+                   - name: resource.name
+                   #- name: http.request.method
+                   #- name: http.method
+                   - name: http.route
+                   #- name: messaging.operation
+                   - name: messaging.destination
+                   #- name: messaging.destination.name
+                   - name: rpc.method
+                   #- name: rpc.service
+                   #- name: graphql.operation.type
+                   - name: graphql.operation.name
+                   #- name: db.system
+                   - name: db.statement
+                   - name: db.query.text
+                   
+                   ## Optional container tags
+                   ## May be used as additional primary tags or in service remapping rules
+                   # # - name: cloud.provider
+                   # - name: cloud.region
+                   # - name: cloud.availability_zone
+                   ## Comment out all container tags above if you uncomment this
+                   # - glob: container.**
+                   ## Comment out all aws.ecs tags above if you uncomment this
+                   # - glob: aws.ecs.**
+                   ## Comment out all k8s.*.name tags above if you uncomment this
+                   # - glob: k8s.*.name
+               # Separate trace processing from sampling so span metrics are computed on all traces
+               forward/traces_sample: { }
+             
+             exporters:
+               debug:
+                 verbosity: detailed
+               otlp_http:
+                 endpoint: https://otlp.${env:DD_SITE}
+                 headers:
+                   dd-api-key: ${env:DD_API_KEY}
+                   # Send resource attributes and scope metadata as metric tags
+                   dd-otel-metric-config: >-
+                     {
+                     "resource_attributes_as_tags": true,
+                     "instrumentation_scope_metadata_as_tags": true
+                     }
+                 compression: zstd
+                 compression_params:
+                   level: 3 # Level must be set explicitly for zstd
+                 sending_queue:
+                   batch:
+                     sizer: bytes
+                     min_size: 2097152 # Start flushing batches at 2MiB (2 * 1024 * 1024)
+                     max_size: 4194304 # Split large batches at 4MiB (4 * 1024 * 1024)
+             
+             extensions:
+               health_check:
+                 endpoint: 0.0.0.0:13133
+               # Report Collector status to Datadog for Fleet Automation
+               datadog:
+                 api:
+                   site: ${env:DD_SITE}
+                   key: ${env:DD_API_KEY}
+                 deployment_type: daemonset
+             
+             service:
+               extensions:
+                 - health_check # May be necessary for liveness/readiness probe
+                 - datadog
+               
+               pipelines:
+                 logs:
+                   receivers: [ otlp ]
+                   processors:
+                     - k8s_attributes
+                     - resourcedetection
+                   exporters: [ otlp_http ]
+                 
+                 metrics:
+                   receivers: [ otlp ]
+                   processors:
+                     - k8s_attributes
+                     - resourcedetection
+                     - cumulativetodelta
+                   exporters: [ otlp_http ]
+                 
+                 traces:
+                   receivers: [ otlp ]
+                   processors:
+                     - k8s_attributes
+                     - resourcedetection
+                   exporters: [ forward/traces_sample, span_metrics ]
+                 
+                 traces/sample:
+                   receivers: [ forward/traces_sample ]
+                   # Add sampling processors here (for example, tail_sampling) before exporting traces
+                   exporters: [ otlp_http ]
+                 
+                 metrics/span_metrics:
+                   receivers: [ span_metrics ]
+                   exporters: [ otlp_http ]
+               
+               telemetry:
+                 # Route Collector internal metrics through its own pipelines for enrichment purposes
+                 metrics:
+                   readers:
+                     - periodic:
+                         exporter:
+                           otlp:
+                             protocol: http/protobuf
+                             endpoint: http://localhost:4318
+  override:
+    clusterAgent:
+      image:
+        name: "registry.datadoghq.com/cluster-agent:latest"
+    nodeAgent:
+      image:
+        # IMPORTANT tag must be `latest-full` when activating the otelCollector feature
+        name: "registry.datadoghq.com/agent:latest-full"
+      tolerations:
+        - key: "node-role.kubernetes.io/controlplane"
+          operator: "Exists"
+          effect: "NoSchedule"
+        - key: "node-role.kubernetes.io/etcd"
+          operator: "Exists"
+          effect: "NoExecute"

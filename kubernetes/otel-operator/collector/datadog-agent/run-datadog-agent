@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# EXTRACT THE OTEL COLLECTOR CONFIG FILE
+
+otelcol_config_file="/etc/otel/config.yaml"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --config=*)
+      otelcol_config_file="${1#--config=}"
+      shift
+      ;;
+    --config)
+      otelcol_config_file="$2"
+      shift 2
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+if [[ ! -f "$otelcol_config_file" ]]; then
+  echo "OTel Collector config file not found: $otelcol_config_file" >&2
+  exit 1
+fi
+
+# EXTRACT DATADOG CONFIG
+# We fake an OTel Collector Datadog exporter config to pass the config to the Datadog agent(`agent`, `trace-agent`...)
+
+# See exporters/datadog/api/key and exporters/datadog/api/site in src/otelcol-config.yaml for the expected shape.
+dd_api_key_line="$(grep -m1 'key:' "$otelcol_config_file" || true)"
+dd_site_line="$(grep -m1 'site:' "$otelcol_config_file" || true)"
+
+if [[ -z "$dd_api_key_line" || -z "$dd_site_line" ]]; then
+  echo "OTel Collector config file $otelcol_config_file is missing the Datadog exporter 'key:'/'site:' settings (see src/otelcol-config.yaml for an example)" >&2
+  exit 1
+fi
+
+extract_value() {
+  printf '%s' "$1" | sed -E 's/^[^:]*:[[:space:]]*//; s/^["'"'"']//; s/["'"'"'[:space:]]*$//'
+}
+
+
+export DD_API_KEY="$(extract_value "$dd_api_key_line")"
+export DD_SITE="$(extract_value "$dd_site_line")"
+export DD_ENV="production" # TODO EXTRACT FROM OTELCOL CONFIG OR ENV VARS
+
+# LAUNCH THE DATADOG AGENT (AGENT, TRACE-AGENT...))
+
+# https://docs.datadoghq.com/agent/configuration/agent-configuration-files/#main-configuration-file
+# https://github.com/DataDog/datadog-agent/blob/main/pkg/config/config_template.yaml
+# All needed config params seems to be settable via env vars, so we don't need to create a datadog.yaml config file.
+
+export DD_INFRASTRUCTURE_MODE='none'
+export DD_HOSTNAME="$OTEL_K8s_NODE_NAME"
+export DD_PROCESS_MANAGER_ENABLED="false"
+# export DD_CLOUD_PROVIDER_METADATA="aws"
+
+path_to_datadog_agent_binary="/opt/datadog-agent/bin/agent/agent"
+path_to_datadog_trace_agent_binary="/opt/datadog-agent/bin/trace-agent/trace-agent"
+
+# TODO implement the logic to run the datadog agent or trace-agent
+${path_to_datadog_agent_binary} run
