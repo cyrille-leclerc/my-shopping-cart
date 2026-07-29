@@ -3,7 +3,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: opentelemetry-stack-kube-state-metrics
+  name: kube-state-metrics
   namespace: opentelemetry-operator-system
   labels:    
     helm.sh/chart: kube-state-metrics-6.3.0

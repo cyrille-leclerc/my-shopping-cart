@@ -62,10 +62,10 @@ echo "Installing OpenTelemetry Kube Stack Helm Chart..."
 
 kubectl create namespace opentelemetry-operator-system || echo "WARNING: Could not create namespace 'opentelemetry-operator-system' (may already exist or insufficient permissions). Continuing..."
 
-kubectl create secret generic dd-secrets \
+kubectl create secret generic datadog-secret \
   --namespace opentelemetry-operator-system  \
-  --from-literal="DD_SITE=${DD_SITE:-datadoghq.com}" \
-  --from-literal="DD_API_KEY=$DD_API_KEY" \
+  --from-literal="api-key=$DD_API_KEY" \
+  --from-literal="dd-site=${DD_SITE:-datadoghq.com}" \
   || echo "WARNING: Could not create secret 'dd-secrets' (may already exist or insufficient permissions). Continuing..."
 
 helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts
@@ -73,7 +73,7 @@ helm repo update
 
 /opt/homebrew/opt/helm@3/bin/helm upgrade opentelemetry-stack \
     open-telemetry/opentelemetry-kube-stack \
-    --version 0.18.0 \
+    --version 0.20.0 \
     --install \
     --namespace opentelemetry-operator-system \
     --set opentelemetry-operator.admissionWebhooks.certManager.enabled=$OTEL_OPERATOR_CERT_MANAGER_ENABLED \

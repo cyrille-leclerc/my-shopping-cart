@@ -3,7 +3,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: opentelemetry-stack-kube-state-metrics
+  name: kube-state-metrics
   namespace: opentelemetry-operator-system
   labels:    
     helm.sh/chart: kube-state-metrics-6.3.0
@@ -37,7 +37,7 @@ spec:
     spec:
       automountServiceAccountToken: true
       hostNetwork: false
-      serviceAccountName: opentelemetry-stack-kube-state-metrics
+      serviceAccountName: kube-state-metrics
       securityContext:
         fsGroup: 65534
         runAsGroup: 65534

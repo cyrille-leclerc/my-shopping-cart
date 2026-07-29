@@ -12,7 +12,7 @@ metadata:
     app.kubernetes.io/instance: opentelemetry-stack
     app.kubernetes.io/version: "2.17.0"
     release: opentelemetry-stack
-  name: opentelemetry-stack-kube-state-metrics
+  name: kube-state-metrics
 rules:
 
 - apiGroups: ["certificates.k8s.io"]

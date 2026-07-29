@@ -17,7 +17,7 @@ generate-examples:
 			helm template opentelemetry-stack \
 				open-telemetry/opentelemetry-kube-stack  \
 				--namespace opentelemetry-operator-system \
-				--version "0.18.0" \
+				--version "0.20.0" \
 				--set-string clusterName="my_testing_k8s_cluster" \
 				--set-string instrumentation.resource.resourceAttributes.deployment\\.environment\\.name="staging" \
 				--set-string collectors.daemon.config.service.telemetry.resource.k8s\\.cluster\\.name="my_testing_k8s_cluster" \
