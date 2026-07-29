@@ -49,7 +49,8 @@ defaultCRConfig:
         attributes:
           - action: insert
             value: "unknown_k8s_cluster"
-            key: k8s.cluster.name
+            key: "k8s.cluster.name"
+
     exporters:
       datadog/exporter:
         api:
@@ -250,7 +251,7 @@ collectors:
         pipelines:
           logs:
             receivers: [k8s_objects]
-            processors: [resource_detection/env]
+            processors: [resource_detection/env, resource/k8s_cluster_name]
             exporters: [datadog/exporter]
 
           metrics/count:
@@ -262,6 +263,7 @@ collectors:
             processors:
               - filter/ksm
               - resource_detection/env
+              - resource/k8s_cluster_name
               - transform/ksm_to_dd
               - transform/rename_uid
               - groupbyattrs
@@ -366,12 +368,12 @@ collectors:
 
           logs:
             receivers: [otlp]
-            processors: [resource_detection/env, k8s_attributes]
+            processors: [resource_detection/env, resource/k8s_cluster_name, k8s_attributes]
             exporters: [datadog/exporter]
 
           traces:
             receivers: [otlp]
-            processors: [resource_detection/env, k8s_attributes]
+            processors: [resource_detection/env, resource/k8s_cluster_name, k8s_attributes]
             exporters: [datadog/connector]
 
           # Add sampling processors here if needed.
@@ -383,6 +385,7 @@ collectors:
             receivers: [datadog/connector, otlp]
             processors:
               - resource_detection/env
+              - resource/k8s_cluster_name
               - k8s_attributes
               - cumulativetodelta
               - deltatorate

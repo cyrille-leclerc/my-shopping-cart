@@ -18,11 +18,11 @@ generate-examples:
 				open-telemetry/opentelemetry-kube-stack  \
 				--namespace opentelemetry-operator-system \
 				--version "0.20.0" \
-				--set-string clusterName="my_testing_k8s_cluster" \
-				--set-string instrumentation.resource.resourceAttributes.deployment\\.environment\\.name="staging" \
-				--set-string collectors.daemon.config.service.telemetry.resource.k8s\\.cluster\\.name="my_testing_k8s_cluster" \
-				--set-string collectors.daemon.config.service.telemetry.resource.deployment\\.environment\\.name="staging" \
-			    --set-string collectors.cluster.config.processors.resource/k8s_cluster_name.attributes[0].value="my_testing_k8s_cluster" \
+				--set-string clusterName="$K8S_CLUSTER_NAME" \
+				--set-string instrumentation.resource.resourceAttributes.deployment\\.environment\\.name="testing" \
+				--set-string defaultCRConfig.config.service.telemetry.resource.deployment\\.environment\\.name="testing" \
+				--set-string defaultCRConfig.config.service.telemetry.resource.k8s\\.cluster\\.name="test_k8s_cluster" \
+				--set-string defaultCRConfig.config.processors.resource/k8s_cluster_name.attributes[0].value="test_k8s_cluster" \
 				--values ./values.yaml --values $${value} \
 				--output-dir "$${EXAMPLES_DIR}/$${example}/rendered"; \
 			mv $${EXAMPLES_DIR}/$${example}/rendered/opentelemetry-kube-stack/templates/* "$${EXAMPLES_DIR}/$${example}/rendered"; \

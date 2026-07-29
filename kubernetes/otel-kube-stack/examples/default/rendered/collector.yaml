@@ -120,7 +120,9 @@ spec:
             name: k8s.pod.uid
       resource/k8s_cluster_name:
         attributes:
-        - value: my_testing_k8s_cluster
+        - action: insert
+          key: k8s.cluster.name
+          value: test_k8s_cluster
       resource_detection/env:
         aks:
           resource_attributes:
@@ -352,6 +354,7 @@ spec:
           processors:
           - k8s_attributes
           - resource_detection/env
+          - resource/k8s_cluster_name
           receivers:
           - k8s_objects
         metrics:
@@ -360,6 +363,7 @@ spec:
           processors:
           - filter/ksm
           - resource_detection/env
+          - resource/k8s_cluster_name
           - transform/ksm_to_dd
           - transform/rename_uid
           - groupbyattrs
@@ -402,7 +406,8 @@ spec:
                   protocol: http/protobuf
                   temporality_preference: delta
         resource:
-          deployment.environment.name: production
+          deployment.environment.name: testing
+          k8s.cluster.name: test_k8s_cluster
   replicas: 1
   imagePullPolicy: IfNotPresent
   upgradeStrategy: automatic
@@ -445,7 +450,7 @@ spec:
         apiVersion: v1
         fieldPath: status.podIP
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "k8s.pod.name=$(OTEL_K8S_POD_NAME),k8s.namespace.name=$(OTEL_K8S_NAMESPACE),k8s.node.name=$(OTEL_K8S_NODE_NAME),host.name=$(OTEL_K8S_NODE_NAME),k8s.node.ip=$(OTEL_K8S_NODE_IP),k8s.pod.ip=$(OTEL_K8S_POD_IP),k8s.cluster.name=my_testing_k8s_cluster"
+    value: "k8s.pod.name=$(OTEL_K8S_POD_NAME),k8s.namespace.name=$(OTEL_K8S_NAMESPACE),k8s.node.name=$(OTEL_K8S_NODE_NAME),host.name=$(OTEL_K8S_NODE_NAME),k8s.node.ip=$(OTEL_K8S_NODE_IP),k8s.pod.ip=$(OTEL_K8S_POD_IP),k8s.cluster.name=8S_CLUSTER_NAME"
   
   - name: DD_API_KEY
     valueFrom:
@@ -574,7 +579,7 @@ spec:
         attributes:
         - action: insert
           key: k8s.cluster.name
-          value: unknown_k8s_cluster
+          value: test_k8s_cluster
       resource_detection/env:
         aks:
           resource_attributes:
@@ -795,6 +800,7 @@ spec:
           - datadog/exporter
           processors:
           - resource_detection/env
+          - resource/k8s_cluster_name
           - k8s_attributes
           receivers:
           - otlp
@@ -804,6 +810,7 @@ spec:
           - datadog/exporter
           processors:
           - resource_detection/env
+          - resource/k8s_cluster_name
           - k8s_attributes
           - cumulativetodelta
           - deltatorate
@@ -819,6 +826,7 @@ spec:
           - datadog/connector
           processors:
           - resource_detection/env
+          - resource/k8s_cluster_name
           - k8s_attributes
           receivers:
           - otlp
@@ -853,8 +861,8 @@ spec:
                   protocol: http/protobuf
                   temporality_preference: delta
         resource:
-          deployment.environment.name: staging
-          k8s.cluster.name: my_testing_k8s_cluster
+          deployment.environment.name: testing
+          k8s.cluster.name: test_k8s_cluster
   imagePullPolicy: IfNotPresent
   upgradeStrategy: automatic
   terminationGracePeriodSeconds: 30
@@ -907,7 +915,7 @@ spec:
         apiVersion: v1
         fieldPath: status.podIP
   - name: OTEL_RESOURCE_ATTRIBUTES
-    value: "k8s.pod.name=$(OTEL_K8S_POD_NAME),k8s.namespace.name=$(OTEL_K8S_NAMESPACE),k8s.node.name=$(OTEL_K8S_NODE_NAME),host.name=$(OTEL_K8S_NODE_NAME),k8s.node.ip=$(OTEL_K8S_NODE_IP),k8s.pod.ip=$(OTEL_K8S_POD_IP),k8s.cluster.name=my_testing_k8s_cluster"
+    value: "k8s.pod.name=$(OTEL_K8S_POD_NAME),k8s.namespace.name=$(OTEL_K8S_NAMESPACE),k8s.node.name=$(OTEL_K8S_NODE_NAME),host.name=$(OTEL_K8S_NODE_NAME),k8s.node.ip=$(OTEL_K8S_NODE_IP),k8s.pod.ip=$(OTEL_K8S_POD_IP),k8s.cluster.name=8S_CLUSTER_NAME"
   
   - name: DD_API_KEY
     valueFrom:
