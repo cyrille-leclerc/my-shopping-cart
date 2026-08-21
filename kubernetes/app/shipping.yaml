@@ -25,7 +25,7 @@ spec:
       annotations:
         resource.opentelemetry.io/service.name: shipping
         resource.opentelemetry.io/service.namespace: ecommerce
-        instrumentation.opentelemetry.io/inject-java: "opentelemetry-operator-system/otel-instrumentation"
+        instrumentation.opentelemetry.io/inject-java: "opentelemetry-operator-system/opentelemetry-kube-stack"
       labels:
         app.kubernetes.io/name: shipping
     spec:

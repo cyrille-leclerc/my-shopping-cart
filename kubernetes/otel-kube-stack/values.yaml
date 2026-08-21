@@ -393,7 +393,6 @@ collectors:
 
 instrumentation:
   enabled: true
-  name: "otel-instrumentation"
   env:
     - name: OTEL_SEMCONV_STABILITY_OPT_IN
       value: "http,database,rpc,messaging"

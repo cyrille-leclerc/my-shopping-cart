@@ -26,7 +26,7 @@ spec:
       annotations:
         resource.opentelemetry.io/service.name: fraud-detection
         resource.opentelemetry.io/service.namespace: ecommerce
-        instrumentation.opentelemetry.io/inject-java: "opentelemetry-operator-system/otel-instrumentation"
+        instrumentation.opentelemetry.io/inject-java: "opentelemetry-operator-system/opentelemetry-kube-stack"
         prometheus.io/scrape: "true"
         prometheus.io/path: /actuator/prometheus
         prometheus.io/port: "8080"
