@@ -10,8 +10,8 @@
 
 	<properties>
 		<spring-boot.version>4.0.7</spring-boot.version>
-		<opentelemetry.version>1.63.0</opentelemetry.version>
-		<opentelemetry-instrumentation.version>2.29.0</opentelemetry-instrumentation.version><opentelemetry-instrumentation.version>2.29.0</opentelemetry-instrumentation.version>
+		<opentelemetry.version>1.65.0</opentelemetry.version>
+		<opentelemetry-instrumentation.version>2.31.1</opentelemetry-instrumentation.version>
 
 		<grpc.version>1.77.0</grpc.version>
         <protobuf-java.version>4.33.1</protobuf-java.version>
@@ -129,11 +129,6 @@
 		</dependency>
 
 		<dependency>
-			<!-- just want the Pyroscope APIs to add Pyroscope labels in the code -->
-			<groupId>io.pyroscope</groupId>
-			<artifactId>agent</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-okhttp</artifactId>
 		</dependency>
@@ -228,16 +223,6 @@
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-math3</artifactId>
 				<version>3.6.1</version>
-			</dependency>
-			<dependency>
-				<groupId>io.pyroscope</groupId>
-				<artifactId>agent</artifactId>
-				<version>2.1.2</version>
-			</dependency>
-			<dependency>
-				<groupId>io.pyroscope</groupId>
-				<artifactId>otel</artifactId>
-				<version>1.0.4</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

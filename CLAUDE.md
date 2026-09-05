@@ -152,15 +152,14 @@ cd load-generator && ./run-load-generator
 ### Run Scripts Details
 
 Each service has a `run-*` script that:
-1. Sources environment from `setenv.sh` or `setenv.default.sh` (defaults: OTEL agent v2.17.0, Pyroscope v0.18.0)
-2. Downloads OpenTelemetry and Pyroscope Java agents if missing (cached in `.otel/` and `.pyroscope/`)
+1. Sources environment from `setenv.sh` or `setenv.default.sh` (defaults: OTEL agent v2.17.0)
+2. Downloads the OpenTelemetry Java agent if missing (cached in `.otel/`)
 3. Builds the service with Maven
-4. Runs the JAR with appropriate OTel/Pyroscope javaagent flags
+4. Runs the JAR with appropriate OTel javaagent flags
 
 **Key env vars** (see `setenv.default.sh`):
-- `OPEN_TELEMETRY_AGENT_VERSION=2.17.0`
+- `OPEN_TELEMETRY_AGENT_VERSION=2.31.1`
 - `DEPLOYMENT_ENVIRONMENT_NAME=staging`
-- `PYROSCOPE_AGENT_VERSION=0.18.0`
 
 ## Docker Compose Deployment
 
@@ -271,8 +270,8 @@ Services are instrumented via:
 
 ### Dependency Versions (Aligned Across Services)
 - Spring Boot: 4.0.6
-- OpenTelemetry: 1.63.0
-- OpenTelemetry Instrumentation: 2.29.0
+- OpenTelemetry: 1.65.0
+- OpenTelemetry Instrumentation: 2.31.1
 - gRPC: 1.77.0
 - Protobuf: 4.33.1
 - Java: 25 (source/target/release)
@@ -311,7 +310,7 @@ Services are instrumented via:
 ### Common Issues
 - **Database connection refused:** Ensure PostgreSQL is running and database `my_shopping_cart` exists
 - **gRPC connection errors:** Verify Checkout service is listening on port 50051
-- **OTel agent download fails:** Check network; agents are cached in `.otel/` and `.pyroscope/` directories
+- **OTel agent download fails:** Check network; agents are cached in the `.otel/` directory
 - **Port conflicts:** Services use fixed ports (8080, 8081, 8088, 8089, 50051); adjust in run scripts or compose.yaml
 
 ## Container Registry

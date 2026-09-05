@@ -30,7 +30,6 @@ target/
 
 .otel/
 .prometheus*
-.pyroscope/
 .datadog
 
 # SECRETS

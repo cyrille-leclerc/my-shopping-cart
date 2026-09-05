@@ -55,31 +55,6 @@ else
     fi
 fi
 
-export PYROSCOPE_AGENT_HOME=$PRGDIR/../.pyroscope
-mkdir -p "$PYROSCOPE_AGENT_HOME"
-
-##########################################################################################
-# DOWNLOAD PYROSCOPE OTEL AGENT EXTENSION IF NOT FOUND
-# code copied from Maven Wrappers's mvnw`
-##########################################################################################
-export PYROSCOPE_OTEL_AGENT_EXTENSION_JAR=$PYROSCOPE_AGENT_HOME/pyroscope-otel-agent-extension-$PYROSCOPE_OTEL_AGENT_EXTENSION_VERSION.jar
-if [ -r "$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR" ]; then
-    echo "Found $PYROSCOPE_OTEL_AGENT_EXTENSION_JAR"
-else
-    echo "Couldn't find $PYROSCOPE_OTEL_AGENT_EXTENSION_JAR, downloading it ..."
-    jarUrl="https://repo1.maven.org/maven2/io/pyroscope/otel/$PYROSCOPE_OTEL_AGENT_EXTENSION_VERSION/otel-$PYROSCOPE_OTEL_AGENT_EXTENSION_VERSION.jar"
-
-    if command -v wget > /dev/null; then
-        wget "$jarUrl" -O "$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR"
-    elif command -v curl > /dev/null; then
-        curl -L --max-redirs 5 -o "$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR" "$jarUrl"
-    else
-        echo "FAILURE: pyroscope otel agent extension not found and  none of curl and wget found"
-        exit 1;
-    fi
-fi
-
-
 $PRGDIR/../mvnw -DskipTests package
 
 
@@ -98,11 +73,6 @@ export OTEL_RESOURCE_ATTRIBUTES
 
 export OTEL_INSTRUMENTATION_COMMON_MDC_RESOURCE_ATTRIBUTES="service.name,service.namespace,service.instance.id,deployment.environment.name"
 
-# /!\ PYROSCOPE_LABELS doesn't support `.` but supports `_`
-# /!\ `_` in labels doesn't work with Pyroscope Tags explorer
-export PYROSCOPE_APPLICATION_NAME="fraud-detection"
-export PYROSCOPE_LABELS="environment=$DEPLOYMENT_ENVIRONMENT_NAME,namespace=$SERVICE_NAMESPACE,instance=instance-1,version=1.1"
-
 export OTEL_SEMCONV_STABILITY_OPT_IN=http,database
 
 export spring_datasource_url=jdbc:postgresql://localhost:5432/my_shopping_cart
@@ -116,5 +86,3 @@ java -javaagent:"$OPEN_TELEMETRY_AGENT_JAR" \
      -Dotel.instrumentation.micrometer.base-time-unit=s \
      -Dotel.semconv-stability.opt-in=http,database \
      -jar target/fraud-detection-1.1-SNAPSHOT.jar
-
-#     -Dotel.javaagent.extensions=$PYROSCOPE_OTEL_AGENT_EXTENSION_JAR \
