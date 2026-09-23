@@ -64,6 +64,10 @@ spec:
               ruby: "2"
             ddTraceConfigs:
               ## ACTIVATE OTEL MODE
+              # DD_OTEL_SDK_ENABLED: Candidate new env var to enable OTel mode on DDOT SDKs, replacing all the previous ones,
+              # but not yet supported by the DDOT SDKs
+              # - name: "DD_OTEL_SDK_ENABLED"
+              #  value: "true"
               - name: "DD_TRACE_OTEL_ENABLED"
                 value: "true"
               - name: "DD_LOGS_OTEL_ENABLED"
@@ -74,15 +78,26 @@ spec:
                 value: "true"
               - name: "OTEL_TRACES_EXPORTER"
                 value: "otlp"
+
               - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
                 value: "http://datadog-agent.datadog.svc.cluster.local:4318"
-              ## ACTIVATE PROFILING
+              ## WORKAROUND: DDOT SDK GO LANG ignores OTEL_EXPORTER_OTLP_ENDPOINT, it's a bug
+              ## https://github.com/DataDog/dd-trace-go/pull/5407
+              - name: "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
+                value: "http://datadog-agent.datadog.svc.cluster.local:4318"
+
+              ## DISABLE PROFILING
               - name: "DD_PROFILING_ENABLED"
-                value: "auto"
-              ## ACTIVATE DBM CONTEXT PROPAGATION
+                value: "false"
+              ## DBM SUPPORT
               - name: "DD_DBM_PROPAGATION_MODE"
                 value: "full"
               - name: "DD_DBM_TRACE_PREPARED_STATEMENTS"
+                value: "true"
+              # DSM SUPPORT
+              - name: "DD_DATA_STREAMS_ENABLED"
+                value: "true"
+              - name: "DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED"
                 value: "true"
     logCollection:
       enabled: true
