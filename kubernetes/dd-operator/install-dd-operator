@@ -31,6 +31,11 @@ helm upgrade my-datadog-operator datadog/datadog-operator\
        --install \
        --namespace datadog
 
+# The helm release above creates the DatadogAgent CRD. Right after helm returns, the API server
+# may not have finished registering it yet, so wait for it to be Established before applying the CR
+# (avoids "no matches for kind DatadogAgent" errors on a fresh install).
+kubectl wait --for condition=Established --timeout=120s crd/datadogagents.datadoghq.com
+
 kubectl apply -f "$SCRIPT_DIR/datadog-agent.yaml"
 
 kubectl apply -f "$SCRIPT_DIR/operator-extra-rbac.yaml"
