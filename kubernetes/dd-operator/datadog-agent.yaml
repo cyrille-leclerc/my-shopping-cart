@@ -176,11 +176,10 @@ spec:
     clusterAgent:
       image:
         # name: "registry.datadoghq.com/cluster-agent:latest"
-        name: registry.ddbuild.io/ci/datadog-agent/cluster-agent:v135249065-9a54d6af-arm64
+        name: "registry.datadoghq.com/cluster-agent:7.83.2"
     nodeAgent:
       image:
-        # IMPORTANT tag must be `latest-full` when activating the otelCollector feature
-        name: "registry.datadoghq.com/agent:latest-full"
+        name: "registry.datadoghq.com/agent:7.83.2-full"
       tolerations:
         - key: "node-role.kubernetes.io/controlplane"
           operator: "Exists"
