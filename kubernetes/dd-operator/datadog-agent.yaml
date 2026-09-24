@@ -29,7 +29,7 @@ spec:
       instrumentation:
         enabled: true
         targets:
-          - name: "default-target" # DATADOG NATIVE MODE
+          - name: "default-target" # DEFAULT - DATADOG NATIVE MODE
             namespaceSelector:
               matchExpressions:
                 - key: kubernetes.io/metadata.name
@@ -112,65 +112,13 @@ spec:
       enabled: true
     liveProcessCollection:
       enabled: true
-    otelCollector:
-      enabled: true
-      ports:
-        - containerPort: 4317
-          hostPort: 4317
-          name: otel-grpc
-        - containerPort: 4318
-          hostPort: 4318
-          name: otel-http
-      conf:
-        configData: |-
-          receivers:
-            prometheus:
-              config:
-                scrape_configs:
-                  - job_name: "otelcol"
-                    scrape_interval: 10s
-                    static_configs:
-                      - targets:
-                          - 0.0.0.0:8888
-            otlp:
-              protocols:
-                grpc:
-                  endpoint: 0.0.0.0:4317
-                http:
-                  endpoint: 0.0.0.0:4318
-          exporters:
-            datadog:
-              api:
-                key: ${env:DD_API_KEY}
-                site: ${env:DD_SITE}
-              sending_queue:
-                batch:
-                  flush_timeout: 10s
-          processors:
-            resource:
-              attributes:
-                - key: deployment.environment.name
-                  value: "production"
-                  action: upsert
-            infraattributes:
-              cardinality: 2
-          connectors:
-            datadog/connector:
-              traces:
-          service:
-            pipelines:
-              traces:
-                receivers: [otlp]
-                processors: [resource, infraattributes]
-                exporters: [datadog, datadog/connector]
-              metrics:
-                receivers: [otlp, datadog/connector, prometheus]
-                processors: [resource, infraattributes]
-                exporters: [datadog]
-              logs:
-                receivers: [otlp]
-                processors: [resource, infraattributes]
-                exporters: [datadog]
+    otlp:
+      receiver:
+        protocols:
+          grpc:
+            enabled: true
+          http:
+            enabled: true
   override:
     clusterAgent:
       image:
@@ -186,3 +134,8 @@ spec:
         - key: "node-role.kubernetes.io/etcd"
           operator: "Exists"
           effect: "NoExecute"
+      containers:
+        agent:
+          env:
+            - name: DD_OTLP_CONFIG_LOGS_ENABLED
+              value: "true"
