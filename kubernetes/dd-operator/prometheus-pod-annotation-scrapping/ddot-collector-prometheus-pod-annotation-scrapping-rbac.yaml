@@ -1,0 +1,26 @@
+# RBAC required by the `prometheus/pod_annotations` receiver of the DDOT Collector
+# (see datadog-agent-otel-collector-prometheus-annotation-scrapping.yaml), which uses
+# `kubernetes_sd_configs` with `role: pod` to discover the pods to scrape.
+# The DDOT Collector runs in the node agent pod with the `datadog-agent` ServiceAccount
+# created by the Datadog Operator for the `datadog` DatadogAgent.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: datadog-agent-otel-collector-pod-discovery
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: datadog-agent-otel-collector-pod-discovery
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: datadog-agent-otel-collector-pod-discovery
+subjects:
+  - kind: ServiceAccount
+    name: datadog-agent
+    namespace: datadog

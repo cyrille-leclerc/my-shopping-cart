@@ -29,31 +29,9 @@ spec:
       instrumentation:
         enabled: true
         targets:
-          - name: "default-target" # DEFAULT - DATADOG NATIVE MODE
-            namespaceSelector:
-              matchExpressions:
-                - key: kubernetes.io/metadata.name
-                  operator: NotIn
-                  values:
-                    # use the OpenTelemetry mode (`otel-mode-target`) to instrument the following k8s namespaces:
-                    - "ecommerce"
-                    - "astronomy-store"
-            ddTraceVersions:
-              java: "1"
-              python: "4"
-              js: "5"
-              php: "1"
-              dotnet: "3"
-              ruby: "2"
-            ddTraceConfigs:
-              - name: "DD_PROFILING_ENABLED"
-                value: "auto"
-              - name: "DD_TRACE_DEBUG"
-                value: "false"
-          - name: "otel-mode-target" # OTEL NATIVE MODE
+          - name: "default-target"
             namespaceSelector:
               matchNames:
-                - "ecommerce"
                 - "astronomy-store"
             ddTraceVersions:
               java: "1"
@@ -62,42 +40,34 @@ spec:
               php: "1"
               dotnet: "3"
               ruby: "2"
-            ddTraceConfigs:
-              ## ACTIVATE OTEL MODE
-              # DD_OTEL_SDK_ENABLED: Candidate new env var to enable OTel mode on DDOT SDKs, replacing all the previous ones,
-              # but not yet supported by the DDOT SDKs
-              # - name: "DD_OTEL_SDK_ENABLED"
-              #  value: "true"
-              - name: "DD_TRACE_OTEL_ENABLED"
-                value: "true"
-              - name: "DD_LOGS_OTEL_ENABLED"
-                value: "true"
-              - name: "DD_METRICS_OTEL_ENABLED"
-                value: "true"
-              - name: "DD_TRACE_OTEL_SEMANTICS_ENABLED"
-                value: "true"
-              - name: "OTEL_TRACES_EXPORTER"
-                value: "otlp"
-
-              - name: "OTEL_EXPORTER_OTLP_ENDPOINT"
-                value: "http://datadog-agent.datadog.svc.cluster.local:4318"
-              ## WORKAROUND: DDOT SDK GO LANG ignores OTEL_EXPORTER_OTLP_ENDPOINT, it's a bug
-              ## https://github.com/DataDog/dd-trace-go/pull/5407
-              - name: "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT"
-                value: "http://datadog-agent.datadog.svc.cluster.local:4318/v1/traces"
-              ## DISABLE PROFILING
-              - name: "DD_PROFILING_ENABLED"
-                value: "false"
-              ## DBM SUPPORT
-              - name: "DD_DBM_PROPAGATION_MODE"
-                value: "full"
-              - name: "DD_DBM_TRACE_PREPARED_STATEMENTS"
-                value: "true"
-              # DSM SUPPORT
-              - name: "DD_DATA_STREAMS_ENABLED"
-                value: "true"
-              - name: "DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED"
-                value: "true"
+            # ddTraceConfigs:
+              # Datadog Dynamic Instrumentation (DDI). See https://docs.datadoghq.com/tracing/dd_instrumentation/ .
+              # - name: "DD_DYNAMIC_INSTRUMENTATION_ENABLED"
+              #   value: "true"
+              # Datadog DBM (Database Monitoring). See https://docs.datadoghq.com/database_monitoring/ .
+              # - name: "DD_DBM_PROPAGATION_MODE" # full, service, disabled
+              #   value: "full"
+              # - name: "DD_DBM_TRACE_PREPARED_STATEMENTS"
+              #   value: "true"
+              # Datadog DSM (Data Streams Monitoring). See https://docs.datadoghq.com/data_streams/ .
+              # - name: "DD_DATA_STREAMS_ENABLED"
+              #   value: "true"
+              # - name: "DD_TRACE_REMOVE_INTEGRATION_SERVICE_NAMES_ENABLED"
+              #   value: "true"
+              # Datadog App & API Protection: threat detection and blocking.
+              # See https://docs.datadoghq.com/security/application_security/ .
+              # - name: DD_APPSEC_ENABLED
+              #   value: "true"
+              # Datadog Code Security IAST (Interactive Application Security Testing): detects code-level
+              # vulnerabilities (SQL injection, SSRF...) in the running service.
+              # See https://docs.datadoghq.com/security/code_security/iast/ .
+              # - name: DD_IAST_ENABLED
+              #   value: "true"
+              # Datadog Code Security SCA (Software Composition Analysis): detects vulnerable open source
+              # libraries loaded at runtime.
+              # See https://docs.datadoghq.com/security/code_security/software_composition_analysis/ .
+              # - name: DD_APPSEC_SCA_ENABLED
+              #   value: "true"
     logCollection:
       enabled: true
       containerCollectAll: true
@@ -120,20 +90,8 @@ spec:
           http:
             enabled: true
   override:
-    clusterAgent:
-      image:
-        # name: "registry.datadoghq.com/cluster-agent:latest"
-        name: "registry.datadoghq.com/cluster-agent:7.83.2"
     nodeAgent:
-      image:
-        name: "registry.datadoghq.com/agent:7.83.2-full"
-      tolerations:
-        - key: "node-role.kubernetes.io/controlplane"
-          operator: "Exists"
-          effect: "NoSchedule"
-        - key: "node-role.kubernetes.io/etcd"
-          operator: "Exists"
-          effect: "NoExecute"
+      # No tolerations: the node agent only runs on untainted nodes. See README.md#node-agent-tolerations
       containers:
         agent:
           env:

@@ -1,0 +1,111 @@
+# fork of https://docs.datadoghq.com/opentelemetry/setup/ddot_collector/install/kubernetes_daemonset?tab=datadogoperator#configure-the-opentelemetry-collector
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: "otelcol"
+          scrape_interval: 10s
+          static_configs:
+            - targets:
+                - 0.0.0.0:8888
+  # extract from https://github.com/open-telemetry/opentelemetry-helm-charts/blob/opentelemetry-kube-stack-0.27.0/charts/opentelemetry-kube-stack/examples/daemonset-prometheus-presets/rendered/collector.yaml#L100-L162
+  prometheus/pod_annotations:
+    config:
+      scrape_configs:
+        - job_name: kubernetes-pods
+          kubernetes_sd_configs:
+            - role: pod
+              selectors:
+                - field: spec.nodeName=${env:OTEL_K8S_NODE_NAME}
+                  label: app.kubernetes.io/component!=opentelemetry-collector
+                  role: pod
+          relabel_configs:
+            - action: keep
+              regex: true
+              source_labels:
+                - __meta_kubernetes_pod_annotation_prometheus_io_scrape
+            - action: drop
+              regex: true
+              source_labels:
+                - __meta_kubernetes_pod_annotation_prometheus_io_scrape_slow
+            - action: replace
+              regex: (https?)
+              source_labels:
+                - __meta_kubernetes_pod_annotation_prometheus_io_scheme
+              target_label: __scheme__
+            - action: replace
+              regex: (.+)
+              source_labels:
+                - __meta_kubernetes_pod_annotation_prometheus_io_path
+              target_label: __metrics_path__
+            - action: replace
+              regex: ([^:]+)(?::\d+)?;(\d+)
+              replacement: $$1:$$2
+              source_labels:
+                - __address__
+                - __meta_kubernetes_pod_annotation_prometheus_io_port
+              target_label: __address__
+            - action: labelmap
+              regex: __meta_kubernetes_pod_annotation_prometheus_io_param_(.+)
+              replacement: __param_$$1
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - action: replace
+              source_labels:
+                - __meta_kubernetes_namespace
+              target_label: namespace
+            - action: replace
+              source_labels:
+                - __meta_kubernetes_pod_name
+              target_label: pod
+            - action: replace
+              source_labels:
+                - __meta_kubernetes_pod_node_name
+              target_label: node
+            - action: drop
+              regex: Pending|Succeeded|Failed|Completed
+              source_labels:
+                - __meta_kubernetes_pod_phase
+            - action: replace
+              source_labels:
+                - __meta_kubernetes_pod_label_app_kubernetes_io_name
+              target_label: job
+          scrape_interval: 30s
+          scrape_timeout: 10s
+exporters:
+  debug:
+    verbosity: detailed
+  datadog:
+    api:
+      key: ${env:DD_API_KEY}
+      site: ${env:DD_SITE}
+    sending_queue:
+      batch:
+        flush_timeout: 10s
+processors:
+  infraattributes:
+    cardinality: 2
+  cumulativetodelta:
+connectors:
+  datadog/connector:
+    traces:
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [infraattributes]
+      exporters: [debug, datadog, datadog/connector]
+    metrics:
+      receivers: [otlp, datadog/connector, prometheus, prometheus/pod_annotations]
+      processors: [infraattributes, cumulativetodelta]
+      exporters: [debug, datadog]
+    logs:
+      receivers: [otlp]
+      processors: [infraattributes]
+      exporters: [debug, datadog]
